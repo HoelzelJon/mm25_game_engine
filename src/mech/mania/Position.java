@@ -1,6 +1,6 @@
 package mech.mania;
 
-/*
+/**
  * 'Position' class for representing the position of things on the board
  */
 public class Position {
@@ -21,7 +21,11 @@ public class Position {
         else return false;
     }
 
-    // (0,0) is bottom-left
+    /**
+     * @param dir direction in which you want to move
+     * @return position that is 1 unit from this, in direction dir
+     *         (NOTE: the position (0,0) is the bottom-left of the map)
+     */
     public Position getNewPosition(Direction dir) {
         if (dir == Direction.DOWN) {
             return new Position(x, y-1);

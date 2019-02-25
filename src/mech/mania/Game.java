@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-/*
+/**
  * Stores the state of the game, as well as handling much of the logic during each turn
  */
 public class Game {
@@ -12,21 +12,34 @@ public class Game {
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
 
-    private static Unit[] initUnitList(Position[] positions) {
+    /**
+     * @param positions array of positions for each unit to be initialized to
+     * @param map       map to add the units onto
+     * @return array of units
+     */
+    private static Unit[] initUnitList(Position[] positions, Map map) {
         Unit[] ret = new Unit[positions.length];
         for (int i = 0; i < positions.length; i ++) {
             ret[i] = new Unit(positions[i]);
+            map.tileAt(positions[i]).setUnit(ret[i]);
         }
         return ret;
     }
 
     public Game(int boardSize, Position[] p1Positions, Position[] p2Positions/*TODO: add parameters (attack patterns?)*/) {
-        p1Units = initUnitList(p1Positions);
-        p2Units = initUnitList(p2Positions);
-
         map = new Map(boardSize);
+
+        map.tileAt(new Position(1, 1)).setType(Tile.Type.INDESTRUCTIBLE);
+
+        p1Units = initUnitList(p1Positions, map);
+        p2Units = initUnitList(p2Positions, map);
     }
 
+    /**
+     *
+     * @param units array of units to check
+     * @return true if any of the units in the array are alive
+     */
     private static boolean hasLiveUnit(Unit[] units){
         for (Unit u : units) {
             if (u.isAlive()) {
@@ -36,6 +49,11 @@ public class Game {
         return false;
     }
 
+    /**
+     * @return P1_WINNER or P2_WINNER, if the other player's bots are all dead
+     *         TIE if all bots are dead
+     *         NO_WINNER if there are still live bots for each player
+     */
     public int getWinner() {
         if (hasLiveUnit(p1Units)) {
             if (hasLiveUnit(p2Units)) {
@@ -52,6 +70,12 @@ public class Game {
         }
     }
 
+    /**
+     * Implements all the game logic for one full turn
+     *
+     * @param p1Decision the decision for player 1 to take
+     * @param p2Decision the decision for player 2 to take
+     */
     public void doTurn(Decision p1Decision, Decision p2Decision) {
         for (int priority = 1; priority <= 3; priority ++) {
             ArrayList<Unit> unitsToMove = new ArrayList<>();
@@ -77,6 +101,13 @@ public class Game {
         }
     }
 
+    /**
+     * Helper function for doTurn -- does all game logic for one round
+     *
+     * @param units the units involved in this round (should all have same priority)
+     * @param movements movements.get(i) is an array representing the movement of units.get(i)
+     * @param attackDirections  the direction for each bot's attack
+     */
     private void doRound(List<Unit> units, List<Direction[]> movements, List<Direction> attackDirections) {
         int numSteps = 0;
         for (int i = 0; i < movements.size(); i ++) {
@@ -86,27 +117,43 @@ public class Game {
         }
 
         // TODO: check that movement arrays are equal to each bot's speed
-
-        // TODO: have bots stop moving after a collision
         for (int stepNum = 0; stepNum < numSteps; stepNum ++) {
             List<Direction> stepDirections = new ArrayList<>(units.size());
 
             for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
-                if (movements.get(unitNum).length < stepNum) {
+                if (movements.get(unitNum).length <= stepNum) {
                     stepDirections.add(unitNum, Direction.STAY);
                 } else {
                     stepDirections.add(unitNum, movements.get(unitNum)[stepNum]);
                 }
             }
 
-            doMovementStep(units, stepDirections);
+            boolean[] collided = doMovementStep(units, stepDirections);
+
+            // should stop units from moving after colliding in a round TODO: test that this works
+            for (int unitNum = units.size() - 1; unitNum >= 0; unitNum --) {
+                if (collided[unitNum]) {
+                    units.remove(unitNum);
+                    movements.remove(unitNum);
+                }
+            }
         }
-        //TODO: death
+
+        doDeaths();
 
         //TODO: attacks
+
+        doDeaths();
     }
 
-    private void doMovementStep(List<Unit> units, List<Direction> directions) {
+    /**
+     * Does a single movement step for some set of units
+     *
+     * @param units         a list of units to move
+     * @param directions    the directions to move each unit (i.e. units.get(i) should move in direction directions.get(i))
+     * @return a boolean array indicating whether each unit has collided during this movement step
+     */
+    private boolean[] doMovementStep(List<Unit> units, List<Direction> directions) {
         // list of each unit's initial position
         List<Position> initialPositions = new ArrayList<>(units.size());
         for (int i = 0; i < units.size(); i ++) {
@@ -119,8 +166,8 @@ public class Game {
             goalPositions.add(i, initialPositions.get(i).getNewPosition(directions.get(i)));
         }
 
-        // list of where the units will actually end up (will be its goalPosition or its initialPosition)
-        List<Position> finalPositions = Arrays.asList(new Position[10]);
+        // list of whether a given unit has collided during this movement step
+        boolean[] collided = new boolean[units.size()];
         // this array will be filled first with the positions of colliding units, then the rest
 
         // handle collisions between units and terrain (or the map boundary)
@@ -128,11 +175,14 @@ public class Game {
             if (! inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
                 System.out.println("Terrain Collision");
 
-                finalPositions.set(i, initialPositions.get(i));
+                collided[i] = true;
                 units.get(i).takeCollisionDamage();
-            } else if (map.tileAt(goalPositions.get(i)).getUnit() != null) {
-                System.out.println("Stationary Unit Collision");
 
+                if (inBounds(goalPositions.get(i))) {
+                    // deal damage to the terrain
+                    map.tileAt(goalPositions.get(i)).collided();
+                }
+            } else if (map.tileAt(goalPositions.get(i)).getUnit() != null) {
                 // handle collision with stationary unit
                 boolean isMoving = false;
                 for (Unit moving : units) {
@@ -143,7 +193,9 @@ public class Game {
                 }
 
                 if (!isMoving) {
-                    finalPositions.set(i, initialPositions.get(i));
+                    System.out.println("Stationary Unit Collision");
+
+                    collided[i] = true;
                     units.get(i).takeCollisionDamage();
                     map.tileAt(goalPositions.get(i)).getUnit().takeCollisionDamage();
                 }
@@ -156,9 +208,9 @@ public class Game {
                 if (goalPositions.get(i).equals(goalPositions.get(j)) || // two units moving onto the same tile
                         (goalPositions.get(i).equals(initialPositions.get(j)) && // two units trying to move through each other
                         goalPositions.get(j).equals(initialPositions.get(i)))) {
-                    finalPositions.set(i, initialPositions.get(i));
+                    collided[i] = true;
                     units.get(i).takeCollisionDamage();
-                    finalPositions.set(j, initialPositions.get(j));
+                    collided[i] = true;
                     units.get(j).takeCollisionDamage();
                 }
             }
@@ -169,43 +221,59 @@ public class Game {
         do {
             foundRipple = false;
             for (int i = 0; i < goalPositions.size(); i++) {
-                if (finalPositions.get(i) == null) { // only check for ripple collisions for bots that haven't already collided
+                if (!collided[i]) { // only check for ripple collisions for bots that haven't already collided
                     for (int j = 0; j < goalPositions.size(); j++) {
-                        if (finalPositions.get(j) != null && finalPositions.get(j).equals(goalPositions.get(i))) {
+                        if (collided[j] && initialPositions.get(j).equals(goalPositions.get(i))) {
                             System.out.println("Ripple Collision");
                             foundRipple = true;
-                            finalPositions.set(i, initialPositions.get(i));
+                            collided[i] = true;
                             units.get(i).takeCollisionDamage();
                             units.get(j).takeCollisionDamage();
+                            break;
                         }
                     }
                 }
             }
         } while (foundRipple);
 
-        // set remaining final positions to the goal positions
+        // move the units
+        List<Unit> moving = new ArrayList<>();
+        List<Position> destinations = new ArrayList<>();
         for (int i = 0; i < units.size(); i ++) {
-            if (finalPositions.get(i) == null) {
-                finalPositions.set(i, goalPositions.get(i));
+            if (!collided[i]) {
+                moving.add(units.get(i));
+                destinations.add(goalPositions.get(i));
             }
         }
 
-        // move the units
-        for (int i = 0; i < units.size(); i ++) {
-            if (! finalPositions.get(i).equals(initialPositions.get(i))) {
-                moveUnit(units.get(i), initialPositions.get(i), finalPositions.get(i));
-            }
-        }
+        map.moveUnits(moving, destinations);
+
+        return collided;
     }
 
+    /**
+     * For any dead units, removes them from the board
+     */
+    private void doDeaths() {
+        doDeaths(p1Units);
+        doDeaths(p2Units);
+    }
+
+    /**
+     * handles death for an array of units
+     *
+     * @param units array of units to check death conditions for
+     */
+    private void doDeaths(Unit[] units) {
+        //TODO
+    }
+
+    /**
+     * @param pos a position that may or may not be on the map
+     * @return true if the position lies within the map, false otherwise
+     */
     private boolean inBounds(Position pos) {
         return (pos.x >= 0 && pos.x < map.width() && pos.y >= 0 && pos.y < map.height());
-    }
-
-    private void moveUnit(Unit unit, Position initial, Position dest) {
-        unit.setPos(dest);
-        map.tileAt(initial).setUnit(null);
-        map.tileAt(dest).setUnit(unit);
     }
 
     public String getMapString() {

@@ -1,6 +1,6 @@
 package mech.mania;
 
-/*
+/**
  * Represents a single mech.
  */
 public class Unit {
