@@ -116,12 +116,12 @@ public class Game {
             }
         }
 
-        // TODO: check that movement arrays are equal to each bot's speed
         for (int stepNum = 0; stepNum < numSteps; stepNum ++) {
             List<Direction> stepDirections = new ArrayList<>(units.size());
 
             for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
-                if (movements.get(unitNum).length <= stepNum) {
+                if (movements.get(unitNum).length <= stepNum || units.get(unitNum).getSpeed() <= stepNum) {
+                    // if the movement array isn't large enough or if the unit's speed isn't high enough, don't let that unit move
                     stepDirections.add(unitNum, Direction.STAY);
                 } else {
                     stepDirections.add(unitNum, movements.get(unitNum)[stepNum]);
