@@ -22,7 +22,15 @@ public class Main {
                                 new Position(size-2, size-1),
                                 new Position(size-1, size-2)};
 
-        Game game = new Game(size, p1Positions, p2Positions);
+        int[][] attack = {{0, 0, 4, 0, 0},
+                          {0, 0, 4, 0, 0},
+                          {3, 3, 0, 1, 1},
+                          {0, 0, 2, 0, 1},
+                          {0, 0, 2, 0, 0}}; // when printed in-game, the 1's should be pointing up
+        int[][][] p1Attacks = {attack, attack, attack};
+        int[][][] p2Attacks = {attack, attack, attack};
+
+        Game game = new Game(size, p1Positions, p2Positions, p1Attacks, p2Attacks);
 
         while (game.getWinner() == Game.NO_WINNER) {
             //player1.sendGameState(game);
@@ -30,9 +38,9 @@ public class Main {
 
             int[] priorities = {1,1,1};
             Direction[][] p1Movements = {
-                                    {Direction.RIGHT, Direction.UP},
-                                    {Direction.RIGHT, Direction.UP},
-                                    {Direction.RIGHT, Direction.UP}};
+                                    {Direction.STAY},
+                                    {Direction.UP},
+                                    {Direction.RIGHT}};
             Direction[][] p2Movements = {
                                     {Direction.LEFT},
                                     {Direction.LEFT},

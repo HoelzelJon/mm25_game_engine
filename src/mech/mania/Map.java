@@ -49,6 +49,30 @@ public class Map {
         }
     }
 
+    /**
+     * Deals attack damage as indicated by attack to tiles, centered at center
+     *
+     * @param attack 2-D int array of attack damages (should be odd width and height to correctly handle center)
+     * @param center Position of the center of the attack
+     */
+    public void doAttackDamage(int[][] attack, Position center) {
+        int attackWidth = attack.length;
+        int attackHeight = attack[0].length;
+
+        int x0 = center.x - (attackWidth / 2); // x-coordinate of where attack[0][0] will go
+        int y0 = center.y - (attackHeight / 2); // y-coordinate of where attack[0][0] will go
+
+        for (int x = 0; x < attackWidth; x ++) {
+            if (x0 + x >= 0 && x0 + x < width()){
+                for (int y = 0; y < attackHeight; y++) {
+                    if (y0 + y >= 0 && y0 + y < height()) {
+                        tiles[x0 + x][y0 + y].takeDamage(attack[x][y]);
+                    }
+                }
+            }
+        }
+    }
+
     @Override
     public String toString() {
         StringBuilder ret = new StringBuilder();

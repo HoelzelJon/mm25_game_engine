@@ -54,11 +54,22 @@ public class Tile {
         } else return " . ";
     }
 
+    /**
+     * should only be called on a terrain tile -- doesn't affect units present on this tile
+     */
     public void collided() {
         hp --;
 
         if (hp <= 0 && type == Type.DESTRUCTIBLE) {
             type = Type.BLANK;
         }
+    }
+
+    /**
+     * deals damage to a tile
+     * @param dmg
+     */
+    public void takeDamage(int dmg) {
+        //TODO
     }
 }

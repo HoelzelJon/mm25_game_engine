@@ -17,26 +17,25 @@ public class Game {
      * @param map       map to add the units onto
      * @return array of units
      */
-    private static Unit[] initUnitList(Position[] positions, Map map) {
+    private static Unit[] initUnitList(Position[] positions, int[][][] attacks, Map map) {
         Unit[] ret = new Unit[positions.length];
         for (int i = 0; i < positions.length; i ++) {
-            ret[i] = new Unit(positions[i]);
+            ret[i] = new Unit(positions[i], attacks[i]);
             map.tileAt(positions[i]).setUnit(ret[i]);
         }
         return ret;
     }
 
-    public Game(int boardSize, Position[] p1Positions, Position[] p2Positions/*TODO: add parameters (attack patterns?)*/) {
+    public Game(int boardSize, Position[] p1Positions, Position[] p2Positions, int[][][] p1Attacks, int[][][] p2Attacks) {
         map = new Map(boardSize);
 
-        map.tileAt(new Position(1, 1)).setType(Tile.Type.INDESTRUCTIBLE);
+        map.tileAt(new Position(1, 1)).setType(Tile.Type.DESTRUCTIBLE); // TODO: remove (eventually)
 
-        p1Units = initUnitList(p1Positions, map);
-        p2Units = initUnitList(p2Positions, map);
+        p1Units = initUnitList(p1Positions, p1Attacks, map);
+        p2Units = initUnitList(p2Positions, p2Attacks, map);
     }
 
     /**
-     *
      * @param units array of units to check
      * @return true if any of the units in the array are alive
      */
@@ -130,7 +129,7 @@ public class Game {
 
             boolean[] collided = doMovementStep(units, stepDirections);
 
-            // should stop units from moving after colliding in a round TODO: test that this works
+            // should stop units from moving after colliding in a round
             for (int unitNum = units.size() - 1; unitNum >= 0; unitNum --) {
                 if (collided[unitNum]) {
                     units.remove(unitNum);
@@ -141,7 +140,12 @@ public class Game {
 
         doDeaths();
 
-        //TODO: attacks
+        for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
+            if (units.get(unitNum).isAlive()) {
+                map.doAttackDamage(units.get(unitNum).getAttack(attackDirections.get(unitNum)),
+                                    units.get(unitNum).getPos());
+            }
+        }
 
         doDeaths();
     }
@@ -180,6 +184,7 @@ public class Game {
 
                 if (inBounds(goalPositions.get(i))) {
                     // deal damage to the terrain
+                    // TODO: resolve bug: in 1 movement step, 2 different bots hit 1 destructible terrain, where the first bot 'kills' the terrain.  Then, the second bot would see the terrain as BLANK and move onto it.
                     map.tileAt(goalPositions.get(i)).collided();
                 }
             } else if (map.tileAt(goalPositions.get(i)).getUnit() != null) {
