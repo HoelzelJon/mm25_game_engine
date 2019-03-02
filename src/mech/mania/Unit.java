@@ -8,12 +8,14 @@ public class Unit {
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
     private int[][] attack; // 2-D grid of attack damages
+    private boolean isAlive;
 
     public Unit(Position pos, int[][] attack) {
         hp = 2;
         speed = 4;
         this.pos = pos;
         this.attack = attack;
+        isAlive = true;
     }
 
     public int getHp() {
@@ -32,9 +34,22 @@ public class Unit {
         this.pos = pos;
     }
 
-    //TODO: only mark units as dead once doDeaths() is called in Game
     public boolean isAlive() {
-        return (hp > 0);
+        return isAlive;
+    }
+
+    /**
+     * Does the death of the unit
+     *
+     * @return true if the unit just died, false otherwise
+     */
+    public boolean doDeath() {
+        if (hp <= 0) {
+            isAlive = false;
+            pos = new Position(-10, -10);
+            return true;
+        }
+        return false;
     }
 
     public void takeCollisionDamage() {

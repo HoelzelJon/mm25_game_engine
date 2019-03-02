@@ -210,9 +210,12 @@ public class Game {
         // handle collisions between two units
         for (int i = 0; i < goalPositions.size(); i ++) {
             for (int j = i+1; j < goalPositions.size(); j ++) {
-                if (goalPositions.get(i).equals(goalPositions.get(j)) || // two units moving onto the same tile
+                if (!collided[i] && !collided[j] &&
+                        (goalPositions.get(i).equals(goalPositions.get(j)) || // two units moving onto the same tile
                         (goalPositions.get(i).equals(initialPositions.get(j)) && // two units trying to move through each other
-                        goalPositions.get(j).equals(initialPositions.get(i)))) {
+                        goalPositions.get(j).equals(initialPositions.get(i))))) {
+                    System.out.println("2-Unit collision");
+
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
                     collided[i] = true;
@@ -270,7 +273,15 @@ public class Game {
      * @param units array of units to check death conditions for
      */
     private void doDeaths(Unit[] units) {
-        //TODO
+        for (Unit u : units) {
+            if (u.isAlive()) {
+                Position oldPos = u.getPos();
+
+                if (u.doDeath()) {
+                    map.tileAt(oldPos).setUnit(null);
+                }
+            }
+        }
     }
 
     /**
