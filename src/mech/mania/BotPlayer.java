@@ -5,6 +5,6 @@ package mech.mania;
  */
 public class BotPlayer extends  Player {
     public BotPlayer(){
-        //do nothing
+        // Do nothing
     }
 }

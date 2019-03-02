@@ -266,7 +266,6 @@ public class Game {
 
     /**
      * handles death for an array of units
-     *
      * @param units array of units to check death conditions for
      */
     private void doDeaths(Unit[] units) {
@@ -283,6 +282,22 @@ public class Game {
 
     public String getMapString() {
         return map.toString();
+    }
+
+    public String getUnitStatsString(){
+        StringBuilder ret = new StringBuilder();
+
+        ret.append("Player 1 Unit Stats:\n");
+        for(Unit u : p1Units){
+            ret.append(u.getId() + ": hp = " + u.getHp() + "\n");
+        }
+        ret.append("\n");
+        ret.append("Player 2 Unit Stats:\n");
+        for(Unit u : p2Units){
+            ret.append(u.getId() + ": hp = " + u.getHp() + "\n");
+        }
+
+        return ret.toString;
     }
 
     public static final int P1_WINNER = 0;

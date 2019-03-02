@@ -10,7 +10,7 @@ public class Player {
     protected Game gameState;
     protected Decision decision;
     public Player(){
-        //do nothing
+        // Do nothing
     }
 
     public void setGameState(Game gameObject){
