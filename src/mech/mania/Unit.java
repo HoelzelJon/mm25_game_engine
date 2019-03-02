@@ -62,7 +62,7 @@ public class Unit {
 
     /**
      * Returns a rotated version of this unit's attack
-     * if dir == UP or dir == STAY then returns unaltered attack //TODO: change STAY to return all zeros?
+     * if dir == UP or dir == STAY then returns unaltered attack
      * if dir == RIGHT then returns copy of attack, rotated 90 degrees clockwise
      * if dir == DOWN then returns copy of attack, rotated 180 degrees
      * if dir == LEFT then returns copy of attack, rotated 90 degrees counterclockwise
@@ -100,6 +100,9 @@ public class Unit {
                     ret[x][y] = attack[height - y - 1][x];
                 }
             }
+            return ret;
+        } else if (dir == Direction.STAY) {
+            int[][] ret = new int[width][height];
             return ret;
         }
 
