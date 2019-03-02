@@ -71,5 +71,15 @@ public class Tile {
      */
     public void takeDamage(int dmg) {
         //TODO
+        if (unit == null) {
+            hp -= dmg;
+
+            if (hp <= 0 && type == Type.DESTRUCTIBLE) {
+                type = Type.BLANK;
+            }
+        } else {
+            unit.takeDamage(dmg);
+        }
+
     }
 }

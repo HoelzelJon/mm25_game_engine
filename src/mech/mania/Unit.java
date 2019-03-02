@@ -41,6 +41,10 @@ public class Unit {
         hp --;
     }
 
+    public void takeDamage(int damage) {
+        hp -= damage;
+    }
+
     /**
      * Returns a rotated version of this unit's attack
      * if dir == UP or dir == STAY then returns unaltered attack //TODO: change STAY to return all zeros?
