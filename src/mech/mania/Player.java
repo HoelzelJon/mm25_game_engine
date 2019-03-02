@@ -2,7 +2,8 @@ package mech.mania;
 
 import com.google.gson.Gson;
 
-/*
+
+/**
  * This class will handle communication to and from the player script.
  */
 public class Player {

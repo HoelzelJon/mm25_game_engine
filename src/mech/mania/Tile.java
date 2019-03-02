@@ -1,27 +1,35 @@
 package mech.mania;
 
-/*
+/**
  * Represents a single square on the game board.
  */
 public class Tile {
     private Position pos; // x,y coordinates of this tile
-    private Unit unit;
-    Type type;
-    int health;
+    private Unit unit; // the Unit present on this tile (or null, if no unit is present)
+    private Type type; // the type of tile this is (see Type enum below)
+    private int hp; // health of this tile (only important for DESTRUCTIBLE type)
 
     enum Type {
-        BLANK, DESTRUCTABLE, INDESTRUCTABLE
+        BLANK, // blank tile -- nothing is on it (except maybe a unit)
+        DESTRUCTIBLE, // destructible terrain -- becomes BLANK after hp is reduced to or below 0
+                      // units cannot be on DESTRUCTIBLE-type tiles
+        INDESTRUCTIBLE // indestructible terrain -- becomes BLANK after hp is reduced to or below 0
+                       // units cannot be on INDESTRUCTIBLE-type tiles
     }
 
     public Tile(Position pos) {
         this.pos = pos;
         unit = null;
         type = Type.BLANK;
-        health = 0;
+        hp = 5;
     }
 
     public Type getType() {
         return type;
+    }
+
+    public void setType(Type type) {
+        this.type = type;
     }
 
     public Unit getUnit() {
@@ -32,14 +40,36 @@ public class Tile {
         this.unit = unit;
     }
 
+    /**
+     * Used for printing out human-readable string of the map
+     * @return a 3-character representation of this tile
+     */
     public String shortString() {
-        if (type == Type.DESTRUCTABLE) {
+        if (type == Type.DESTRUCTIBLE) {
             return " D ";
-        } else if (type == Type.INDESTRUCTABLE) {
+        } else if (type == Type.INDESTRUCTIBLE) {
             return " I ";
         } else if (unit != null) {
             return " " + unit.getHp() + " ";
         } else return " . ";
     }
 
+    /**
+     * should only be called on a terrain tile -- doesn't affect units present on this tile
+     */
+    public void collided() {
+        hp --;
+
+        if (hp <= 0 && type == Type.DESTRUCTIBLE) {
+            type = Type.BLANK;
+        }
+    }
+
+    /**
+     * deals damage to a tile
+     * @param dmg
+     */
+    public void takeDamage(int dmg) {
+        //TODO
+    }
 }
