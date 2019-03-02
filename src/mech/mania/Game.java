@@ -174,6 +174,9 @@ public class Game {
         boolean[] collided = new boolean[units.size()];
         // this array will be filled first with the positions of colliding units, then the rest
 
+        // list of terrain tiles to damage through collisions
+        List<Tile> collidedTiles = new ArrayList<>();
+
         // handle collisions between units and terrain (or the map boundary)
         for (int i = 0; i < goalPositions.size(); i ++) {
             if (! inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
@@ -183,9 +186,8 @@ public class Game {
                 units.get(i).takeCollisionDamage();
 
                 if (inBounds(goalPositions.get(i))) {
-                    // deal damage to the terrain
-                    // TODO: resolve bug: in 1 movement step, 2 different bots hit 1 destructible terrain, where the first bot 'kills' the terrain.  Then, the second bot would see the terrain as BLANK and move onto it.
-                    map.tileAt(goalPositions.get(i)).collided();
+                    // add the terrain to the list of terrain to damage
+                    collidedTiles.add(map.tileAt(goalPositions.get(i)));
                 }
             } else if (map.tileAt(goalPositions.get(i)).getUnit() != null) {
                 // handle collision with stationary unit
@@ -243,6 +245,11 @@ public class Game {
                 }
             }
         } while (foundRipple);
+
+        // damage each collided tile
+        for (Tile t : collidedTiles) {
+            t.collided();
+        }
 
         // move the units
         List<Unit> moving = new ArrayList<>();
