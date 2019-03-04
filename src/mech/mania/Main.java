@@ -21,11 +21,11 @@ public class Main {
                                 new Position(size-2, size-1),
                                 new Position(size-1, size-2)};
 
-        int[][] attack = {{0, 0, 4, 0, 0},
-                          {0, 0, 4, 0, 0},
-                          {3, 3, 0, 1, 1},
-                          {0, 0, 2, 0, 1},
-                          {0, 0, 2, 0, 0}}; // when printed in-game, the 1's should be pointing up
+        int[][] attack = {{0, 0, 1, 0, 0},
+                          {0, 0, 1, 0, 0},
+                          {1, 1, 0, 1, 1},
+                          {0, 0, 1, 0, 1},
+                          {0, 0, 1, 0, 0}}; // when printed in-game, the 1's should be pointing up
         int[][][] p1Attacks = {attack, attack, attack};
         int[][][] p2Attacks = {attack, attack, attack};
 
@@ -41,7 +41,7 @@ public class Main {
                                     {Direction.DOWN},
                                     {Direction.RIGHT}};
             Direction[][] p2Movements = {
-                                    {Direction.LEFT},
+                                    {Direction.UP},
                                     {Direction.LEFT},
                                     {Direction.LEFT}};
 
@@ -71,5 +71,6 @@ public class Main {
     static void printTurnLog(Game g) {
         System.out.println(g.getMapString() + "\n");
         //TODO
+
     }
 }
