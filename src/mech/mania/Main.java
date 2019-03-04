@@ -8,7 +8,6 @@ public class Main {
         Player player1 = new Player();
         Player player2 = new Player();
 
-        //TODO: figure out how to do initial spawns
         //TODO: get attack patterns from each player
 
         int size = 6;
@@ -22,15 +21,15 @@ public class Main {
                                 new Position(size-2, size-1),
                                 new Position(size-1, size-2)};
 
-        int[][] attack = {{0, 0, 4, 0, 0},
-                          {0, 0, 4, 0, 0},
-                          {3, 3, 0, 1, 1},
-                          {0, 0, 2, 0, 1},
-                          {0, 0, 2, 0, 0}}; // when printed in-game, the 1's should be pointing up
+        int[][] attack = {{0, 0, 1, 0, 0},
+                          {0, 0, 1, 0, 0},
+                          {1, 1, 0, 1, 1},
+                          {0, 0, 1, 0, 1},
+                          {0, 0, 1, 0, 0}}; // when printed in-game, the 1's should be pointing up
         int[][][] p1Attacks = {attack, attack, attack};
         int[][][] p2Attacks = {attack, attack, attack};
 
-        Game game = new Game(size, p1Positions, p2Positions, p1Attacks, p2Attacks);
+        Game game = new Game(p1Attacks, p2Attacks);
 
         while (game.getWinner() == Game.NO_WINNER) {
             //player1.sendGameState(game);
@@ -39,14 +38,14 @@ public class Main {
             int[] priorities = {1,1,1};
             Direction[][] p1Movements = {
                                     {Direction.STAY},
-                                    {Direction.UP},
+                                    {Direction.DOWN},
                                     {Direction.RIGHT}};
             Direction[][] p2Movements = {
-                                    {Direction.LEFT},
+                                    {Direction.UP},
                                     {Direction.LEFT},
                                     {Direction.LEFT}};
 
-            Direction[] attacks = new Direction[3];
+            Direction[] attacks = {Direction.STAY, Direction.STAY, Direction.STAY};
 
             Decision p1Decision = new Decision(priorities, p1Movements, attacks); //TODO: player1.getDecision();
             Decision p2Decision = new Decision(priorities, p2Movements, attacks); //TODO: player2.getDecision();
@@ -72,5 +71,6 @@ public class Main {
     static void printTurnLog(Game g) {
         System.out.println(g.getMapString() + "\n");
         //TODO
+
     }
 }

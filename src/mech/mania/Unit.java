@@ -8,12 +8,14 @@ public class Unit {
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
     private int[][] attack; // 2-D grid of attack damages
+    private boolean isAlive;
 
     public Unit(Position pos, int[][] attack) {
         hp = 2;
         speed = 4;
         this.pos = pos;
         this.attack = attack;
+        isAlive = true;
     }
 
     public int getHp() {
@@ -32,18 +34,35 @@ public class Unit {
         this.pos = pos;
     }
 
-    //TODO: only mark units as dead once doDeaths() is called in Game
     public boolean isAlive() {
-        return (hp > 0);
+        return isAlive;
+    }
+
+    /**
+     * Does the death of the unit
+     *
+     * @return true if the unit just died, false otherwise
+     */
+    public boolean doDeath() {
+        if (hp <= 0) {
+            isAlive = false;
+            pos = new Position(-10, -10);
+            return true;
+        }
+        return false;
     }
 
     public void takeCollisionDamage() {
         hp --;
     }
 
+    public void takeDamage(int damage) {
+        hp -= damage;
+    }
+
     /**
      * Returns a rotated version of this unit's attack
-     * if dir == UP or dir == STAY then returns unaltered attack //TODO: change STAY to return all zeros?
+     * if dir == UP or dir == STAY then returns unaltered attack
      * if dir == RIGHT then returns copy of attack, rotated 90 degrees clockwise
      * if dir == DOWN then returns copy of attack, rotated 180 degrees
      * if dir == LEFT then returns copy of attack, rotated 90 degrees counterclockwise
@@ -81,6 +100,9 @@ public class Unit {
                     ret[x][y] = attack[height - y - 1][x];
                 }
             }
+            return ret;
+        } else if (dir == Direction.STAY) {
+            int[][] ret = new int[width][height];
             return ret;
         }
 

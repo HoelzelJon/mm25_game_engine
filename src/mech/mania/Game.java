@@ -12,6 +12,8 @@ public class Game {
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
 
+    private List<GameTurn> turns = new ArrayList<GameTurn>();
+
     /**
      * @param positions array of positions for each unit to be initialized to
      * @param map       map to add the units onto
@@ -26,10 +28,10 @@ public class Game {
         return ret;
     }
 
-    public Game(int boardSize, Position[] p1Positions, Position[] p2Positions, int[][][] p1Attacks, int[][][] p2Attacks) {
-        map = new Map(boardSize);
-
-        map.tileAt(new Position(1, 1)).setType(Tile.Type.DESTRUCTIBLE); // TODO: remove (eventually)
+    public Game(int[][][] p1Attacks, int[][][] p2Attacks) {
+        map = new Map();
+        Position[] p1Positions = map.getP1InitialPositions();
+        Position[] p2Positions = map.getP2InitialPositions();
 
         p1Units = initUnitList(p1Positions, p1Attacks, map);
         p2Units = initUnitList(p2Positions, p2Attacks, map);
@@ -174,6 +176,9 @@ public class Game {
         boolean[] collided = new boolean[units.size()];
         // this array will be filled first with the positions of colliding units, then the rest
 
+        // list of terrain tiles to damage through collisions
+        List<Tile> collidedTiles = new ArrayList<>();
+
         // handle collisions between units and terrain (or the map boundary)
         for (int i = 0; i < goalPositions.size(); i ++) {
             if (! inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
@@ -183,9 +188,8 @@ public class Game {
                 units.get(i).takeCollisionDamage();
 
                 if (inBounds(goalPositions.get(i))) {
-                    // deal damage to the terrain
-                    // TODO: resolve bug: in 1 movement step, 2 different bots hit 1 destructible terrain, where the first bot 'kills' the terrain.  Then, the second bot would see the terrain as BLANK and move onto it.
-                    map.tileAt(goalPositions.get(i)).collided();
+                    // add the terrain to the list of terrain to damage
+                    collidedTiles.add(map.tileAt(goalPositions.get(i)));
                 }
             } else if (map.tileAt(goalPositions.get(i)).getUnit() != null) {
                 // handle collision with stationary unit
@@ -210,9 +214,12 @@ public class Game {
         // handle collisions between two units
         for (int i = 0; i < goalPositions.size(); i ++) {
             for (int j = i+1; j < goalPositions.size(); j ++) {
-                if (goalPositions.get(i).equals(goalPositions.get(j)) || // two units moving onto the same tile
+                if (!collided[i] && !collided[j] &&
+                        (goalPositions.get(i).equals(goalPositions.get(j)) || // two units moving onto the same tile
                         (goalPositions.get(i).equals(initialPositions.get(j)) && // two units trying to move through each other
-                        goalPositions.get(j).equals(initialPositions.get(i)))) {
+                        goalPositions.get(j).equals(initialPositions.get(i))))) {
+                    System.out.println("2-Unit collision");
+
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
                     collided[i] = true;
@@ -240,6 +247,11 @@ public class Game {
                 }
             }
         } while (foundRipple);
+
+        // damage each collided tile
+        for (Tile t : collidedTiles) {
+            t.collided();
+        }
 
         // move the units
         List<Unit> moving = new ArrayList<>();
@@ -270,7 +282,15 @@ public class Game {
      * @param units array of units to check death conditions for
      */
     private void doDeaths(Unit[] units) {
-        //TODO
+        for (Unit u : units) {
+            if (u.isAlive()) {
+                Position oldPos = u.getPos();
+
+                if (u.doDeath()) {
+                    map.tileAt(oldPos).setUnit(null);
+                }
+            }
+        }
     }
 
     /**
