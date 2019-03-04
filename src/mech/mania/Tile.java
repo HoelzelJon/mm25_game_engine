@@ -40,6 +40,10 @@ public class Tile {
         this.unit = unit;
     }
 
+    public void setHp(int hp) {
+        this.hp = hp;
+    }
+
     /**
      * Used for printing out human-readable string of the map
      * @return a 3-character representation of this tile

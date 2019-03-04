@@ -26,10 +26,10 @@ public class Game {
         return ret;
     }
 
-    public Game(int boardSize, Position[] p1Positions, Position[] p2Positions, int[][][] p1Attacks, int[][][] p2Attacks) {
-        map = new Map(boardSize);
-
-        map.tileAt(new Position(1, 1)).setType(Tile.Type.DESTRUCTIBLE); // TODO: remove (eventually)
+    public Game(int[][][] p1Attacks, int[][][] p2Attacks) {
+        map = new Map();
+        Position[] p1Positions = map.getP1InitialPositions();
+        Position[] p2Positions = map.getP2InitialPositions();
 
         p1Units = initUnitList(p1Positions, p1Attacks, map);
         p2Units = initUnitList(p2Positions, p2Attacks, map);
