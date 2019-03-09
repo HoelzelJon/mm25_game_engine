@@ -300,7 +300,7 @@ public class Game {
         return ret.toString();
     }
 
-    public Unit[] getPlayerUnits(playerNum){
+    public Unit[] getPlayerUnits(int playerNum){
         if(playerNum == 1){
             return p1Units;
         }
