@@ -5,8 +5,8 @@ package mech.mania;
  */
 public class Main {
     public static void main(String[] args) {
-        Player player1 = new Player();
-        Player player2 = new Player();
+        Player player1 = new Player(1);
+        Player player2 = new Player(2);
 
         //TODO: figure out how to do initial spawns
         //TODO: get attack patterns from each player
