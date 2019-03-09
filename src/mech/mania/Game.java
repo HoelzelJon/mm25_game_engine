@@ -297,7 +297,7 @@ public class Game {
             ret.append(u.getId() + ": hp = " + u.getHp() + "\n");
         }
 
-        return ret.toString;
+        return ret.toString();
     }
 
     public static final int P1_WINNER = 0;
