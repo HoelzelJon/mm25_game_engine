@@ -9,7 +9,9 @@ import com.google.gson.Gson;
 public class Player {
     protected Game gameState;
     protected Decision decision;
-    public Player(){
+    protected int playerNum;
+    public Player(playerNum){
+        this.playerNum = playerNum;
         // Do nothing
     }
 

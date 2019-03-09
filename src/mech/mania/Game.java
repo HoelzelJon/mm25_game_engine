@@ -300,6 +300,18 @@ public class Game {
         return ret.toString();
     }
 
+    public Unit[] getPlayerUnits(playerNum){
+        if(playerNum == 1){
+            return p1Units;
+        }
+        else if (playerNum == 2){
+            return p2Units;
+        }
+        else{
+            return null;
+        }
+    }
+
     public static final int P1_WINNER = 0;
     public static final int P2_WINNER = 1;
     public static final int TIE = 2;
