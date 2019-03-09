@@ -1,7 +1,6 @@
 package mech.mania;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -12,7 +11,12 @@ public class Game {
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
 
-    private List<GameTurn> turns = new ArrayList<GameTurn>();
+    private List<GameTurn> turns = new ArrayList<>();
+    private List<RoundMovement> roundMovements;
+    private List<Movement> unitMovements;
+    private List<UnitDamaged> unitsDamaged;
+    private List<UnitCollision> unitCollisions;
+    private List<TileCollision> tileCollisions;
 
     /**
      * @param positions array of positions for each unit to be initialized to
@@ -78,6 +82,9 @@ public class Game {
      * @param p2Decision the decision for player 2 to take
      */
     public void doTurn(Decision p1Decision, Decision p2Decision) {
+
+        turns.add(new GameTurn());
+
         for (int priority = 1; priority <= 3; priority ++) {
             ArrayList<Unit> unitsToMove = new ArrayList<>();
             ArrayList<Direction[]> movements = new ArrayList<>();
@@ -98,8 +105,11 @@ public class Game {
                 }
             }
 
+
             doRound(unitsToMove, movements, attackDirections);
         }
+
+        System.out.println(turns.toString());
     }
 
     /**
@@ -117,8 +127,11 @@ public class Game {
             }
         }
 
+        roundMovements = new ArrayList<>();
+
         for (int stepNum = 0; stepNum < numSteps; stepNum ++) {
-            List<Direction> stepDirections = new ArrayList<>(units.size());
+
+            List<Direction> stepDirections = new ArrayList<>();
 
             for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
                 if (movements.get(unitNum).length <= stepNum || units.get(unitNum).getSpeed() <= stepNum) {
@@ -135,21 +148,31 @@ public class Game {
             for (int unitNum = units.size() - 1; unitNum >= 0; unitNum --) {
                 if (collided[unitNum]) {
                     units.remove(unitNum);
-                    movements.remove(unitNum);
                 }
             }
         }
 
         doDeaths();
 
+        List<Attack> attacks = new ArrayList<>();
+
         for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
             if (units.get(unitNum).isAlive()) {
                 map.doAttackDamage(units.get(unitNum).getAttack(attackDirections.get(unitNum)),
                                     units.get(unitNum).getPos());
+                if (attackDirections.get(unitNum) != Direction.STAY) {
+                    attacks.add(new Attack(units.get(unitNum), attackDirections.get(unitNum)));
+                }
             }
         }
 
         doDeaths();
+
+        turns.get(turns.size() - 1).add(
+                new GameRound(
+                        roundMovements.toArray(new RoundMovement[0]),
+                        attacks.toArray(new Attack[0])
+                ));
     }
 
     /**
@@ -160,6 +183,11 @@ public class Game {
      * @return a boolean array indicating whether each unit has collided during this movement step
      */
     private boolean[] doMovementStep(List<Unit> units, List<Direction> directions) {
+        unitMovements = new ArrayList<>();
+        unitsDamaged = new ArrayList<>();
+        unitCollisions = new ArrayList<>();
+        tileCollisions = new ArrayList<>();
+
         // list of each unit's initial position
         List<Position> initialPositions = new ArrayList<>(units.size());
         for (int i = 0; i < units.size(); i ++) {
@@ -186,6 +214,11 @@ public class Game {
 
                 collided[i] = true;
                 units.get(i).takeCollisionDamage();
+                tileCollisions.add(new TileCollision(
+                        units.get(i),
+                        null,
+                        Unit.COLLISION_DAMAGE,
+                        0));
 
                 if (inBounds(goalPositions.get(i))) {
                     // add the terrain to the list of terrain to damage
@@ -207,6 +240,13 @@ public class Game {
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
                     map.tileAt(goalPositions.get(i)).getUnit().takeCollisionDamage();
+
+
+                    tileCollisions.add(new TileCollision(
+                            units.get(i),
+                            map.tileAt(goalPositions.get(i)),
+                            Unit.COLLISION_DAMAGE,
+                            Tile.COLLISION_DAMAGE));
                 }
             }
         }
@@ -222,8 +262,15 @@ public class Game {
 
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
-                    collided[i] = true;
+                    collided[j] = true;
                     units.get(j).takeCollisionDamage();
+
+                    unitCollisions.add(new UnitCollision(
+                            units.get(i),
+                            units.get(j),
+                            Unit.COLLISION_DAMAGE,
+                            Unit.COLLISION_DAMAGE
+                    ));
                 }
             }
         }
@@ -241,6 +288,13 @@ public class Game {
                             collided[i] = true;
                             units.get(i).takeCollisionDamage();
                             units.get(j).takeCollisionDamage();
+                            unitCollisions.add(
+                                    new UnitCollision(
+                                            units.get(i),
+                                            units.get(j),
+                                            Unit.COLLISION_DAMAGE,
+                                            Unit.COLLISION_DAMAGE
+                                    ));
                             break;
                         }
                     }
@@ -260,8 +314,23 @@ public class Game {
             if (!collided[i]) {
                 moving.add(units.get(i));
                 destinations.add(goalPositions.get(i));
+                unitMovements.add(new Movement(
+                        units.get(i),     // same indices
+                        directions.get(i) // same indices
+                ));
             }
         }
+
+        roundMovements.add(new RoundMovement(
+                unitMovements.toArray(new Movement[0]),
+                unitsDamaged.toArray(new UnitDamaged[0]),
+                unitCollisions.toArray(new UnitCollision[0]),
+                tileCollisions.toArray(new TileCollision[0])
+        ));
+        unitMovements = null;
+        unitsDamaged = null;
+        unitCollisions = null;
+        tileCollisions = null;
 
         map.moveUnits(moving, destinations);
 

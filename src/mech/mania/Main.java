@@ -1,5 +1,9 @@
 package mech.mania;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Random;
+
 /**
  * Main class -- where the magic happens
  */
@@ -9,17 +13,6 @@ public class Main {
         Player player2 = new Player();
 
         //TODO: get attack patterns from each player
-
-        int size = 6;
-        Position[] p1Positions = {
-                                new Position(0, 0),
-                                new Position(1, 0),
-                                new Position(0, 1)};
-
-        Position[] p2Positions = {
-                                new Position(size-1, size-1),
-                                new Position(size-2, size-1),
-                                new Position(size-1, size-2)};
 
         int[][] attack = {{0, 0, 1, 0, 0},
                           {0, 0, 1, 0, 0},
@@ -35,14 +28,14 @@ public class Main {
             //player1.sendGameState(game);
             //player2.sendGameState(game);
 
-            int[] priorities = {1,1,1};
+            int[] priorities = {1,2,3};
             Direction[][] p1Movements = {
                                     {Direction.STAY},
                                     {Direction.DOWN},
                                     {Direction.RIGHT}};
             Direction[][] p2Movements = {
                                     {Direction.UP},
-                                    {Direction.LEFT},
+                                    {Direction.STAY},
                                     {Direction.LEFT}};
 
             Direction[] attacks = {Direction.STAY, Direction.STAY, Direction.STAY};
