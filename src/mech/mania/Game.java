@@ -12,7 +12,7 @@ public class Game {
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
 
-    private List<GameTurn> turns = new ArrayList<GameTurn>();
+    private GameTurn lastTurn;
 
     /**
      * @param positions array of positions for each unit to be initialized to

@@ -13,10 +13,6 @@ public class GameTurn {
     public List<GameRound> getRounds() {
         return rounds;
     }
-
-    public String toJson() {
-        return "";
-    }
 }
 
 class GameRound {
