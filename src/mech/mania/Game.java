@@ -11,6 +11,7 @@ public class Game {
     private Map map; // current map
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
+    private String gameId;
 
     /**
      * @param positions array of positions for each unit to be initialized to
@@ -26,13 +27,15 @@ public class Game {
         return ret;
     }
 
-    public Game(int boardSize, Position[] p1Positions, Position[] p2Positions, int[][][] p1Attacks, int[][][] p2Attacks) {
+    public Game(int boardSize, Position[] p1Positions, Position[] p2Positions, int[][][] p1Attacks, int[][][] p2Attacks, String gameId) {
         map = new Map(boardSize);
 
         map.tileAt(new Position(1, 1)).setType(Tile.Type.DESTRUCTIBLE); // TODO: remove (eventually)
 
         p1Units = initUnitList(p1Positions, p1Attacks, map);
         p2Units = initUnitList(p2Positions, p2Attacks, map);
+
+        this.gameId= gameId;
     }
 
     /**

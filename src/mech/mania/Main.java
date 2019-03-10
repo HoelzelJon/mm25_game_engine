@@ -5,8 +5,8 @@ package mech.mania;
  */
 public class Main {
     public static void main(String[] args) {
-        PlayerCommunicator player1 = new HumanPlayerCommunicator(1);
-        PlayerCommunicator player2 = new HumanPlayerCommunicator(2);
+        PlayerCommunicator player1 = new ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
+        PlayerCommunicator player2 = new ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
         //TODO: get attack patterns from each player
 
@@ -29,7 +29,7 @@ public class Main {
         int[][][] p1Attacks = {attack, attack, attack};
         int[][][] p2Attacks = {attack, attack, attack};
 
-        Game game = new Game(size, p1Positions, p2Positions, p1Attacks, p2Attacks);
+        Game game = new Game(size, p1Positions, p2Positions, p1Attacks, p2Attacks, "ID");
 
         while (game.getWinner() == Game.NO_WINNER) {
             //player1.sendGameState(game);
@@ -47,7 +47,8 @@ public class Main {
 
             Direction[] attacks = new Direction[3];
 
-            Decision p1Decision = new Decision(priorities, p1Movements, attacks); //TODO: player1.getDecision();
+            //Decision p1Decision = new Decision(priorities, p1Movements, attacks); //TODO: player1.getDecision();
+            Decision p1Decision = player1.getDecision(game);
             Decision p2Decision = new Decision(priorities, p2Movements, attacks); //TODO: player2.getDecision();
 
             game.doTurn(p1Decision, p2Decision);
