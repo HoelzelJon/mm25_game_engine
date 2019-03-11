@@ -1,5 +1,7 @@
 package mech.mania;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * Represents a single square on the game board.
  */
@@ -82,7 +84,11 @@ public class Tile {
      * @param dmg
      */
     public void takeDamage(int dmg) {
-        //TODO
+        if (type == Type.BLANK) {
+            // blank tiles cannot be damaged
+            return;
+        }
+
         if (unit == null) {
             hp -= dmg;
 

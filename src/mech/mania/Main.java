@@ -1,9 +1,5 @@
 package mech.mania;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Random;
-
 /**
  * Main class -- where the magic happens
  */
@@ -24,21 +20,23 @@ public class Main {
 
         Game game = new Game(p1Attacks, p2Attacks);
 
+        printIntroJson(game);
+
         while (game.getWinner() == Game.NO_WINNER) {
             //player1.sendGameState(game);
             //player2.sendGameState(game);
 
             int[] priorities = {1,2,3};
             Direction[][] p1Movements = {
-                                    {Direction.STAY},
-                                    {Direction.DOWN},
-                                    {Direction.RIGHT}};
+                                    {Direction.STAY, Direction.LEFT, Direction.UP},
+                                    {Direction.DOWN, Direction.STAY, Direction.RIGHT},
+                                    {Direction.RIGHT, Direction.DOWN}};
             Direction[][] p2Movements = {
-                                    {Direction.UP},
-                                    {Direction.STAY},
-                                    {Direction.LEFT}};
+                                    {Direction.STAY, Direction.STAY, Direction.DOWN},
+                                    {Direction.STAY, Direction.DOWN, Direction.DOWN},
+                                    {Direction.RIGHT, Direction.DOWN, Direction.DOWN, Direction.LEFT}};
 
-            Direction[] attacks = {Direction.STAY, Direction.STAY, Direction.STAY};
+            Direction[] attacks = {Direction.STAY, Direction.UP, Direction.STAY};
 
             Decision p1Decision = new Decision(priorities, p1Movements, attacks); //TODO: player1.getDecision();
             Decision p2Decision = new Decision(priorities, p2Movements, attacks); //TODO: player2.getDecision();
@@ -53,17 +51,19 @@ public class Main {
         }
 
         if (game.getWinner() == Game.TIE) {
-            System.out.println("It's a tie!");
+            SystemIO.print("It's a tie!", true);
         } else if (game.getWinner() == Game.P1_WINNER) {
-            System.out.println("Player 1 wins!");
+            SystemIO.print("Player 1 wins!", true);
         } else if (game.getWinner() == Game.P2_WINNER) {
-            System.out.println("Player 2 wins!");
+            SystemIO.print("Player 2 wins!", true);
         }
     }
 
-    static void printTurnLog(Game g) {
-        System.out.println(g.getMapString() + "\n");
-        //TODO
+    static void printIntroJson(Game game) {
 
+    }
+
+    static void printTurnLog(Game game) {
+        SystemIO.print(game.getFormattedMap() + "\n", true);
     }
 }
