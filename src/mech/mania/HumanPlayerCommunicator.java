@@ -19,7 +19,11 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      */
     @Override
     public Decision getDecision(Game gameState){
-        //TODO: build Decision object from user input and pass it
+        // Print gameState and Unit's stats for user to see
+        System.out.println(gameState.getMapString());
+        System.out.println(gameState.getUnitStatsString());
+
+        System.out.println("**********Player " + playerNum + "**********");
 
         Unit[] myUnits = gameState.getPlayerUnits(playerNum);
 
@@ -31,7 +35,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         // Iterate through bots
         for(int botId = 0; botId < myUnits.length; botId++){
             // Ask for priority
-            System.out.println("Specify priority for bot " + botId + " (1 to " + myUnits.length + ", 1 is first):");
+            System.out.println("Specify priority for bot " + botId + " (board ID " + myUnits[botId].getId() + ") (1 to " + myUnits.length + ", 1 is first):");
             priorities[botId] = sk.nextInt();
             sk.nextLine();
             while(priorities[botId] < 1 || priorities[botId] > myUnits.length){
@@ -43,15 +47,26 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
             // Ask for movement
             movements[botId] = new Direction[myUnits[botId].getSpeed()];
             System.out.println("Specify movement steps for bot " + botId + ". U = up, D = down, L = left, R = right, S = stay");
+            String moveSteps = sk.nextLine();
             for(int step = 0; step < movements[botId].length; step++){
-                movements[botId][step] = dirFromChar(sk.nextChar());
+                try{
+                    movements[botId][step] = dirFromChar(moveSteps.charAt(step));
+                }
+                catch(Exception e){
+                    // Triggers if user didn't enter all 4 movement steps
+                    movements[botId][step] = Direction.STAY;
+                }
             }
-            sk.nextLine();
 
             // Ask for attack direction
             System.out.println("Specify attack direction for bot " + botId + ". U = up, D = down, L = left, R = right, S = stay");
-            attackDirs[botId] = dirFromChar(sk.nextChar());
-            sk.nextLine();
+            try{
+                attackDirs[botId] = dirFromChar(sk.nextLine().charAt(0));
+            }
+            catch(Exception e){
+                // Triggers if user doesn't enter anything
+                attackDirs[botId] = Direction.STAY;
+            }
         }
 
         return new Decision(priorities, movements, attackDirs);
@@ -62,6 +77,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      */
     public int[][][] getAttackPatterns(int numBots){
         int[][][] attackPatterns = new int[numBots][][];
+        int[][][] attackPatternsTransform = new int[numBots][][];
 
         // Iterate over bots
         for(int botId = 0; botId < numBots; botId++){
@@ -75,7 +91,11 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
                 numRows = sk.nextInt();
                 sk.nextLine();
             }
-
+            
+            // ASSUMING SQUARE MATRIX
+            System.out.println("Assuming square attack matrix");
+            int numCols = numRows;
+            /*
             // Ask for columns
             System.out.println("How many columns (x-values) does the attack pattern span?");
             int numCols = sk.nextInt();
@@ -85,6 +105,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
                 numCols = sk.nextInt();
                 sk.nextLine();
             }
+            */
 
             // Fill in attack pattern values
             attackPatterns[botId] = new int[numRows][numCols];
@@ -92,7 +113,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
                     "0 0 0\n" +
                     "0 0 0\n" +
                     "0 0 0");
-            System.out.println("Your bot is in the center of the array.")
+            System.out.println("Your bot is in the center of the array.");
             for(int r = 0; r < numRows; r++){
                 for(int c = 0; c < numCols; c++){
                     attackPatterns[botId][r][c] = sk.nextInt();
@@ -100,39 +121,35 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
                 sk.nextLine();
             }
 
-            // TODO: Transform attackPatterns matrix into correct coordinates
-            // 1 2 3        3 6 9
-            // 4 5 6    ->  2 5 8
-            // 7 8 9        1 4 7
+            // Transform attackPatterns matrix into correct coordinates
+            // 1 2 3      7 8 9
+            // 4 5 6  ->  4 5 6
+            // 7 8 9      1 2 3
+            attackPatternsTransform[botId] = Map.toGameCoords(attackPatterns[botId]);
+            
         }
 
-        return attackPatterns;
-    }
-
-    /**
-     * Helper method to transform from visual coordinates to game coordinates
-     */
-    public int[][] toGameCoords(int map[][]){
-        return null;
+        return attackPatternsTransform;
     }
 
     /**
      * Helper method to convert a UDLRS character to a Direction
      */
     public Direction dirFromChar(char d){
+        d = Character.toUpperCase(d);
+        if(!Character.isUpperCase(d)){
+            // d was not a letter
+            return Direction.STAY;
+        }
         switch(d){
             case 'U':
                 return Direction.UP;
-                break;
             case 'D':
                 return Direction.DOWN;
-                break;
             case 'L':
                 return Direction.LEFT;
-                break;
             case 'R':
                 return Direction.RIGHT;
-                break;
             default:
                 return Direction.STAY;
         }

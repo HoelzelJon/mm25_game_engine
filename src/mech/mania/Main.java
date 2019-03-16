@@ -1,14 +1,21 @@
 package mech.mania;
 
+import java.util.Arrays;
+
 /**
  * Main class -- where the magic happens
  */
 public class Main {
     public static void main(String[] args) {
-        PlayerCommunicator player1 = new ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
-        PlayerCommunicator player2 = new ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
+        HumanPlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
+        HumanPlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
-        //TODO: get attack patterns from each player
+        //int[][][] p1Attacks = player1.getAttackPatterns(1); 
+        //int[][][] p2Attacks = player2.getAttackPatterns(1);
+
+        /*int size = 6;
+        Position[] p1Positions = {new Position(0,0)};
+        Position[] p2Positions = {new Position(size-1, size-1)};*/
 
         int size = 6;
         Position[] p1Positions = {
@@ -29,13 +36,13 @@ public class Main {
         int[][][] p1Attacks = {attack, attack, attack};
         int[][][] p2Attacks = {attack, attack, attack};
 
+        System.out.println(Arrays.deepToString(attack));
+        System.out.println(Arrays.deepToString(Map.toGameCoords(attack)));
+
         Game game = new Game(size, p1Positions, p2Positions, p1Attacks, p2Attacks, "ID");
 
         while (game.getWinner() == Game.NO_WINNER) {
-            //player1.sendGameState(game);
-            //player2.sendGameState(game);
-
-            int[] priorities = {1,1,1};
+            /*int[] priorities = {1,1,1};
             Direction[][] p1Movements = {
                                     {Direction.STAY},
                                     {Direction.UP},
@@ -45,11 +52,11 @@ public class Main {
                                     {Direction.LEFT},
                                     {Direction.LEFT}};
 
-            Direction[] attacks = new Direction[3];
+            Direction[] attacks = new Direction[3];*/
 
-            //Decision p1Decision = new Decision(priorities, p1Movements, attacks); //TODO: player1.getDecision();
+            //Decision p1Decision = new Decision(priorities, p1Movements, attacks);
             Decision p1Decision = player1.getDecision(game);
-            Decision p2Decision = new Decision(priorities, p2Movements, attacks); //TODO: player2.getDecision();
+            Decision p2Decision = player2.getDecision(game);
 
             game.doTurn(p1Decision, p2Decision);
 
