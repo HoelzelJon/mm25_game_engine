@@ -1,5 +1,8 @@
 package mech.mania;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -7,16 +10,89 @@ import java.util.List;
  * May also be responsible for generating random boards, if that is what we end up doing.
  */
 public class Map {
+    private static final String DIRECTORY = "./Maps/";
+
     private Tile[][] tiles; // 2-D array of all tiles on the board
+    private Position[][] init_positions; // init_positions[0] = array of player 1's initial positions
+                                        // init_positions[1] = array of player 2's initial positions
 
-    public Map(int size) {
-        tiles = new Tile[size][size];
+    /**
+     * Default map constructor: generates map based on a random file from DIRECTORY, in the following format:
+     * - formatted as a .csv file (columns separated by commas, rows separated by newlines)
+     * - Indestructtile tiles are marked with 'I'
+     * - Destructible tiles marked with an integer for their health
+     * - Tiles which are initial spawns for units should be 'U##', where:
+     *      - the first # is replaced by either 1 or 2, based on which player owns that unit
+     *      - the second # is replaced by 0, 1, or 2, based on which unit it is
+     */
+    public Map() {
+        File folder = new File(DIRECTORY);
+        File[] files = folder.listFiles();
 
-        for (int x = 0; x < size; x ++) {
-            for (int y = 0; y < size; y ++) {
-                tiles[x][y] = new Tile(new Position(x, y));
+        int fileIndex = (int)(Math.random() * files.length);
+
+        List<String> fileStr = new ArrayList<>();
+        try {
+            fileStr = Files.readAllLines(files[fileIndex].toPath());
+        } catch (Exception ex) {
+            System.out.println("Error reading file.");
+        }
+
+        int height = fileStr.size();
+
+        List<String[]> stringGrid = new ArrayList<>();
+
+        for (int y = 0; y < height; y ++) {
+            stringGrid.add(fileStr.get(y).split(","));
+        }
+
+        int width = 0;
+        for (int y = 0; y < stringGrid.size(); y ++) {
+            if (stringGrid.get(y).length > width) {
+                width = stringGrid.get(y).length;
             }
         }
+
+        tiles = new Tile[width][height];
+
+        init_positions = new Position[2][3];
+
+        for (int x = 0; x < width; x ++) {
+            for (int y = 0; y < height; y ++) {
+                Tile t = new Tile(new Position(x, y));
+
+                if (stringGrid.get(height - y - 1).length > x) {
+                    String s = stringGrid.get(height - y - 1)[x].trim();
+
+                    if (s.equalsIgnoreCase("I")) {
+                        t.setType(Tile.Type.INDESTRUCTIBLE);
+                    } else if (s.length() >= 3 && s.charAt(0) == 'U') {
+                        int playerNum = s.charAt(1) - '0';
+                        int unitNum = s.charAt(2) - '0';
+
+                        init_positions[playerNum - 1][unitNum] = new Position(x, y);
+                    } else if (s.length() > 0) {
+                        // should be a Destructible tile, so entry should be a number
+                        try {
+                            t.setHp(Integer.parseInt(s));
+                            t.setType(Tile.Type.DESTRUCTIBLE);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Found weird string at position (" + x + "," + y + ") while parsing map: " + s);
+                        }
+                    }
+                }
+
+                tiles[x][y] = t;
+            }
+        }
+    }
+
+    public Position[] getP1InitialPositions() {
+        return init_positions[0];
+    }
+
+    public Position[] getP2InitialPositions() {
+        return init_positions[1];
     }
 
     public Tile tileAt(Position pos) {

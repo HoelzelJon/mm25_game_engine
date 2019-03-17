@@ -28,33 +28,32 @@ public class Main {
                                 new Position(size-2, size-1),
                                 new Position(size-1, size-2)};
 
-        int[][] attack = {{0, 0, 4, 0, 0},
-                          {0, 0, 4, 0, 0},
-                          {3, 3, 0, 1, 1},
-                          {0, 0, 2, 0, 1},
-                          {0, 0, 2, 0, 0}}; // when printed in-game, the 1's should be pointing up
+        int[][] attack = {{0, 0, 1, 0, 0},
+                          {0, 0, 1, 0, 0},
+                          {1, 1, 0, 1, 1},
+                          {0, 0, 1, 0, 1},
+                          {0, 0, 1, 0, 0}}; // when printed in-game, the 1's should be pointing up
         int[][][] p1Attacks = {attack, attack, attack};
         int[][][] p2Attacks = {attack, attack, attack};
 
         System.out.println(Arrays.deepToString(attack));
         System.out.println(Arrays.deepToString(Map.toGameCoords(attack)));
-
-        Game game = new Game(size, p1Positions, p2Positions, p1Attacks, p2Attacks, "ID");
+        Game game = new Game(p1Attacks, p2Attacks);
 
         while (game.getWinner() == Game.NO_WINNER) {
             /*int[] priorities = {1,1,1};
             Direction[][] p1Movements = {
                                     {Direction.STAY},
-                                    {Direction.UP},
+                                    {Direction.DOWN},
                                     {Direction.RIGHT}};
             Direction[][] p2Movements = {
-                                    {Direction.LEFT},
+                                    {Direction.UP},
                                     {Direction.LEFT},
                                     {Direction.LEFT}};
 
-            Direction[] attacks = new Direction[3];*/
+            Direction[] attacks = {Direction.STAY, Direction.STAY, Direction.STAY};
+            Decision p1Decision = new Decision(priorities, p1Movements, attacks);*/
 
-            //Decision p1Decision = new Decision(priorities, p1Movements, attacks);
             Decision p1Decision = player1.getDecision(game);
             Decision p2Decision = player2.getDecision(game);
 
@@ -79,5 +78,6 @@ public class Main {
     static void printTurnLog(Game g) {
         System.out.println(g.getMapString() + "\n");
         //TODO
+
     }
 }
