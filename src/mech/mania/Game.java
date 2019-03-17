@@ -310,14 +310,10 @@ public class Game {
     public String getUnitStatsString(){
         StringBuilder ret = new StringBuilder();
 
-        ret.append("Player 1 Unit Stats:\n");
-        for(Unit u : p1Units){
-            ret.append(u.getId() + ": hp = " + u.getHp() + "\n");
-        }
-        ret.append("\n");
-        ret.append("Player 2 Unit Stats:\n");
-        for(Unit u : p2Units){
-            ret.append(u.getId() + ": hp = " + u.getHp() + "\n");
+        ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
+        for(int i = 0; i < p1Units.length; i++){
+            ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t");
+            ret.append(p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
         }
 
         return ret.toString();

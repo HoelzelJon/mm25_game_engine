@@ -1,7 +1,5 @@
 package mech.mania;
 
-import java.util.Arrays;
-
 /**
  * Main class -- where the magic happens
  */
@@ -10,34 +8,21 @@ public class Main {
         HumanPlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
         HumanPlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
-        //int[][][] p1Attacks = player1.getAttackPatterns(1); 
-        //int[][][] p2Attacks = player2.getAttackPatterns(1);
+        int[][][] p1Attacks = player1.getAttackPatterns(1); 
+        int[][][] p2Attacks = player2.getAttackPatterns(1);
 
         /*int size = 6;
         Position[] p1Positions = {new Position(0,0)};
         Position[] p2Positions = {new Position(size-1, size-1)};*/
 
-        int size = 6;
-        Position[] p1Positions = {
-                                new Position(0, 0),
-                                new Position(1, 0),
-                                new Position(0, 1)};
-
-        Position[] p2Positions = {
-                                new Position(size-1, size-1),
-                                new Position(size-2, size-1),
-                                new Position(size-1, size-2)};
-
-        int[][] attack = {{0, 0, 1, 0, 0},
+        /*int[][] attack = {{0, 0, 1, 0, 0},
                           {0, 0, 1, 0, 0},
                           {1, 1, 0, 1, 1},
                           {0, 0, 1, 0, 1},
                           {0, 0, 1, 0, 0}}; // when printed in-game, the 1's should be pointing up
         int[][][] p1Attacks = {attack, attack, attack};
-        int[][][] p2Attacks = {attack, attack, attack};
+        int[][][] p2Attacks = {attack, attack, attack};*/
 
-        System.out.println(Arrays.deepToString(attack));
-        System.out.println(Arrays.deepToString(Map.toGameCoords(attack)));
         Game game = new Game(p1Attacks, p2Attacks);
 
         while (game.getWinner() == Game.NO_WINNER) {
