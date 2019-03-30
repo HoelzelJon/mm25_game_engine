@@ -467,7 +467,7 @@ public class Game {
 
         ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
         for(int i = 0; i < p1Units.length; i++){
-            ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t");
+            ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t\t\t");
             ret.append(p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
         }
 
