@@ -5,15 +5,13 @@ package mech.mania;
  */
 public abstract class PlayerCommunicator {
     protected int playerNum;
-    protected Map map;
 
-    public PlayerCommunicator(int playerNum, Map map){
+    public PlayerCommunicator(int playerNum){
         this.playerNum = playerNum;
-        this.map = map;
         // Do nothing
     }
 
-    public abstract int[][][] getAttackPatterns();
+    public abstract int[][][] getAttackPatterns(Map map);
 
     public abstract Decision getDecision(Game gameState);
 }

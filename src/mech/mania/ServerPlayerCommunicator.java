@@ -18,15 +18,15 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
 
     private static final int MAX_TURN_TIME_MILIS = 5000;
 
-    public ServerPlayerCommunicator(int playerNum, Map map, String urlString) {
-        super(playerNum, map);
+    public ServerPlayerCommunicator(int playerNum, String urlString) {
+        super(playerNum);
         this.urlString = urlString;
 
 
     }
 
     @Override
-    public int[][][] getAttackPatterns() {
+    public int[][][] getAttackPatterns(Map map) {
         return new int[][][] {{{0}}}; //TODO
     }
 

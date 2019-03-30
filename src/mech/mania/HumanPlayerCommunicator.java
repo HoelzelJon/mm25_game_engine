@@ -5,8 +5,8 @@ import java.util.Scanner;
 public class HumanPlayerCommunicator extends PlayerCommunicator {
     private Scanner sk;
 
-    public HumanPlayerCommunicator(int playerNum, Map map){
-        super(playerNum, map);
+    public HumanPlayerCommunicator(int playerNum){
+        super(playerNum);
         sk = new Scanner(System.in);
         // Do nothing
     }
@@ -73,7 +73,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      * Prompt user for initial attack patterns
      */
     @Override
-    public int[][][] getAttackPatterns(){
+    public int[][][] getAttackPatterns(Map map){
         int numBots = 3;
 
         int[][][] attackPatterns = new int[numBots][][];
