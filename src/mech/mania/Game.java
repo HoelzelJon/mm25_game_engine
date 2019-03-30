@@ -13,8 +13,12 @@ public class Game {
     private Map map; // current map
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
+    private int gameId;
+    private static int globalGameId = 0;
 
     private Gson gameRoundSerializer;
+    
+    private String recentVisualizerJson = "";
 
     /**
      * @param positions array of positions for each unit to be initialized to
@@ -87,7 +91,9 @@ public class Game {
                 }
             }).create();
         // serialize myself, which has starting information
-        SystemIO.print(gameInitStateSerializer.toJson(this), false);
+        recentVisualizerJson = gameInitStateSerializer.toJson(this);
+
+        gameId = globalGameId++;
     }
 
     public String getFormattedMap() {
@@ -254,7 +260,7 @@ public class Game {
                 attacks.toArray(new Attack[0]));
 
         // use our custom serializer to convert the GameRound to a JSON String
-        SystemIO.print(gameRoundSerializer.toJson(gameRound), false);
+        recentVisualizerJson = gameRoundSerializer.toJson(gameRound);
     }
 
     /**
@@ -294,7 +300,7 @@ public class Game {
         // handle collisions between units and terrain (or the map boundary)
         for (int i = 0; i < goalPositions.size(); i ++) {
             if (! inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
-                SystemIO.print("Terrain Collision", true);
+                System.out.println("Terrain Collision");
 
                 collided[i] = true;
                 units.get(i).takeCollisionDamage();
@@ -321,7 +327,7 @@ public class Game {
                 }
 
                 if (!isMoving) {
-                    SystemIO.print("Stationary Unit Collision", true);
+                    System.out.println("Stationary Unit Collision");
 
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
@@ -344,7 +350,7 @@ public class Game {
                         (goalPositions.get(i).equals(goalPositions.get(j)) || // two units moving onto the same tile
                         (goalPositions.get(i).equals(initialPositions.get(j)) && // two units trying to move through each other
                         goalPositions.get(j).equals(initialPositions.get(i))))) {
-                    SystemIO.print("2-Unit collision", true);
+                    System.out.println("2-Unit collision");
 
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
@@ -370,7 +376,7 @@ public class Game {
                 if (!collided[i]) { // only check for ripple collisions for bots that haven't already collided
                     for (int j = 0; j < goalPositions.size(); j++) {
                         if (collided[j] && initialPositions.get(j).equals(goalPositions.get(i))) {
-                            SystemIO.print("Ripple Collision", true);
+                            System.out.println("Ripple Collision");
                             foundRipple = true;
                             collided[i] = true;
                             units.get(i).takeCollisionDamage();
@@ -432,7 +438,6 @@ public class Game {
 
     /**
      * handles death for an array of units
-     *
      * @param units array of units to check death conditions for
      */
     private void doDeaths(Unit[] units) {
@@ -455,8 +460,40 @@ public class Game {
         return (pos.x >= 0 && pos.x < map.width() && pos.y >= 0 && pos.y < map.height());
     }
 
+    public String getMapString() {
+        return map.toString();
+    }
+
+    public String getUnitStatsString(){
+        StringBuilder ret = new StringBuilder();
+
+        ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
+        for(int i = 0; i < p1Units.length; i++){
+            ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t");
+            ret.append(p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
+        }
+
+        return ret.toString();
+    }
+
+    public Unit[] getPlayerUnits(int playerNum){
+        if(playerNum == 1){
+            return p1Units;
+        }
+        else if (playerNum == 2){
+            return p2Units;
+        }
+        else{
+            return null;
+        }
+    }
+
     public static final int P1_WINNER = 0;
     public static final int P2_WINNER = 1;
     public static final int TIE = 2;
     public static final int NO_WINNER = 3;
+
+    public String getRecentVisualizerJson() {
+        return recentVisualizerJson;
+    }
 }

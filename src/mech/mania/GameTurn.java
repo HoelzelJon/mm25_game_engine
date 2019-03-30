@@ -1,11 +1,11 @@
 package mech.mania;
 
 /**
- * One round (series of three movements according to player's decisions)
+ * One round (series of three roundMovements according to player's decisions)
  * A container class that groups data that doesn't fit under each Movement
  */
 class GameRound {
-    private RoundMovement[] movements;
+    private RoundMovement[] roundMovements;
     private DamagedTile[] damagedTiles;
     private DamagedUnit[] damagedUnits;
     private Attack[] attacks;
@@ -14,7 +14,7 @@ class GameRound {
                      DamagedTile[] damagedTiles,
                      DamagedUnit[] damagedUnits,
                      Attack[] attacks) {
-        this.movements = movements;
+        this.roundMovements = movements;
         this.damagedTiles = damagedTiles;
         this.damagedUnits = damagedUnits;
         this.attacks = attacks;
