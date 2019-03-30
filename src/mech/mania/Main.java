@@ -47,7 +47,7 @@ public class Main {
 
             game.doTurn(p1Decision, p2Decision);
 
-            printTurnLog(game);
+            printGameMap(game);
             printVisualizerJson(game);
 
             try {
@@ -68,7 +68,7 @@ public class Main {
         System.out.println(game.getRecentVisualizerJson() + "\n");
     }
 
-    static void printTurnLog(Game game) {
+    static void printGameMap(Game game) {
         System.out.println(game.getMapString() + "\n");
     }
 
