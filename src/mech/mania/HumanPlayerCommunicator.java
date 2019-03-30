@@ -2,9 +2,6 @@ package mech.mania;
 
 import java.util.Scanner;
 
-/**
- * Created by prith on 3/2/2019.
- */
 public class HumanPlayerCommunicator extends PlayerCommunicator {
     private Scanner sk;
 
@@ -75,7 +72,10 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
     /**
      * Prompt user for initial attack patterns
      */
-    public int[][][] getAttackPatterns(int numBots){
+    @Override
+    public int[][][] getAttackPatterns(){
+        int numBots = 3;
+
         int[][][] attackPatterns = new int[numBots][][];
         int[][][] attackPatternsTransform = new int[numBots][][];
 

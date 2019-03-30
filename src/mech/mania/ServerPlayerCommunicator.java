@@ -26,6 +26,11 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
 
     }
 
+    @Override
+    public int[][][] getAttackPatterns() {
+        return new int[][][] {{{0}}}; //TODO
+    }
+
     public Decision getDecision(Game gameState) {
         Gson gson = new Gson();
 

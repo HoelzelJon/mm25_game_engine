@@ -5,39 +5,15 @@ package mech.mania;
  */
 public class Main {
     public static void main(String[] args) {
-        HumanPlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
-        HumanPlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
+        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
+        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
-        int[][][] p1Attacks = player1.getAttackPatterns(1); 
-        int[][][] p2Attacks = player2.getAttackPatterns(1);
-
-        /*int size = 6;
-        Position[] p1Positions = {new Position(0,0)};
-        Position[] p2Positions = {new Position(size-1, size-1)};*/
-
-        /*int[][] attack = {{0, 0, 1, 0, 0},
-                          {0, 0, 1, 0, 0},
-                          {1, 1, 0, 1, 1},
-                          {0, 0, 1, 0, 1},
-                          {0, 0, 1, 0, 0}}; // when printed in-game, the 1's should be pointing up
-        int[][][] p1Attacks = {attack, attack, attack};
-        int[][][] p2Attacks = {attack, attack, attack};*/
+        int[][][] p1Attacks = player1.getAttackPatterns();
+        int[][][] p2Attacks = player2.getAttackPatterns();
 
         Game game = new Game(p1Attacks, p2Attacks);
 
         while (game.getWinner() == Game.NO_WINNER) {
-            /*int[] priorities = {1,1,1};
-            Direction[][] p1Movements = {
-                                    {Direction.STAY},
-                                    {Direction.DOWN},
-                                    {Direction.RIGHT}};
-            Direction[][] p2Movements = {
-                                    {Direction.UP},
-                                    {Direction.LEFT},
-                                    {Direction.LEFT}};
-
-            Direction[] attacks = {Direction.STAY, Direction.STAY, Direction.STAY};
-            Decision p1Decision = new Decision(priorities, p1Movements, attacks);*/
 
             Decision p1Decision = player1.getDecision(game);
             Decision p2Decision = player2.getDecision(game);
@@ -61,8 +37,7 @@ public class Main {
     }
 
     static void printTurnLog(Game g) {
-        System.out.println(g.getMapString() + "\n");
+        //System.out.println(g.getMapString() + "\n");
         //TODO
-
     }
 }
