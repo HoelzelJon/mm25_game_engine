@@ -63,7 +63,7 @@ public class Main {
     }
 
     static void printInitialState(Game game) {
-        System.out.println(game.getRecentVisualizerJson() + "\n");
+        System.out.println(game.getRecentVisualizerJson());
     }
 
     static void printGameMap(Game game) {
@@ -71,6 +71,6 @@ public class Main {
     }
 
     static void printVisualizerJson(Game game) {
-        System.out.println(game.getRecentVisualizerJson() + "\n");
+        System.out.println(game.getRecentVisualizerJson());
     }
 }
