@@ -10,11 +10,18 @@ public class Unit {
     private int[][] attack; // 2-D grid of attack damages
     private boolean isAlive;
 
+    // ID and ID tracker for HumanPlayer output
+    private int id;
+    private static int numUnits;
+
     public Unit(Position pos, int[][] attack) {
         hp = 2;
         speed = 4;
         this.pos = pos;
         this.attack = attack;
+
+        this.id = numUnits;
+        numUnits++;
         isAlive = true;
     }
 
@@ -56,6 +63,10 @@ public class Unit {
         hp --;
     }
 
+    public int getId(){
+        return id;
+    }
+    
     public void takeDamage(int damage) {
         hp -= damage;
     }

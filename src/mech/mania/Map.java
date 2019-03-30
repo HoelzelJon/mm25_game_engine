@@ -162,4 +162,33 @@ public class Map {
 
         return ret.toString();
     }
+
+    /**
+     * Transform from visual coordinates to game coordinates by reflecting horizontally
+     * 
+     * @param map The map (in visual coordinates) to transform to game coordinates
+     * 
+     * @return The map transformed to game coordinates
+     */
+    public static int[][] toGameCoords(int map[][]){
+        int[][] transform = new int[map.length][map[0].length];
+        for(int r = 0; r < transform.length; r++){
+            for(int c = 0; c < transform[0].length; c++){
+                transform[r][c] = map[map.length - r - 1][c];
+            }
+        }
+        return transform;
+    }
+
+    /**
+     * Transform from game coordinate to visual coordinate by reflecting horizontally
+     * 
+     * @param map The map (in game coordinates) to transform to visual coordinates
+     * 
+     * @return The map transformed to visual coordinates
+     */
+    public static int[][] toVisualCoords(int map[][]){
+        // Since a horizontal reflect works both ways, both coordinate conversions are the same
+        return toGameCoords(map);
+    }
 }

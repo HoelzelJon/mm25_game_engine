@@ -11,6 +11,7 @@ public class Game {
     private Map map; // current map
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
+    private String gameId;
 
     private List<GameTurn> turns = new ArrayList<GameTurn>();
 
@@ -35,6 +36,8 @@ public class Game {
 
         p1Units = initUnitList(p1Positions, p1Attacks, map);
         p2Units = initUnitList(p2Positions, p2Attacks, map);
+
+        this.gameId = gameId;
     }
 
     /**
@@ -278,7 +281,6 @@ public class Game {
 
     /**
      * handles death for an array of units
-     *
      * @param units array of units to check death conditions for
      */
     private void doDeaths(Unit[] units) {
@@ -303,6 +305,30 @@ public class Game {
 
     public String getMapString() {
         return map.toString();
+    }
+
+    public String getUnitStatsString(){
+        StringBuilder ret = new StringBuilder();
+
+        ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
+        for(int i = 0; i < p1Units.length; i++){
+            ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t");
+            ret.append(p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
+        }
+
+        return ret.toString();
+    }
+
+    public Unit[] getPlayerUnits(int playerNum){
+        if(playerNum == 1){
+            return p1Units;
+        }
+        else if (playerNum == 2){
+            return p2Units;
+        }
+        else{
+            return null;
+        }
     }
 
     public static final int P1_WINNER = 0;
