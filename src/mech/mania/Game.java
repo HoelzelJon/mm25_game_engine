@@ -13,6 +13,8 @@ public class Game {
     private Map map; // current map
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
+    private int gameId;
+    private static int globalGameId = 0;
 
     private Gson gameRoundSerializer;
     
@@ -90,6 +92,8 @@ public class Game {
             }).create();
         // serialize myself, which has starting information
         recentVisualizerJson = gameInitStateSerializer.toJson(this);
+
+        gameId = globalGameId++;
     }
 
     public String getFormattedMap() {
@@ -434,7 +438,6 @@ public class Game {
 
     /**
      * handles death for an array of units
-     *
      * @param units array of units to check death conditions for
      */
     private void doDeaths(Unit[] units) {
@@ -455,6 +458,34 @@ public class Game {
      */
     private boolean inBounds(Position pos) {
         return (pos.x >= 0 && pos.x < map.width() && pos.y >= 0 && pos.y < map.height());
+    }
+
+    public String getMapString() {
+        return map.toString();
+    }
+
+    public String getUnitStatsString(){
+        StringBuilder ret = new StringBuilder();
+
+        ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
+        for(int i = 0; i < p1Units.length; i++){
+            ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t");
+            ret.append(p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
+        }
+
+        return ret.toString();
+    }
+
+    public Unit[] getPlayerUnits(int playerNum){
+        if(playerNum == 1){
+            return p1Units;
+        }
+        else if (playerNum == 2){
+            return p2Units;
+        }
+        else{
+            return null;
+        }
     }
 
     public static final int P1_WINNER = 0;

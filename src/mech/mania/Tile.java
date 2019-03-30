@@ -64,7 +64,7 @@ public class Tile {
         } else if (type == Type.INDESTRUCTIBLE) {
             return " I ";
         } else if (unit != null) {
-            return " " + unit.getHp() + " ";
+            return " " + unit.getId() + " ";
         } else return " . ";
     }
 

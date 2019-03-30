@@ -4,8 +4,7 @@ package mech.mania;
  * Represents a single mech.
  */
 public class Unit {
-    private static long globalId;
-    private long id;
+    private static int globalId;
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
@@ -13,16 +12,23 @@ public class Unit {
     private boolean isAlive;
     public static final int COLLISION_DAMAGE = 1;
 
+    // ID and ID tracker for HumanPlayer output
+    private int id;
+    private static int numUnits;
+
     public Unit(Position pos, int[][] attack) {
         id = globalId++;
         hp = 2;
         speed = 4;
         this.pos = pos;
         this.attack = attack;
+
+        this.id = numUnits;
+        numUnits++;
         isAlive = true;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 
@@ -63,7 +69,7 @@ public class Unit {
     public void takeCollisionDamage() {
         hp -= COLLISION_DAMAGE;
     }
-
+    
     public void takeDamage(int damage) {
         hp -= damage;
     }
