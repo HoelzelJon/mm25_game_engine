@@ -13,8 +13,7 @@ public class Game {
     private Map map; // current map
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
-    private int gameId;
-    private static int globalGameId = 0;
+    private String gameId;
 
     private Gson gameRoundSerializer;
     
@@ -34,7 +33,8 @@ public class Game {
         return ret;
     }
 
-    public Game(int[][][] p1Attacks, int[][][] p2Attacks) {
+    public Game(String id, int[][][] p1Attacks, int[][][] p2Attacks) {
+        this.gameId = id;
         map = new Map();
         Position[] p1Positions = map.getP1InitialPositions();
         Position[] p2Positions = map.getP2InitialPositions();
@@ -93,8 +93,6 @@ public class Game {
             }).create();
         // serialize myself, which has starting information
         recentVisualizerJson = gameInitStateSerializer.toJson(this);
-
-        gameId = globalGameId++;
     }
 
     public String getFormattedMap() {

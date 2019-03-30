@@ -5,6 +5,8 @@ package mech.mania;
  */
 public class Main {
     public static void main(String[] args) {
+        String gameID = args[0];
+
         PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
         PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
@@ -21,7 +23,7 @@ public class Main {
         int[][][] p1Attacks = player1.getAttackPatterns();
         int[][][] p2Attacks = player2.getAttackPatterns();
 
-        Game game = new Game(p1Attacks, p2Attacks);
+        Game game = new Game(gameID, p1Attacks, p2Attacks);
         printInitialState(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
