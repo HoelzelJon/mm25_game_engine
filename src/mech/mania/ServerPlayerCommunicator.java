@@ -9,8 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class ServerPlayerCommunicator extends PlayerCommunicator {
@@ -21,8 +19,6 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
         this.urlString = urlString;
-
-
     }
 
     @Override
