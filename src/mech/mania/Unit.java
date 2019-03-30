@@ -4,17 +4,20 @@ package mech.mania;
  * Represents a single mech.
  */
 public class Unit {
+    private static int globalId;
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
     private int[][] attack; // 2-D grid of attack damages
     private boolean isAlive;
+    public static final int COLLISION_DAMAGE = 1;
 
     // ID and ID tracker for HumanPlayer output
     private int id;
     private static int numUnits;
 
     public Unit(Position pos, int[][] attack) {
+        id = globalId++;
         hp = 2;
         speed = 4;
         this.pos = pos;
@@ -23,6 +26,10 @@ public class Unit {
         this.id = numUnits;
         numUnits++;
         isAlive = true;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public int getHp() {
@@ -60,11 +67,7 @@ public class Unit {
     }
 
     public void takeCollisionDamage() {
-        hp --;
-    }
-
-    public int getId(){
-        return id;
+        hp -= COLLISION_DAMAGE;
     }
     
     public void takeDamage(int damage) {
