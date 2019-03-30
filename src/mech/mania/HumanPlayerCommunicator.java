@@ -5,8 +5,8 @@ import java.util.Scanner;
 public class HumanPlayerCommunicator extends PlayerCommunicator {
     private Scanner sk;
 
-    public HumanPlayerCommunicator(int playerNum){
-        super(playerNum);
+    public HumanPlayerCommunicator(int playerNum, Map map){
+        super(playerNum, map);
         sk = new Scanner(System.in);
         // Do nothing
     }

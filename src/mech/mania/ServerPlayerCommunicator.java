@@ -1,7 +1,6 @@
 package mech.mania;
 
 import com.google.gson.Gson;
-import org.omg.CORBA.NameValuePair;
 
 import java.io.IOException;
 import java.io.InputStream;

@@ -5,9 +5,11 @@ package mech.mania;
  */
 public abstract class PlayerCommunicator {
     protected int playerNum;
+    protected Map map;
 
-    public PlayerCommunicator(int playerNum){
+    public PlayerCommunicator(int playerNum, Map map){
         this.playerNum = playerNum;
+        this.map = map;
         // Do nothing
     }
 
