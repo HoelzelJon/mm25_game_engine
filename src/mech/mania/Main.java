@@ -49,6 +49,7 @@ public class Main {
 
             printGameMap(game);
             printVisualizerJson(game);
+            printPlayerJson(game);
 
             try {
                 Thread.sleep(1000);
@@ -64,15 +65,19 @@ public class Main {
         }
     }
 
-    static void printInitialState(Game game) {
-        System.out.println(game.getRecentVisualizerJson());
-    }
-
     static void printGameMap(Game game) {
         System.out.println(game.getMapString() + "\n");
     }
 
+    static void printInitialState(Game game) {
+        System.out.println(game.getRecentVisualizerJson() + "\n");
+    }
+
     static void printVisualizerJson(Game game) {
-        System.out.println(game.getRecentVisualizerJson());
+        System.out.println(game.getRecentVisualizerJson() + "\n");
+    }
+
+    static void printPlayerJson(Game game) {
+        System.out.println(game.getRecentPlayerJson() + "\n");
     }
 }

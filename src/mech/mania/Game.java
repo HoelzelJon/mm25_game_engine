@@ -16,8 +16,10 @@ public class Game {
     private String gameId;
 
     private Gson gameRoundSerializer;
+    private Gson gameStateSerializer;
     
     private String recentVisualizerJson = "";
+    private String recentPlayerJson = "";
 
     /**
      * @param positions array of positions for each unit to be initialized to
@@ -66,7 +68,7 @@ public class Game {
                 }
             }).create();
 
-        Gson gameInitStateSerializer = new GsonBuilder().addSerializationExclusionStrategy(
+        gameStateSerializer = new GsonBuilder().addSerializationExclusionStrategy(
             new ExclusionStrategy() {
                 @Override
                 public boolean shouldSkipField(FieldAttributes fieldAttributes) {
@@ -92,11 +94,7 @@ public class Game {
                 }
             }).create();
         // serialize myself, which has starting information
-        recentVisualizerJson = gameInitStateSerializer.toJson(this);
-    }
-
-    public String getFormattedMap() {
-        return map.toString();
+        recentVisualizerJson = gameStateSerializer.toJson(this);
     }
 
     /**
@@ -260,6 +258,7 @@ public class Game {
 
         // use our custom serializer to convert the GameRound to a JSON String
         recentVisualizerJson = gameRoundSerializer.toJson(gameRound);
+        recentPlayerJson = gameStateSerializer.toJson(this);
     }
 
     /**
@@ -494,5 +493,9 @@ public class Game {
 
     public String getRecentVisualizerJson() {
         return recentVisualizerJson;
+    }
+
+    public String getRecentPlayerJson() {
+        return recentPlayerJson;
     }
 }
