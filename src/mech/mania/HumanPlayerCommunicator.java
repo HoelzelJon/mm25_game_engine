@@ -33,11 +33,11 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         for(int botId = 0; botId < myUnits.length; botId++){
             // Ask for priority
             System.out.println("Specify priority for bot " + botId + " (board ID " + myUnits[botId].getId() + ") (1 to " + myUnits.length + ", 1 is first):");
-            priorities[botId] = sk.nextInt();
+            priorities[botId] = sk.hasNextInt()? sk.nextInt() : 0;
             sk.nextLine();
             while(priorities[botId] < 1 || priorities[botId] > myUnits.length){
-                System.out.println("Priority must be from 1 to 3. Entery priority for bot " + botId + ":");
-                priorities[botId] = sk.nextInt();
+                System.out.println("Priority must be a number from 1 to 3. Entery priority for bot " + botId + ":");
+                priorities[botId] = sk.hasNextInt()? sk.nextInt() : 0;
                 sk.nextLine();
             }
 
@@ -84,11 +84,11 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
             System.out.println("Configuring attack pattern for bot " + botId);
             // Ask for numRows
             System.out.println("How many rows (y-values) does the attack pattern span?");
-            int numRows = sk.nextInt();
+            int numRows = sk.hasNextInt()? sk.nextInt() : 0; // only get int if there is one -- avoids exceptions
             sk.nextLine();
             while(numRows < 0 || numRows%2 == 0){
                 System.out.println("Must have a positive, odd number of rows. Enter a new value:");
-                numRows = sk.nextInt();
+                numRows = sk.hasNextInt()? sk.nextInt() : 0;
                 sk.nextLine();
             }
             
@@ -116,7 +116,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
             System.out.println("Your bot is in the center of the array.");
             for(int r = 0; r < numRows; r++){
                 for(int c = 0; c < numCols; c++){
-                    attackPatterns[botId][r][c] = sk.nextInt();
+                    attackPatterns[botId][r][c] = sk.hasNextInt()? sk.nextInt() : 0;
                 }
                 sk.nextLine();
             }
