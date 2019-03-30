@@ -37,7 +37,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
                 priorities[botId] = sk.hasNextInt()? sk.nextInt() : 0;
                 sk.nextLine();
                 while(priorities[botId] < 1 || priorities[botId] > myUnits.length){
-                    System.out.println("Priority must be a number from 1 to 3. Entery priority for bot " + botId + ":");
+                    System.out.println("Priority must be a number from 1 to 3. Enter priority for bot " + botId + ":");
                     priorities[botId] = sk.hasNextInt()? sk.nextInt() : 0;
                     sk.nextLine();
                 }
