@@ -15,6 +15,8 @@ public class Game {
     private Unit[] p2Units; // array of Player 2's units
 
     private Gson gameRoundSerializer;
+    
+    private String recentVisualizerJson = "";
 
     /**
      * @param positions array of positions for each unit to be initialized to
@@ -87,7 +89,7 @@ public class Game {
                 }
             }).create();
         // serialize myself, which has starting information
-        SystemIO.print(gameInitStateSerializer.toJson(this), false);
+        recentVisualizerJson = gameInitStateSerializer.toJson(this);
     }
 
     public String getFormattedMap() {
@@ -254,7 +256,7 @@ public class Game {
                 attacks.toArray(new Attack[0]));
 
         // use our custom serializer to convert the GameRound to a JSON String
-        SystemIO.print(gameRoundSerializer.toJson(gameRound), false);
+        recentVisualizerJson = gameRoundSerializer.toJson(gameRound);
     }
 
     /**
@@ -294,7 +296,7 @@ public class Game {
         // handle collisions between units and terrain (or the map boundary)
         for (int i = 0; i < goalPositions.size(); i ++) {
             if (! inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
-                SystemIO.print("Terrain Collision", true);
+                System.out.println("Terrain Collision");
 
                 collided[i] = true;
                 units.get(i).takeCollisionDamage();
@@ -321,7 +323,7 @@ public class Game {
                 }
 
                 if (!isMoving) {
-                    SystemIO.print("Stationary Unit Collision", true);
+                    System.out.println("Stationary Unit Collision");
 
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
@@ -344,7 +346,7 @@ public class Game {
                         (goalPositions.get(i).equals(goalPositions.get(j)) || // two units moving onto the same tile
                         (goalPositions.get(i).equals(initialPositions.get(j)) && // two units trying to move through each other
                         goalPositions.get(j).equals(initialPositions.get(i))))) {
-                    SystemIO.print("2-Unit collision", true);
+                    System.out.println("2-Unit collision");
 
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
@@ -370,7 +372,7 @@ public class Game {
                 if (!collided[i]) { // only check for ripple collisions for bots that haven't already collided
                     for (int j = 0; j < goalPositions.size(); j++) {
                         if (collided[j] && initialPositions.get(j).equals(goalPositions.get(i))) {
-                            SystemIO.print("Ripple Collision", true);
+                            System.out.println("Ripple Collision");
                             foundRipple = true;
                             collided[i] = true;
                             units.get(i).takeCollisionDamage();
@@ -459,4 +461,8 @@ public class Game {
     public static final int P2_WINNER = 1;
     public static final int TIE = 2;
     public static final int NO_WINNER = 3;
+
+    public String getRecentVisualizerJson() {
+        return recentVisualizerJson;
+    }
 }

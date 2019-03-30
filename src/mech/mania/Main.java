@@ -19,8 +19,7 @@ public class Main {
         int[][][] p2Attacks = {attack, attack, attack};
 
         Game game = new Game(p1Attacks, p2Attacks);
-
-        printIntroJson(game);
+        printInitialState(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
             //player1.sendGameState(game);
@@ -44,6 +43,7 @@ public class Main {
             game.doTurn(p1Decision, p2Decision);
 
             printTurnLog(game);
+            printVisualizerJson(game);
 
             try {
                 Thread.sleep(1000);
@@ -51,19 +51,23 @@ public class Main {
         }
 
         if (game.getWinner() == Game.TIE) {
-            SystemIO.print("It's a tie!", true);
+            System.out.println("It's a tie!");
         } else if (game.getWinner() == Game.P1_WINNER) {
-            SystemIO.print("Player 1 wins!", true);
+            System.out.println("Player 1 wins!");
         } else if (game.getWinner() == Game.P2_WINNER) {
-            SystemIO.print("Player 2 wins!", true);
+            System.out.println("Player 2 wins!");
         }
     }
 
-    static void printIntroJson(Game game) {
-
+    static void printInitialState(Game game) {
+        System.out.println(game.getRecentVisualizerJson() + "\n");
     }
 
     static void printTurnLog(Game game) {
-        SystemIO.print(game.getFormattedMap() + "\n", true);
+        System.out.println(game.getFormattedMap() + "\n");
+    }
+
+    static void printVisualizerJson(Game game) {
+        System.out.println(game.getRecentVisualizerJson() + "\n");
     }
 }
