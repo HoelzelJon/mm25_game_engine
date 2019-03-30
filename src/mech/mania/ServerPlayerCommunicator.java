@@ -18,8 +18,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
 
     private static final int MAX_TURN_TIME_MILIS = 5000;
 
-    public ServerPlayerCommunicator(int playerNum, String urlString) {
-        super(playerNum);
+    public ServerPlayerCommunicator(int playerNum, Map map, String urlString) {
+        super(playerNum, map);
         this.urlString = urlString;
 
 

@@ -15,7 +15,7 @@ public class Unit {
     private static int numUnits;
 
     public Unit(Position pos, int[][] attack) {
-        hp = 2;
+        hp = 5;
         speed = 4;
         this.pos = pos;
         this.attack = attack;
