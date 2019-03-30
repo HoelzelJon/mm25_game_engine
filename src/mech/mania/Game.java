@@ -79,7 +79,8 @@ public class Game {
                         // serializing this Game object, we want everything that
                         // doesn't start with the word game:
                         // map, p1Units, p2Units
-                        return fieldAttributes.getName().startsWith("game");
+                        return fieldAttributes.getName().startsWith("game") ||
+                                fieldAttributes.getName().contains("Json");
                     }
 
                     return false;
