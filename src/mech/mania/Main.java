@@ -17,7 +17,10 @@ public class Main {
 
         printInitialState(game);
 
+        String gameHistory = "\n";
+
         while (game.getWinner() == Game.NO_WINNER) {
+            gameHistory += game.getMapString() + "\n";
 
             Decision p1Decision = player1.getDecision(game);
             Decision p2Decision = player2.getDecision(game);
@@ -27,9 +30,16 @@ public class Main {
             printGameMap(game);
             printVisualizerJson(game);
 
+            String[] p1 = p1Decision.getActions();
+            String[] p2 = p2Decision.getActions();
+            for (int i = 0; i < 3; i++) {
+                gameHistory += "\nplayer1:\n" + p1[i] + "\nplayer2:\n" + p2[i] + "\n";
+            }
+
             try {
                 Thread.sleep(1000);
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+            }
         }
 
         if (game.getWinner() == Game.TIE) {
@@ -39,6 +49,8 @@ public class Main {
         } else if (game.getWinner() == Game.P2_WINNER) {
             System.out.println("Player 2 wins!");
         }
+
+        System.out.print(gameHistory);
     }
 
     static void printInitialState(Game game) {
