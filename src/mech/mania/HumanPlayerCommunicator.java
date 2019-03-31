@@ -75,6 +75,18 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
     }
 
     /**
+     * Helper function for calculating attack cost.
+     * If attack value is 3 it costs (3 + 2 + 1) 6 points.
+     * @return
+     */
+    private int getAttackCost(int attack) {
+        int cost = 0;
+        for (int i = 1; i <= attack; i++) {
+            cost += i;
+        }
+        return cost;
+    }
+    /**
      * Helper function to ensure players do not input more than limit points for attack pattern.
      */
     private int getRowSum(int [] attackPatternRow, int rowIdx) {
@@ -82,7 +94,8 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         ArrayList<Integer> rowIndices = attackPatternRowIdxMap.get(rowIdx);
         for (int c = 0; c < NUM_COLS; c++) {
             if (rowIndices.contains(c)) {
-                sum += attackPatternRow[c];
+                int cost = getAttackCost(attackPatternRow[c]);
+                sum += cost;
             }
         }
         return sum;
