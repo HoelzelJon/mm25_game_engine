@@ -10,8 +10,6 @@ public class Main {
         PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
         PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
-        //TODO: get attack patterns from each player
-
 //        int[][] attack = {{0, 0, 1, 0, 0},
 //                          {0, 0, 1, 0, 0},
 //                          {1, 1, 0, 1, 1},
@@ -39,8 +37,8 @@ public class Main {
 //
 //            Direction[] attacks = {Direction.STAY, Direction.UP, Direction.STAY};
 
-//            Decision p1Decision = new Decision(priorities, p1Movements, attacks); //TODO: player1.getDecision();
-//            Decision p2Decision = new Decision(priorities, p2Movements, attacks); //TODO: player2.getDecision();
+//            Decision p1Decision = new Decision(priorities, p1Movements, attacks);
+//            Decision p2Decision = new Decision(priorities, p2Movements, attacks);
 
             Decision p1Decision = player1.getDecision(game);
             Decision p2Decision = player2.getDecision(game);
@@ -49,6 +47,7 @@ public class Main {
 
             printGameMap(game);
             printVisualizerJson(game);
+            printPlayerJson(game);
 
             try {
                 Thread.sleep(1000);
@@ -64,15 +63,19 @@ public class Main {
         }
     }
 
-    static void printInitialState(Game game) {
-        System.out.println(game.getRecentVisualizerJson() + "\n");
-    }
-
     static void printGameMap(Game game) {
         System.out.println(game.getMapString() + "\n");
     }
 
+    static void printInitialState(Game game) {
+        System.out.println(game.getRecentVisualizerJson() + "\n");
+    }
+
     static void printVisualizerJson(Game game) {
         System.out.println(game.getRecentVisualizerJson() + "\n");
+    }
+
+    static void printPlayerJson(Game game) {
+        System.out.println(game.getRecentPlayerJson() + "\n");
     }
 }
