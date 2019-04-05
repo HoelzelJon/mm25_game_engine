@@ -23,7 +23,28 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
 
     @Override
     public int[][][] getAttackPatterns(Map map) {
-        return new int[][][] {{{0}}}; //TODO
+        HttpURLConnection connection;
+
+        try {
+            URL url = new URL(urlString + "pattern");
+
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setReadTimeout(MAX_TURN_TIME_MILIS);
+        } catch (MalformedURLException ex) {
+            System.err.println("MalformedURLException found when getting attack pattern for player #" + playerNum);
+            System.err.println("URL= " + urlString);
+            return null;
+        } catch (IOException ex) {
+            System.err.println("IOException when opening URL connection to player #" + playerNum);
+            System.err.print("URL= " + urlString);
+            return null;
+        }
+
+        Gson gson = new Gson();
+        String mapJson = gson.toJson(map);
+
+        //TODO
+        return new int[][][] {{{0}}};
     }
 
     public Decision getDecision(Game gameState) {
@@ -37,7 +58,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             connection = (HttpURLConnection) url.openConnection();
             connection.setReadTimeout(MAX_TURN_TIME_MILIS);
         } catch (MalformedURLException ex) {
-            System.err.println("MalformedURLException found when starting player #" + playerNum);
+            System.err.println("MalformedURLException found when connecting to player #" + playerNum);
             System.err.println("URL= " + urlString);
             return null;
         } catch (IOException ex) {
@@ -47,14 +68,14 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         }
 
         String gameJson = gson.toJson(gameState);
-         try {
-             connection.setRequestMethod("POST");
-             connection.setDoOutput(true);
-             connection.setDoInput(true);
-         } catch (ProtocolException ex) {
-             System.err.println("ProtocolException when setting request method to POST");
-             return null;
-         }
+        try {
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+        } catch (ProtocolException ex) {
+            System.err.println("ProtocolException when setting request method to POST");
+            return null;
+        }
 
         try  {
             OutputStream os = connection.getOutputStream();
