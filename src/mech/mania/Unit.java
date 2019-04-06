@@ -19,7 +19,6 @@ public class Unit {
         speed = setSpeed;
         this.pos = pos;
         this.attack = attack;
-
         this.id = numUnits;
         numUnits++;
         isAlive = true;
@@ -30,7 +29,6 @@ public class Unit {
         speed = 4;
         this.pos = pos;
         this.attack = attack;
-
         this.id = numUnits;
         numUnits++;
         isAlive = true;

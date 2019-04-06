@@ -12,12 +12,25 @@ import java.util.Arrays;
 public class GUIPlayerCommunicator extends PlayerCommunicator {
 
     private static final int MAX_POINTS = 14;
+    private static final int NUM_BOTS = 3;
 
     public GUIPlayerCommunicator(int playerNum) {
         super(playerNum);
     }
 
     @Override
+    public UnitSetup[] getUnitsSetup() {
+        UnitSetup[] allUnits = new UnitSetup[NUM_BOTS];
+        int[][][] allPatterns = getAttackPatterns();
+        for (int i = 0; i < NUM_BOTS; i++) {
+            allUnits[i] = new UnitSetup();
+            allUnits[i].attackPattern = allPatterns[i];
+            // TODO: set the Unit HP and Speed (default for now)
+        }
+
+        return allUnits;
+    }
+
     public int[][][] getAttackPatterns() {
         Application.launch(GUIInitialBotInput.class);
         Platform.setImplicitExit(true);

@@ -20,22 +20,22 @@ public class Game {
      * @param map       map to add the units onto
      * @return array of units
      */
-    private static Unit[] initUnitList(Position[] positions, int[][][] attacks, Map map) {
+    private static Unit[] initUnitList(Position[] positions, UnitSetup[] setups, Map map) {
         Unit[] ret = new Unit[positions.length];
         for (int i = 0; i < positions.length; i ++) {
-            ret[i] = new Unit(positions[i], attacks[i]);
+            ret[i] = new Unit(positions[i], setups[i]);
             map.tileAt(positions[i]).setUnit(ret[i]);
         }
         return ret;
     }
 
-    public Game(int[][][] p1Attacks, int[][][] p2Attacks) {
+    public Game(UnitSetup[] p1UnitSetups, UnitSetup[] p2UnitSetups) {
         map = new Map();
         Position[] p1Positions = map.getP1InitialPositions();
         Position[] p2Positions = map.getP2InitialPositions();
 
-        p1Units = initUnitList(p1Positions, p1Attacks, map);
-        p2Units = initUnitList(p2Positions, p2Attacks, map);
+        p1Units = initUnitList(p1Positions, p1UnitSetups, map);
+        p2Units = initUnitList(p2Positions, p2UnitSetups, map);
 
         this.gameId = gameId;
     }

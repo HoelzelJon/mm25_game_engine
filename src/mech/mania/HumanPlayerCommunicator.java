@@ -7,62 +7,7 @@ import java.util.Scanner;
 public class HumanPlayerCommunicator extends PlayerCommunicator {
     private Scanner sk;
     //TODO: check that input priorities are different
-    private static int NUM_ROWS = 7;
-    private static int NUM_COLS = 7;
-    private static int MAX_POINTS = 14;
-    //Maps rows of attack pattern array to valid indices in that row (since attack pattern is a diamond and array is a square)
-    private static java.util.HashMap<Integer, ArrayList<Integer>> attackPatternRowIdxMap;
 
-    private void initializeAttackPatternMap() {
-        attackPatternRowIdxMap = new HashMap<Integer, ArrayList<Integer>>();
-        recurse(0, attackPatternRowIdxMap);
-    }
-
-    private void recurse(int r, HashMap<Integer, ArrayList<Integer>> map) {
-        ArrayList<Integer> rowIndices = new ArrayList<>();
-        int middleIdx = NUM_COLS/2;
-
-        if (r != NUM_ROWS/2) rowIndices.add(middleIdx);
-        for (int i = 1; i < r+1; i++) {
-            rowIndices.add(middleIdx + i);
-            rowIndices.add(middleIdx - i);
-        }
-        map.put(r, rowIndices);
-        if (r == NUM_ROWS/2) return;
-        recurse(r + 1, map);
-
-        ArrayList<Integer> oppositeRowIndices = new ArrayList<>();
-        oppositeRowIndices.add(middleIdx);
-        for (int i = 1; i < r+1; i++) {
-            oppositeRowIndices.add(middleIdx + i);
-            oppositeRowIndices.add(middleIdx - i);
-        }
-        map.put(NUM_ROWS - 1 - r, oppositeRowIndices);
-    }
-
-    /**
-     * Zeroes out mech position and unused positions in 7x7 attack pattern array to be used as a Diamond pattern.
-     * @param attackPattern
-     */
-    private void squareArrayToDiamond(int [][] attackPattern) {
-        for (int r = 0; r < NUM_ROWS; r++) {
-            ArrayList<Integer> rowIndices = attackPatternRowIdxMap.get(r);
-            for (int c = 0; c < NUM_COLS; c++) {
-                if (!rowIndices.contains(c)) {
-                    attackPattern[r][c] = 0;
-                }
-            }
-        }
-    }
-
-    private void printAttackPattern(int [][] attackPattern) {
-        for (int r = 0; r < NUM_ROWS; r++) {
-            for (int c = 0; c < NUM_COLS; c++) {
-                System.out.print(attackPattern[r][c] + " ");
-            }
-            System.out.print("\n");
-        }
-    }
 
     private void printAttackPatternInfo() {
         System.out.println(" X X X 0 X X X");
@@ -72,33 +17,6 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         System.out.println(" X 0 0 0 0 0 X");
         System.out.println(" X X 0 0 0 X X");
         System.out.println(" X X X 0 X X X");
-    }
-
-    /**
-     * Helper function for calculating attack cost.
-     * If attack value is 3 it costs (3 + 2 + 1) 6 points.
-     * @return
-     */
-    private int getAttackCost(int attack) {
-        int cost = 0;
-        for (int i = 1; i <= attack; i++) {
-            cost += i;
-        }
-        return cost;
-    }
-    /**
-     * Helper function to ensure players do not input more than limit points for attack pattern.
-     */
-    private int getRowSum(int [] attackPatternRow, int rowIdx) {
-        int sum = 0;
-        ArrayList<Integer> rowIndices = attackPatternRowIdxMap.get(rowIdx);
-        for (int c = 0; c < NUM_COLS; c++) {
-            if (rowIndices.contains(c)) {
-                int cost = getAttackCost(attackPatternRow[c]);
-                sum += cost;
-            }
-        }
-        return sum;
     }
 
     public HumanPlayerCommunicator(int playerNum){
@@ -165,61 +83,36 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         return new Decision(priorities, movements, attackDirs);
     }
 
+
     /**
      * Prompt user for initial attack patterns
      */
     @Override
-    public int[][][] getAttackPatterns(){
-        initializeAttackPatternMap();
-        int numBots = 3;
-
+    public UnitSetup[] getUnitsSetup(){
+        int numBots = InputValidator.BOTS_PER_PLAYER;
+        UnitSetup[] setups = new UnitSetup[numBots];
         int[][][] attackPatterns = new int[numBots][][];
         int[][][] attackPatternsTransform = new int[numBots][][];
 
         // Iterate over bots
         for(int botId = 0; botId < numBots; botId++){
             System.out.println("Configuring attack pattern for bot " + botId);
-            // Ask for numRows
-//            System.out.println("How many rows (y-values) does the attack pattern span?");
-//            int numRows = sk.hasNextInt()? sk.nextInt() : 0; // only get int if there is one -- avoids exceptions
-//            sk.nextLine();
-//            while(numRows < 0 || numRows%2 == 0){
-//                System.out.println("Must have a positive, odd number of rows. Enter a new value:");
-//                numRows = sk.hasNextInt()? sk.nextInt() : 0;
-//                sk.nextLine();
-//            }
-            
-//           ASSUMING SQUARE MATRIX
-            //int numCols = numRows;
-            /*
-            // Ask for columns
-            System.out.println("How many columns (x-values) does the attack pattern span?");
-            int numCols = sk.nextInt();
-            sk.nextLine();
-            while(numCols < 0 || numCols%2 == 0){
-                System.out.println("Must have a positive, odd number of columns. Enter a new value:");
-                numCols = sk.nextInt();
-                sk.nextLine();
-            }
-            */
-
-            // Fill in attack pattern values
-
-            attackPatterns[botId] = new int[NUM_ROWS][NUM_COLS];
+            attackPatterns[botId] = new int[InputValidator.NUM_ROWS][InputValidator.NUM_COLS];
             System.out.println("Attack pattern looks like so:");
             printAttackPatternInfo();
             System.out.println("Numbers in X and M positions are not counted.");
             System.out.println("Your bot is at the center of the array.");
             int totalSum = 0;
-            for(int r = 0; r < NUM_ROWS; r++) {
+            int maxPoints = InputValidator.MAX_POINTS;
+            for(int r = 0; r < InputValidator.NUM_ROWS; r++) {
                 while (true) {
                     System.out.println("Enter row " + Integer.toString(r) + " of attack pattern\n");
-                    for (int c = 0; c < NUM_COLS; c++) {
+                    for (int c = 0; c < InputValidator.NUM_COLS; c++) {
                         attackPatterns[botId][r][c] = sk.hasNextInt() ? sk.nextInt() : 0;
                     }
-                    int rowSum = getRowSum(attackPatterns[botId][r], r);
+                    int rowSum = InputValidator.getRowSum(attackPatterns[botId][r], r);
                     System.out.println("You used " + Integer.toString(rowSum) + " points on this row");
-                    if (totalSum + rowSum > MAX_POINTS) {
+                    if (totalSum + rowSum > maxPoints) {
                         System.out.println("Not enough points for this! Try again.");
                     } else {
                         totalSum += rowSum;
@@ -229,16 +122,37 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
                 sk.nextLine();
             }
             System.out.println("Selected Pattern:");
-            squareArrayToDiamond(attackPatterns[botId]);
-            printAttackPattern(attackPatterns[botId]);
+            InputValidator.squareArrayToDiamond(attackPatterns[botId]);
+            InputValidator.printAttackPattern(attackPatterns[botId]);
             // Transform attackPatterns matrix into correct coordinates
             // 1 2 3      7 8 9
             // 4 5 6  ->  4 5 6
             // 7 8 9      1 2 3
             attackPatternsTransform[botId] = Map.toGameCoords(attackPatterns[botId]);
+            UnitSetup setup = new UnitSetup();
+            System.out.println("Select extra health for this mech");
+            System.out.println("You have " + (maxPoints - totalSum) + " available");
+            int extraHealth = sk.nextInt();
+            if (totalSum + extraHealth > InputValidator.MAX_POINTS) {
+                System.out.println("Not enough points. set to 0");
+            } else {
+                totalSum += extraHealth;
+                setup.health += extraHealth;
+            }
+
+            System.out.println("Select extra speed for this mech");
+            System.out.println("You have " + (maxPoints - totalSum) + " available");
+            int extraSpeed = sk.nextInt();
+            if (totalSum + extraSpeed > InputValidator.MAX_POINTS) {
+                System.out.println("Not enough points. set to 0");
+            } else {
+                setup.speed += extraSpeed;
+            }
+            setup.attackPattern = attackPatternsTransform[botId];
+            setups[botId] = setup;
         }
 
-        return attackPatternsTransform;
+        return setups;
     }
 
     /**

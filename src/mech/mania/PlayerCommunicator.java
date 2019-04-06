@@ -11,7 +11,7 @@ public abstract class PlayerCommunicator {
         // Do nothing
     }
 
-    public abstract int[][][] getAttackPatterns();
+    public abstract UnitSetup[] getUnitsSetup();
 
     public abstract Decision getDecision(Game gameState);
 }
