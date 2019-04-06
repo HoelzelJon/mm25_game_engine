@@ -1,5 +1,7 @@
 package mech.mania;
 
+import java.util.ArrayList;
+
 /**
  * Main class -- where the magic happens
  */
@@ -8,10 +10,21 @@ public class Main {
         PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
         PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
-        int[][][] p1Attacks = player1.getAttackPatterns();
-        int[][][] p2Attacks = player2.getAttackPatterns();
+        UnitSetup[] p1setup = player1.getUnitsSetup();
+        UnitSetup[] p2setup = player2.getUnitsSetup();
 
-        Game game = new Game(p1Attacks, p2Attacks);
+        for (int i = 0; i < 3; i++) {
+            System.out.println("p1 bot " + i + " setup health: " + p1setup[i].health);
+            System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].speed);
+            InputValidator.printAttackPattern(p1setup[i].attackPattern);
+        }
+        for (int i = 0; i < 3; i++) {
+            System.out.println("p2 bot " + i + "setup health: " + p2setup[i].health);
+            System.out.println("p2 bot " + i + "setup speed: " + p2setup[i].speed);
+            InputValidator.printAttackPattern(p2setup[i].attackPattern);
+        }
+
+        Game game = new Game(p1setup, p2setup);
 
         while (game.getWinner() == Game.NO_WINNER) {
 

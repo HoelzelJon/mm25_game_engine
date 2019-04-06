@@ -1,7 +1,7 @@
 package mech.mania;
 
 import com.google.gson.Gson;
-import org.omg.CORBA.NameValuePair;
+//import org.omg.CORBA.NameValuePair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,8 +27,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public int[][][] getAttackPatterns() {
-        return new int[][][] {{{0}}}; //TODO
+    public UnitSetup[] getUnitsSetup() {
+        return new UnitSetup[3]; //TODO
     }
 
     public Decision getDecision(Game gameState) {

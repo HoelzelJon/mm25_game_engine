@@ -1,5 +1,7 @@
 package mech.mania;
 
+import java.util.ArrayList;
+
 /**
  * This class will handle communication to and from the player script.
  */
@@ -11,7 +13,7 @@ public abstract class PlayerCommunicator {
         // Do nothing
     }
 
-    public abstract int[][][] getAttackPatterns();
+    public abstract UnitSetup[] getUnitsSetup();
 
     public abstract Decision getDecision(Game gameState);
 }
