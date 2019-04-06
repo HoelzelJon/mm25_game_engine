@@ -14,6 +14,17 @@ public class Unit {
     private int id;
     private static int numUnits;
 
+    public Unit(Position pos, int[][] attack, int setHp, int setSpeed) {
+        hp = setHp;
+        speed = setSpeed;
+        this.pos = pos;
+        this.attack = attack;
+
+        this.id = numUnits;
+        numUnits++;
+        isAlive = true;
+    }
+
     public Unit(Position pos, int[][] attack) {
         hp = 2;
         speed = 4;

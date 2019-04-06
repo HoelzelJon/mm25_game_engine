@@ -5,8 +5,8 @@ package mech.mania;
  */
 public class Main {
     public static void main(String[] args) {
-        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
-        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
+        PlayerCommunicator player1 = new GUIPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
+        PlayerCommunicator player2 = new GUIPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
         int[][][] p1Attacks = player1.getAttackPatterns();
         int[][][] p2Attacks = player2.getAttackPatterns();
