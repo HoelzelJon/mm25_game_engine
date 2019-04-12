@@ -99,4 +99,66 @@ public class InputValidator {
         return sum;
     }
 
+
+
+
+    // static methods to validate Decision and initial unit conditions
+
+    private static String errorMessage = "";
+
+    public static String getErrorMessage() {
+        return errorMessage;
+    }
+
+    // validate for EACH bot
+    public static boolean hasValidStartingConditions(int[][] setAttackPatterns,
+                                                     int setHp,
+                                                     int setSpeed) {
+        if (setHp < 4 || setSpeed < 5) {
+            errorMessage = "hp and speed must be >= 4 and >= 5, respectively";
+            return false;
+        }
+
+        int sum = 0;
+        for (int[] row : setAttackPatterns) {
+            for (int col : row) {
+                if (col > 1) {
+                    sum += 2 * (col - 1);
+                }
+                sum += col;
+            }
+        }
+        if (sum > MAX_POINTS) {
+            errorMessage = "too many points allotted in grid";
+            return false;
+        } else if (setHp - 4 + setSpeed - 4 + sum > MAX_POINTS) {
+            errorMessage = "too many extra points in hp and speed";
+            return false;
+        }
+
+        return true;
+    }
+
+    public static boolean hasValidDecision(int[] priorities,
+                                           Direction[][] movements,
+                                           Direction[] attacks) {
+        for (int priority : priorities) {
+            if (priority != 1 && priority != 2 && priority != 3) {
+                errorMessage = "priorities must be 1, 2, or 3";
+                return false;
+            }
+        }
+
+        for (int i = 0; i < priorities.length - 1; i++) {
+            if (priorities[i] == priorities[i + 1]) {
+                errorMessage = "there may not be any duplicate priorities";
+                return false;
+            }
+        }
+
+        // attacks and movements do not have to be validated since they are
+        // already Direction objects
+        return true;
+    }
+
 }

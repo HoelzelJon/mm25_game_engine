@@ -1,6 +1,7 @@
 package mech.mania;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -10,19 +11,16 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
-import java.util.stream.Collectors;
 
 import static java.util.Map.entry;
 
-public class GUIInitialBotInput extends Application {
+public class GUIInitialUnitInput extends Application {
 
     private int[][][] attackPatterns;
     private int[] hps;
@@ -34,22 +32,26 @@ public class GUIInitialBotInput extends Application {
     private int playerNum = 1;
     private static final int DEFAULT_HP = 4;
     private static final int DEFAULT_SPEED = 5;
-    private static final int SCENE_WIDTH = 600;
-    private static final int SCENE_HEIGHT = 350;
+    private static final int DEFAULT_SCENE_WIDTH = 600;
+    private static final int DEFAULT_SCENE_HEIGHT = 350;
     private static final int NUM_UNITS = 3;
     private static final int GRID_SIZE = 7;
-    private static GUIInitialBotInput instance;
+
+    private static GUIInitialUnitInput instance;
     private static CountDownLatch latch;
 
     // ---------------------- STUFF TO GET JAVAFX TO COOPERATE ----------------------
 
-    public GUIInitialBotInput() {
+    public GUIInitialUnitInput() {
         instance = this;
     }
 
-    public static GUIInitialBotInput awaitAndGetInstance() {
+    public static GUIInitialUnitInput awaitAndGetInstance() {
         latch = new CountDownLatch(1);
         try {
+            // Will await until the player hits the submit button in one of the
+            // GUIs and has a valid input. This way we can control when the
+            // program should continue.
             latch.await();
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -61,7 +63,7 @@ public class GUIInitialBotInput extends Application {
 
     /**
      * Alias function for start, since getting initialization values for
-     * bots happens at the start of the Application launching, while Decision
+     * units happens at the start of the Application launching, while Decision
      * GUI showing will not occur until after Application has started (and don't
      * have to deal with any issues of Application not being launched already)
      */
@@ -77,32 +79,31 @@ public class GUIInitialBotInput extends Application {
     /**
      * A GUI for easier player input. Contains input for HP, speed, and attack
      * pattern.
-     * <p>
-     * Get values set by this function through the getAll___() methods
-     * <p>
-     * Note: call GUIInitialBotInput.launch() from other code to create this
-     * window.
      *
+     * Get values set by this function through the getAll___() methods
+     *
+     * Note: call GUIInitialUnitInput.launch() from other code to create this
+     * window.
      */
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("Player " + playerNum + " : Mechmania 25 Bot Initialization");
+        primaryStage.setTitle("Player " + playerNum + " : Mechmania 25 Unit Initialization");
 
-        InitializationInputVBox[] botInputs = new InitializationInputVBox[3];
-        for (int i = 0; i < botInputs.length; i++) {
-            botInputs[i] = new InitializationInputVBox();
+        InitializationInputVBox[] unitInputs = new InitializationInputVBox[3];
+        for (int i = 0; i < unitInputs.length; i++) {
+            unitInputs[i] = new InitializationInputVBox();
         }
 
         HBox allComps = new HBox();
         allComps.setSpacing(10.0);
-        for (int i = 0; i < botInputs.length; i++) {
-            allComps.getChildren().add(
-                    botInputs[i].getBotInputVBox("Bot " + (i + 1))
-            );
+        for (int i = 0; i < unitInputs.length; i++) {
+            allComps.getChildren().add(unitInputs[i].getUnitInputVBox("Unit " + (i + 1)));
         }
 
+        // error message to show to user in case of an error
         Text errorMessage = new Text("");
 
+        // submit button
         Button submit = new Button("Submit");
         submit.setOnMouseClicked(event -> {
 
@@ -111,25 +112,33 @@ public class GUIInitialBotInput extends Application {
             int[] allHps = new int[NUM_UNITS];
             int[] allSpeeds = new int[NUM_UNITS];
 
-            for (int i = 0; i < botInputs.length; i++) {
-                // check conditions using method from GUIPlayerCommunicator
-                boolean valid = isValid(botInputs[i].hpField,
-                        botInputs[i].speedField,
-                        botInputs[i].attackPatternGrid);
+            for (int i = 0; i < unitInputs.length; i++) {
+                // check conditions using helper method below
+                boolean valid = isValid(unitInputs[i].hpField,
+                        unitInputs[i].speedField,
+                        unitInputs[i].attackPatternGrid);
 
+                // if valid, then set the actual values in the array above
                 if (valid) {
-                    errorMessage.setText("success! you may now close the window");
-                    allAttackPatterns[i] = botInputs[i].attackPatternGrid.getAttackPattern();
-                    allHps[i] = getNumFromTextField(botInputs[i].hpField, DEFAULT_HP);
-                    allSpeeds[i] = getNumFromTextField(botInputs[i].speedField, DEFAULT_SPEED);
+                    allAttackPatterns[i] = unitInputs[i].attackPatternGrid.getAttackPattern();
+                    allHps[i] = getNumFromTextField(unitInputs[i].hpField, DEFAULT_HP);
+                    allSpeeds[i] = getNumFromTextField(unitInputs[i].speedField, DEFAULT_SPEED);
                 } else {
+                    // print out an error message for the user to see
                     errorMessage.setText("invalid conditions\n" +
-                            GUIPlayerCommunicator.getErrorMessage());
+                            InputValidator.getErrorMessage());
                     allValid = false;
                     break;
                 }
             }
 
+            // set the local variables to the instance variables so that
+            // the instance variables remain null / uninitialized if there
+            // is an error in the input
+            // close the window and countdown the latch (which will release
+            // the latch.await() from awaitAndGetInstance() method in this
+            // class), allowing GUIPlayerCommunicator.getUnitsSetup() to 
+            // continue.
             if (allValid) {
                 attackPatterns = allAttackPatterns;
                 hps = allHps;
@@ -140,6 +149,8 @@ public class GUIInitialBotInput extends Application {
             }
         });
 
+        // if initialization is cancelled by closing the window, then
+        // exit the game.
         primaryStage.setOnCloseRequest(event -> {
             latch.countDown();
             System.out.println("Game exited.");
@@ -149,13 +160,18 @@ public class GUIInitialBotInput extends Application {
         // Show everything
         VBox root = new VBox();
         root.getChildren().addAll(allComps, errorMessage, submit);
-        primaryStage.setScene(new Scene(root, SCENE_WIDTH, SCENE_HEIGHT));
+        primaryStage.setScene(new Scene(root, DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT));
         primaryStage.show();
     }
 
 
     // ---------------------- DECISION GUI ----------------------
 
+    /** 
+     * A lookup table for conversion from String (since the ChoiceBox automatically
+     * has a certain amount of variables already set) to Direction object that 
+     * needs to be returned later.
+     */
     private static final java.util.Map<String, Direction> DIRECTION_MAP = java.util.Map.ofEntries(
             entry("Stay", Direction.STAY),
             entry("Don't Attack", Direction.STAY),
@@ -165,27 +181,38 @@ public class GUIInitialBotInput extends Application {
             entry("Down", Direction.DOWN)
     );
 
-    public void launchDecisionGui(int setPlayerNum, Unit[] units) {
+    /**
+     * Launch the Decision input GUI. Requires a running instance of Application, but
+     * will create its own Stage to display the GUI onto.
+     * @param setPlayerNum player number to display as the title of the GUI
+     * @param units an array of Unit objects to be accessed for speed and ID
+     */
+    public void launchDecisionGui(final int setPlayerNum, final Unit[] units) {
         playerNum = setPlayerNum;
         Stage stage = new Stage();
         stage.setTitle("Player " + setPlayerNum + " Decision");
 
         Text directions = new Text("Type in a number (1, 2, 3) in the first box " +
-                "for the priority,\n" +
-                "then choose three movement steps and a direction of attack.");
+                "for the priority, then choose three movement steps and a direction of attack.");
 
-        DecisionInputHBox[] allBotDerivationObjs = new DecisionInputHBox[units.length];
-        HBox[] allBotHBoxes = new HBox[units.length];
+        // DecisionInputHBox is an object that holds the HBox and its internal
+        // priority, movements, and attack fields that can be accessed later for
+        // their values. Therefore storing both the object and the HBox created
+        // by it is important.
+        DecisionInputHBox[] allUnitDerivationObjs = new DecisionInputHBox[units.length];
+        HBox[] allUnitHBoxes = new HBox[units.length];
         for (int i = 0; i < units.length; i++) {
             if (units[i].isAlive()) {
-                allBotDerivationObjs[i] = new DecisionInputHBox();
-                allBotHBoxes[i] = allBotDerivationObjs[i].getDecisionInputHBox(
-                        "Bot " + units[i].getId(), units[i].getSpeed());
+                allUnitDerivationObjs[i] = new DecisionInputHBox();
+                allUnitHBoxes[i] = allUnitDerivationObjs[i].getDecisionInputHBox(
+                        "Unit " + units[i].getId(), units[i].getSpeed());
             }
         }
 
+        // default error message that can change if there is an error
         Text errorMessage = new Text("");
 
+        // submit button
         Button submit = new Button("Submit");
         submit.setOnMouseClicked(event -> {
             int[] priorities = new int[units.length];
@@ -193,7 +220,11 @@ public class GUIInitialBotInput extends Application {
             Direction[] attacks = new Direction[units.length];
 
             for (int i = 0; i < units.length; i++) {
-                if (allBotDerivationObjs[i] == null) {
+                
+                // if the unit is dead, then this index of the list wouldn't 
+                // have been initialized, so to prevent NullPointerException
+                // we need to account for it here.
+                if (allUnitDerivationObjs[i] == null) {
                     priorities[i] = 0;
                     attacks[i] = Direction.STAY;
                     Direction[] myMovements = new Direction[units[i].getSpeed()];
@@ -204,18 +235,25 @@ public class GUIInitialBotInput extends Application {
                     continue;
                 }
 
-                priorities[i] = getNumFromTextField(allBotDerivationObjs[i].priority, -1);
-                attacks[i] = DIRECTION_MAP.get(allBotDerivationObjs[i].attack);
+                // if the unit is still alive, then get the corresponding values from
+                // each of the TextFields and ChoiceBoxes that were displayed on screen
+                priorities[i] = getNumFromTextField(allUnitDerivationObjs[i].priority, -1);
+                attacks[i] = DIRECTION_MAP.get(allUnitDerivationObjs[i].attack);
 
                 Direction[] myMovements = new Direction[units[i].getSpeed()];
                 for (int j = 0; j < units[i].getSpeed(); j++) {
-                    String choice = allBotDerivationObjs[i].movements[j].getValue();
+                    String choice = allUnitDerivationObjs[i].movements[j].getValue();
                     myMovements[j] = DIRECTION_MAP.get(choice);
                 }
                 movements[i] = myMovements;
             }
 
-            if (GUIPlayerCommunicator.hasValidDecision(priorities, movements, attacks)) {
+            // if the Decision that the player made was valid (if the priorities were
+            // set without any duplicates and only had a 1, 2, or a 3), then close
+            // the window and countdown the latch (which will allow the next part of
+            // the code to run (awaitAndGetInstance() in this file and 
+            // GUIPlayerCommunicator.getDecision())
+            if (InputValidator.hasValidDecision(priorities, movements, attacks)) {
                 this.priorities = priorities;
                 this.movements = movements;
                 this.attacks = attacks;
@@ -223,23 +261,31 @@ public class GUIInitialBotInput extends Application {
                 stage.close();
                 latch.countDown();
             } else {
-                errorMessage.setText(GUIPlayerCommunicator.getErrorMessage());
+                // invalidate the input, don't close the window, and display an
+                // error message for the user to see.
+                errorMessage.setText(InputValidator.getErrorMessage());
             }
         });
 
+        // create a "root" node that we can store all of our stuff in
         VBox hBoxWrapper = new VBox();
-        HBox[] nonNullHBoxes = Arrays.stream(allBotHBoxes).filter(Objects::nonNull).toArray(HBox[]::new);
+        // filter out all of the dead units
+        HBox[] nonNullHBoxes = Arrays.stream(allUnitHBoxes).filter(Objects::nonNull).toArray(HBox[]::new);
         hBoxWrapper.getChildren().add(directions);
         hBoxWrapper.getChildren().addAll(nonNullHBoxes);
         hBoxWrapper.getChildren().addAll(errorMessage, submit);
 
+        // use the max speed to adjust how wide the screen should be
         int maxSpeed = Arrays.stream(units).max(Comparator.comparingInt(Unit::getSpeed)).get().getSpeed();
+        // if the screen is prematurely closed, then quit the game
         stage.setOnCloseRequest(event -> {
             latch.countDown();
             System.err.println("Unit decision was not made properly.");
             System.exit(0);
         });
-        Scene root = new Scene(hBoxWrapper, SCENE_WIDTH * (1 + maxSpeed * 0.05), SCENE_HEIGHT * 0.5);
+        
+        // create the Scene and show the stage
+        Scene root = new Scene(hBoxWrapper, DEFAULT_SCENE_WIDTH * (1 + maxSpeed * 0.05), DEFAULT_SCENE_HEIGHT * 0.5);
         stage.setScene(root);
         stage.show();
     }
@@ -257,6 +303,7 @@ public class GUIInitialBotInput extends Application {
                 Integer.parseInt(fieldText) : defaultNum;
     }
 
+    /** Helper method for validating a condition given TextFields */
     private static boolean isValid(TextField hpField, TextField speedField, AttackPatternGrid grid) {
         int hp = getNumFromTextField(hpField, 0);
         int speed = getNumFromTextField(speedField, 0);
@@ -264,7 +311,7 @@ public class GUIInitialBotInput extends Application {
         // get attack pattern from grid
         int[][] attackPatterns = grid.getAttackPattern();
 
-        return GUIPlayerCommunicator.hasValidStartingConditions(attackPatterns, hp, speed);
+        return InputValidator.hasValidStartingConditions(attackPatterns, hp, speed);
     }
 
     public int[][][] getAttackPatterns() {
@@ -306,7 +353,12 @@ class DecisionInputHBox {
     ChoiceBox<String>[] movements;
     ChoiceBox<String> attack;
 
-    public HBox getDecisionInputHBox(String title, int botSpeed) {
+    /** 
+     * Get a HBox containing the Unit ID, unit speed number of ChoiceBox's
+     * that have the choices MOVEMENT_CHOICES and one ChoiceBox containing
+     * the choices ATTACK_CHOICES
+     */
+    public HBox getDecisionInputHBox(String title, int unitSpeed) {
         Text titleText = new Text(title);
 
         // priority
@@ -315,8 +367,8 @@ class DecisionInputHBox {
 
         // movements
         HBox allMovements = new HBox();
-        movements = new ChoiceBox[botSpeed];
-        for (int i = 0; i < botSpeed; i++) {
+        movements = new ChoiceBox[unitSpeed];
+        for (int i = 0; i < unitSpeed; i++) {
             movements[i] = new ChoiceBox<>();
             movements[i].getItems().addAll(MOVEMENT_CHOICES);
             movements[i].getSelectionModel().selectFirst();
@@ -346,7 +398,7 @@ class InitializationInputVBox {
     TextField speedField;
     AttackPatternGrid attackPatternGrid;
 
-    public VBox getBotInputVBox(String title) {
+    public VBox getUnitInputVBox(String title) {
 
         Text titleText = new Text(title);
 
@@ -435,7 +487,7 @@ class AttackPatternGrid {
                     case MECH:
                         Text text = new Text("M");
                         grid.add(text, i, j);
-                        text.setTextAlignment(TextAlignment.CENTER);
+                        grid.setAlignment(Pos.CENTER);
                     case INVALID:
                         nodes[i][j] = null;
                         break;
