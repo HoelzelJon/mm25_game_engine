@@ -19,8 +19,6 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
         this.urlString = urlString;
-
-
     }
 
     @Override

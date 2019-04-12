@@ -3,6 +3,7 @@ package mech.mania;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -19,7 +20,7 @@ public class Map {
     /**
      * Default map constructor: generates map based on a random file from DIRECTORY, in the following format:
      * - formatted as a .csv file (columns separated by commas, rows separated by newlines)
-     * - Indestructtile tiles are marked with 'I'
+     * - Indestructible tiles are marked with 'I'
      * - Destructible tiles marked with an integer for their health
      * - Tiles which are initial spawns for units should be 'U##', where:
      *      - the first # is replaced by either 1 or 2, based on which player owns that unit
@@ -130,8 +131,11 @@ public class Map {
      *
      * @param attack 2-D int array of attack damages (should be odd width and height to correctly handle center)
      * @param center Position of the center of the attack
+     * @return `Tile` objects that were affected by attack, along with the damage they took
      */
-    public void doAttackDamage(int[][] attack, Position center) {
+    public HashMap<Object, Integer> doAttackDamage(int[][] attack, Position center) {
+        HashMap<Object, Integer> collisions = new HashMap<>();
+
         int attackWidth = attack.length;
         int attackHeight = attack[0].length;
 
@@ -143,10 +147,19 @@ public class Map {
                 for (int y = 0; y < attackHeight; y++) {
                     if (y0 + y >= 0 && y0 + y < height()) {
                         tiles[x0 + x][y0 + y].takeDamage(attack[x][y]);
+
+                        // if there is a Unit on the tile then make sure damage is applied to it
+                        if (tiles[x0 + x][y0 + y].getUnit() != null) {
+                            collisions.put(tiles[x0 + x][y0 + y].getUnit(), attack[x][y]);
+                        } else {
+                            collisions.put(tiles[x0 + x][y0 + y], attack[x][y]);
+                        }
                     }
                 }
             }
         }
+
+        return collisions;
     }
 
     @Override

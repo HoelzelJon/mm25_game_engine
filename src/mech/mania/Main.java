@@ -24,16 +24,35 @@ public class Main {
             InputValidator.printAttackPattern(p2setup[i].attackPattern);
         }
 
-        Game game = new Game(p1setup, p2setup);
+        String gameID = args[0];
+
+        Game game = new Game(gameID, p1setup, p2setup);
+        printInitialState(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
+//            int[] priorities = {1,2,3};
+//            Direction[][] p1Movements = {
+//                                    {Direction.STAY, Direction.LEFT, Direction.UP},
+//                                    {Direction.DOWN, Direction.STAY, Direction.RIGHT},
+//                                    {Direction.RIGHT, Direction.DOWN}};
+//            Direction[][] p2Movements = {
+//                                    {Direction.STAY, Direction.STAY, Direction.DOWN},
+//                                    {Direction.STAY, Direction.DOWN, Direction.DOWN},
+//                                    {Direction.RIGHT, Direction.DOWN, Direction.DOWN, Direction.LEFT}};
+//
+//            Direction[] attacks = {Direction.STAY, Direction.UP, Direction.STAY};
+
+//            Decision p1Decision = new Decision(priorities, p1Movements, attacks);
+//            Decision p2Decision = new Decision(priorities, p2Movements, attacks);
 
             Decision p1Decision = player1.getDecision(game);
             Decision p2Decision = player2.getDecision(game);
 
             game.doTurn(p1Decision, p2Decision);
 
-            printTurnLog(game);
+            printGameMap(game);
+            printVisualizerJson(game);
+            printPlayerJson(game);
 
             try {
                 Thread.sleep(1000);
@@ -49,8 +68,19 @@ public class Main {
         }
     }
 
-    static void printTurnLog(Game g) {
-        //System.out.println(g.getMapString() + "\n");
-        //TODO
+    static void printGameMap(Game game) {
+        System.out.println(game.getMapString() + "\n");
+    }
+
+    static void printInitialState(Game game) {
+        System.out.println(game.getRecentVisualizerJson() + "\n");
+    }
+
+    static void printVisualizerJson(Game game) {
+        System.out.println(game.getRecentVisualizerJson() + "\n");
+    }
+
+    static void printPlayerJson(Game game) {
+        System.out.println(game.getRecentPlayerJson() + "\n");
     }
 }
