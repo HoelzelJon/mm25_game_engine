@@ -29,7 +29,7 @@ public class Game {
     private static Unit[] initUnitList(Position[] positions, UnitSetup[] setups, Map map) {
         Unit[] ret = new Unit[positions.length];
         for (int i = 0; i < positions.length; i ++) {
-            ret[i] = new Unit(positions[i], setups[i]);
+            ret[i] = new Unit(positions[i], setups[i].attackPattern, setups[i].health, setups[i].speed);
             map.tileAt(positions[i]).setUnit(ret[i]);
         }
         return ret;
@@ -470,9 +470,19 @@ public class Game {
         StringBuilder ret = new StringBuilder();
 
         ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
-        for(int i = 0; i < p1Units.length; i++){
-            ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t\t\t");
-            ret.append(p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
+
+        for (int i = 0; i < p1Units.length; i++) {
+            if (p1Units[i].isAlive()) {
+                ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t\t");
+            } else {
+                ret.append("        \t\t\t");
+            }
+
+            if (p2Units[i].isAlive()) {
+                ret.append(p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
+            } else {
+                ret.append("        \n");
+            }
         }
 
         return ret.toString();

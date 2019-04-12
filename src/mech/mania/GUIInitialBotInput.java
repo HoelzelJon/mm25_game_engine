@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
@@ -12,30 +13,84 @@ import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
+import java.util.stream.Collectors;
+
+import static java.util.Map.entry;
+
 public class GUIInitialBotInput extends Application {
 
-    private static int[][][] attackPatterns;
-    private static int SCENE_WIDTH = 900;
-    private static int SCENE_HEIGHT = 350;
+    private int[][][] attackPatterns;
+    private int[] hps;
+    private int[] speeds;
+    private int[] priorities;
+    private Direction[][] movements;
+    private Direction[] attacks;
+
+    private int playerNum = 1;
+    private static final int DEFAULT_HP = 4;
+    private static final int DEFAULT_SPEED = 5;
+    private static final int SCENE_WIDTH = 600;
+    private static final int SCENE_HEIGHT = 350;
+    private static final int NUM_UNITS = 3;
+    private static final int GRID_SIZE = 7;
+    private static GUIInitialBotInput instance;
+    private static CountDownLatch latch;
+
+    // ---------------------- STUFF TO GET JAVAFX TO COOPERATE ----------------------
+
+    public GUIInitialBotInput() {
+        instance = this;
+    }
+
+    public static GUIInitialBotInput awaitAndGetInstance() {
+        latch = new CountDownLatch(1);
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return instance;
+    }
+
+    // ---------------------- INITIALIZATION GUI ----------------------
+
+    /**
+     * Alias function for start, since getting initialization values for
+     * bots happens at the start of the Application launching, while Decision
+     * GUI showing will not occur until after Application has started (and don't
+     * have to deal with any issues of Application not being launched already)
+     */
+    public void launchInitializationGui(int setPlayerNum) {
+        playerNum = setPlayerNum;
+        try {
+            start(new Stage());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * A GUI for easier player input. Contains input for HP, speed, and attack
      * pattern.
      * <p>
-     * Get values set by this function through the get___() methods
+     * Get values set by this function through the getAll___() methods
      * <p>
      * Note: call GUIInitialBotInput.launch() from other code to create this
      * window.
      *
-     * @param primaryStage
      */
     @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("Mechmania 25 Bot Initialization");
+    public void start(Stage primaryStage) throws Exception {
+        primaryStage.setTitle("Player " + playerNum + " : Mechmania 25 Bot Initialization");
 
-        IndividualInputBox[] botInputs = new IndividualInputBox[3];
+        InitializationInputVBox[] botInputs = new InitializationInputVBox[3];
         for (int i = 0; i < botInputs.length; i++) {
-            botInputs[i] = new IndividualInputBox();
+            botInputs[i] = new InitializationInputVBox();
         }
 
         HBox allComps = new HBox();
@@ -49,58 +104,243 @@ public class GUIInitialBotInput extends Application {
         Text errorMessage = new Text("");
 
         Button submit = new Button("Submit");
-        submit.setOnMouseClicked(value -> {
+        submit.setOnMouseClicked(event -> {
 
             boolean allValid = true;
-            int[][][] allAttackPatterns = new int[3][7][7];
+            int[][][] allAttackPatterns = new int[NUM_UNITS][GRID_SIZE][GRID_SIZE];
+            int[] allHps = new int[NUM_UNITS];
+            int[] allSpeeds = new int[NUM_UNITS];
 
             for (int i = 0; i < botInputs.length; i++) {
                 // check conditions using method from GUIPlayerCommunicator
-                boolean valid = isValid(botInputs[i].hpField, botInputs[i].speedField, botInputs[i].attackPatternGrid);
+                boolean valid = isValid(botInputs[i].hpField,
+                        botInputs[i].speedField,
+                        botInputs[i].attackPatternGrid);
 
                 if (valid) {
                     errorMessage.setText("success! you may now close the window");
                     allAttackPatterns[i] = botInputs[i].attackPatternGrid.getAttackPattern();
+                    allHps[i] = getNumFromTextField(botInputs[i].hpField, DEFAULT_HP);
+                    allSpeeds[i] = getNumFromTextField(botInputs[i].speedField, DEFAULT_SPEED);
                 } else {
-                    errorMessage.setText("invalid conditions\n" + GUIPlayerCommunicator.errorMessage);
+                    errorMessage.setText("invalid conditions\n" +
+                            GUIPlayerCommunicator.getErrorMessage());
                     allValid = false;
                     break;
                 }
             }
 
-            attackPatterns = allValid ? allAttackPatterns : null;
+            if (allValid) {
+                attackPatterns = allAttackPatterns;
+                hps = allHps;
+                speeds = allSpeeds;
+
+                primaryStage.close();
+                latch.countDown();
+            }
+        });
+
+        primaryStage.setOnCloseRequest(event -> {
+            latch.countDown();
+            System.out.println("Game exited.");
+            System.exit(0);
         });
 
         // Show everything
         VBox root = new VBox();
         root.getChildren().addAll(allComps, errorMessage, submit);
         primaryStage.setScene(new Scene(root, SCENE_WIDTH, SCENE_HEIGHT));
-        primaryStage.show(); // wait until program ends for next step to occur
+        primaryStage.show();
     }
 
-    private boolean isValid(TextField hpField, TextField speedField, AttackPatternGrid grid) {
-        // get number from hp field
-        String hpFieldText = hpField.getText();
-        int hp = hpFieldText.matches("^\\d+$") ?
-                Integer.parseInt(hpFieldText) : 0;
 
-        // get number from speed field
-        String speedFieldText = speedField.getText();
-        int speed = speedFieldText.matches("^\\d+$") ?
-                Integer.parseInt(speedFieldText) : 0;
+    // ---------------------- DECISION GUI ----------------------
+
+    private static final java.util.Map<String, Direction> DIRECTION_MAP = java.util.Map.ofEntries(
+            entry("Stay", Direction.STAY),
+            entry("Don't Attack", Direction.STAY),
+            entry("Left", Direction.LEFT),
+            entry("Right", Direction.RIGHT),
+            entry("Up", Direction.UP),
+            entry("Down", Direction.DOWN)
+    );
+
+    public void launchDecisionGui(int setPlayerNum, Unit[] units) {
+        playerNum = setPlayerNum;
+        Stage stage = new Stage();
+        stage.setTitle("Player " + setPlayerNum + " Decision");
+
+        Text directions = new Text("Type in a number (1, 2, 3) in the first box " +
+                "for the priority,\n" +
+                "then choose three movement steps and a direction of attack.");
+
+        DecisionInputHBox[] allBotDerivationObjs = new DecisionInputHBox[units.length];
+        HBox[] allBotHBoxes = new HBox[units.length];
+        for (int i = 0; i < units.length; i++) {
+            if (units[i].isAlive()) {
+                allBotDerivationObjs[i] = new DecisionInputHBox();
+                allBotHBoxes[i] = allBotDerivationObjs[i].getDecisionInputHBox(
+                        "Bot " + units[i].getId(), units[i].getSpeed());
+            }
+        }
+
+        Text errorMessage = new Text("");
+
+        Button submit = new Button("Submit");
+        submit.setOnMouseClicked(event -> {
+            int[] priorities = new int[units.length];
+            Direction[][] movements = new Direction[units.length][];
+            Direction[] attacks = new Direction[units.length];
+
+            for (int i = 0; i < units.length; i++) {
+                if (allBotDerivationObjs[i] == null) {
+                    priorities[i] = 0;
+                    attacks[i] = Direction.STAY;
+                    Direction[] myMovements = new Direction[units[i].getSpeed()];
+                    for (int j = 0; j < units[i].getSpeed(); j++) {
+                        myMovements[j] = Direction.STAY;
+                    }
+                    movements[i] = myMovements;
+                    continue;
+                }
+
+                priorities[i] = getNumFromTextField(allBotDerivationObjs[i].priority, -1);
+                attacks[i] = DIRECTION_MAP.get(allBotDerivationObjs[i].attack);
+
+                Direction[] myMovements = new Direction[units[i].getSpeed()];
+                for (int j = 0; j < units[i].getSpeed(); j++) {
+                    String choice = allBotDerivationObjs[i].movements[j].getValue();
+                    myMovements[j] = DIRECTION_MAP.get(choice);
+                }
+                movements[i] = myMovements;
+            }
+
+            if (GUIPlayerCommunicator.hasValidDecision(priorities, movements, attacks)) {
+                this.priorities = priorities;
+                this.movements = movements;
+                this.attacks = attacks;
+
+                stage.close();
+                latch.countDown();
+            } else {
+                errorMessage.setText(GUIPlayerCommunicator.getErrorMessage());
+            }
+        });
+
+        VBox hBoxWrapper = new VBox();
+        HBox[] nonNullHBoxes = Arrays.stream(allBotHBoxes).filter(Objects::nonNull).toArray(HBox[]::new);
+        hBoxWrapper.getChildren().add(directions);
+        hBoxWrapper.getChildren().addAll(nonNullHBoxes);
+        hBoxWrapper.getChildren().addAll(errorMessage, submit);
+
+        int maxSpeed = Arrays.stream(units).max(Comparator.comparingInt(Unit::getSpeed)).get().getSpeed();
+        stage.setOnCloseRequest(event -> {
+            latch.countDown();
+            System.err.println("Unit decision was not made properly.");
+            System.exit(0);
+        });
+        Scene root = new Scene(hBoxWrapper, SCENE_WIDTH * (1 + maxSpeed * 0.05), SCENE_HEIGHT * 0.5);
+        stage.setScene(root);
+        stage.show();
+    }
+
+
+    // ---------------------- HELPER + GETTER METHODS ----------------------
+
+    private static int getNumFromTextField(TextField field, int defaultNum) {
+        if (field == null) {
+            return defaultNum;
+        }
+
+        String fieldText = field.getText();
+        return fieldText.matches("^\\d+$") ?
+                Integer.parseInt(fieldText) : defaultNum;
+    }
+
+    private static boolean isValid(TextField hpField, TextField speedField, AttackPatternGrid grid) {
+        int hp = getNumFromTextField(hpField, 0);
+        int speed = getNumFromTextField(speedField, 0);
 
         // get attack pattern from grid
         int[][] attackPatterns = grid.getAttackPattern();
 
-        return GUIPlayerCommunicator.hasValidConditions(attackPatterns, hp, speed);
+        return GUIPlayerCommunicator.hasValidStartingConditions(attackPatterns, hp, speed);
     }
 
-    public static int[][][] getAttackPatterns() {
+    public int[][][] getAttackPatterns() {
         return attackPatterns;
+    }
+
+    public int[] getHps() {
+        return hps;
+    }
+
+    public int[] getSpeeds() {
+        return speeds;
+    }
+
+    public int[] getPriorities() {
+        return priorities;
+    }
+
+    public Direction[][] getMovements() {
+        return movements;
+    }
+
+    public Direction[] getAttacks() {
+        return attacks;
+    }
+
+}
+
+/**
+ * Wrapper class that contains information for creating the decision VBox used
+ * for the decision GUI.
+ */
+class DecisionInputHBox {
+
+    private static final String[] MOVEMENT_CHOICES = {"Stay", "Left", "Right", "Up", "Down"};
+    private static final String[] ATTACK_CHOICES = {"Don't Attack", "Left", "Right", "Up", "Down"};
+
+    TextField priority;
+    ChoiceBox<String>[] movements;
+    ChoiceBox<String> attack;
+
+    public HBox getDecisionInputHBox(String title, int botSpeed) {
+        Text titleText = new Text(title);
+
+        // priority
+        priority = new TextField();
+        priority.setMaxWidth(30);
+
+        // movements
+        HBox allMovements = new HBox();
+        movements = new ChoiceBox[botSpeed];
+        for (int i = 0; i < botSpeed; i++) {
+            movements[i] = new ChoiceBox<>();
+            movements[i].getItems().addAll(MOVEMENT_CHOICES);
+            movements[i].getSelectionModel().selectFirst();
+        }
+        allMovements.getChildren().addAll(movements);
+
+        // attacks
+        attack = new ChoiceBox<>();
+        attack.getItems().addAll(ATTACK_CHOICES);
+        attack.getSelectionModel().selectFirst();
+
+        HBox root = new HBox();
+        root.getChildren().addAll(titleText, priority, allMovements, attack);
+        root.setSpacing(10);
+        return root;
     }
 }
 
-class IndividualInputBox {
+
+/**
+ * Wrapper class that contains information for one entire VBox of the initialization
+ * screen. Contains the TextField for the grid, the hp input box and speed input box.
+ */
+class InitializationInputVBox {
 
     TextField hpField;
     TextField speedField;
@@ -132,6 +372,12 @@ class IndividualInputBox {
     }
 }
 
+/**
+ * Another wrapper class that has methods to create a grid of TextField objects
+ * in the shape defined in the POSITIONS char[][] and the INVALID, VALID, and
+ * MECH final char variables, which denote what should be placed when the program
+ * encounters the character in the position grid.
+ */
 class AttackPatternGrid {
 
     private static final int SIZE = 7;

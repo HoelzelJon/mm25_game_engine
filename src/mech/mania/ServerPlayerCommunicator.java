@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class ServerPlayerCommunicator extends PlayerCommunicator {
     String urlString;
 
-    private static final int MAX_TURN_TIME_MILIS = 5000;
+    private static final int MAX_TURN_TIME_MILLIS = 5000;
 
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
@@ -35,7 +35,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             URL url = new URL(urlString + "turn");
 
             connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(MAX_TURN_TIME_MILIS);
+            connection.setReadTimeout(MAX_TURN_TIME_MILLIS);
         } catch (MalformedURLException ex) {
             System.err.println("MalformedURLException found when starting player #" + playerNum);
             System.err.println("URL= " + urlString);

@@ -11,4 +11,10 @@ public class UnitSetup {
         health = BASE_HEALTH;
         speed = BASE_SPEED;
     }
+
+    public UnitSetup(int[][] setAttackPattern, int setHealth, int setSpeed) {
+        attackPattern = setAttackPattern;
+        health = setHealth;
+        speed = setSpeed;
+    }
 }
