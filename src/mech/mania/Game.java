@@ -29,7 +29,7 @@ public class Game {
     private static Unit[] initUnitList(Position[] positions, UnitSetup[] setups, Map map) {
         Unit[] ret = new Unit[positions.length];
         for (int i = 0; i < positions.length; i ++) {
-            ret[i] = new Unit(positions[i], setups[i].attackPattern, setups[i].health, setups[i].speed);
+            ret[i] = new Unit(positions[i], setups[i]);
             map.tileAt(positions[i]).setUnit(ret[i]);
         }
         return ret;

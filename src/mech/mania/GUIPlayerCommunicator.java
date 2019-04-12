@@ -63,6 +63,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         return allUnits;
     }
 
+    // TODO: fix this function so attacking in a direction works
     private int[][] transformMap(int[][] map) {
         // for this method of input, the map needs to be transformed as follows:
         // 1 2 3       1 4 7
@@ -72,7 +73,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         int[][] newMap = new int[map.length][map[0].length];
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                newMap[i][j] = map[j][i];
+                newMap[i][j] = map[map.length - 1 - j][i];
             }
         }
         return newMap;
