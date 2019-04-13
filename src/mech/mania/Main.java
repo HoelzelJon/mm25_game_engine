@@ -7,11 +7,11 @@ public class Main {
     public static void main(String[] args) {
         String gameID = args[0];
         Map map = new Map();
-        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
+        PlayerCommunicator player1 = new /*HumanPlayerCommunicator(1);*/ ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
         PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
-        int[][][] p1Attacks = player1.getAttackPatterns(map);
-        int[][][] p2Attacks = player2.getAttackPatterns(map);
+        int[][][] p1Attacks = player1.getAttackPatterns(gameID, map);
+        int[][][] p2Attacks = player2.getAttackPatterns(gameID, map);
 
         Game game = new Game(gameID, p1Attacks, p2Attacks, map);
 

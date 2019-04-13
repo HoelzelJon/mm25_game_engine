@@ -22,7 +22,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public int[][][] getAttackPatterns(Map map) {
+    public int[][][] getAttackPatterns(String gameID, Map map) {
         HttpURLConnection connection;
 
         try {
