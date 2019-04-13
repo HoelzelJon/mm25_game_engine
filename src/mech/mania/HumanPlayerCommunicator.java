@@ -73,7 +73,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      * Prompt user for initial attack patterns
      */
     @Override
-    public int[][][] getAttackPatterns(Map map){
+    public int[][][] getAttackPatterns(String gameID, Map map){
         int numBots = 3;
 
         int[][][] attackPatterns = new int[numBots][][];
