@@ -7,7 +7,7 @@ public class Main {
     public static void main(String[] args) {
         String gameID = args[0];
         Map map = new Map();
-        PlayerCommunicator player1 = new /*HumanPlayerCommunicator(1);*/ ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
+        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
         PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
 
         int[][][] p1Attacks = player1.getAttackPatterns(gameID, map);
@@ -17,10 +17,7 @@ public class Main {
 
         printInitialState(game);
 
-        String gameHistory = "\n";
-
         while (game.getWinner() == Game.NO_WINNER) {
-            gameHistory += game.getMapString() + "\n";
 
             Decision p1Decision = player1.getDecision(game);
             Decision p2Decision = player2.getDecision(game);
@@ -29,12 +26,6 @@ public class Main {
 
             printGameMap(game);
             printVisualizerJson(game);
-
-            String[] p1 = p1Decision.getActions();
-            String[] p2 = p2Decision.getActions();
-            for (int i = 0; i < 3; i++) {
-                gameHistory += "\nplayer1:\n" + p1[i] + "\nplayer2:\n" + p2[i] + "\n";
-            }
 
             try {
                 Thread.sleep(1000);
@@ -49,8 +40,6 @@ public class Main {
         } else if (game.getWinner() == Game.P2_WINNER) {
             System.out.println("Player 2 wins!");
         }
-
-        System.out.print(gameHistory);
     }
 
     static void printInitialState(Game game) {

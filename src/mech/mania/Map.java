@@ -204,4 +204,8 @@ public class Map {
         // Since a horizontal reflect works both ways, both coordinate conversions are the same
         return toGameCoords(map);
     }
+
+    public String toPlayerJSON() {
+
+    }
 }
