@@ -66,11 +66,15 @@ public class Unit {
     }
 
     public void takeCollisionDamage() {
-        hp -= COLLISION_DAMAGE;
+        if (isAlive) {
+            hp -= COLLISION_DAMAGE;
+        }
     }
     
     public void takeDamage(int damage) {
-        hp -= damage;
+        if (isAlive) {
+            hp -= damage;
+        }
     }
 
     /**

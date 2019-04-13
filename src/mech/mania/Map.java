@@ -60,7 +60,7 @@ public class Map {
 
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
-                Tile t = new Tile(new Position(x, y));
+                Tile t = new Tile();
 
                 if (stringGrid.get(height - y - 1).length > x) {
                     String s = stringGrid.get(height - y - 1)[x].trim();
@@ -205,7 +205,7 @@ public class Map {
         return toGameCoords(map);
     }
 
-    public String toPlayerJSON() {
+    //public String toPlayerJSON() {
 
-    }
+    //}
 }
