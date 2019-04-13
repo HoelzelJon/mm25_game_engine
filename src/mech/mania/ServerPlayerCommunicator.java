@@ -48,7 +48,6 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     public Decision getDecision(Game gameState) {
-        Gson gson = new Gson();
 
         HttpURLConnection connection;
 
@@ -67,7 +66,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             return null;
         }
 
-        String gameJson = gson.toJson(gameState);
+        String gameJson = gameState.getRecentPlayerJson();
         try {
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
@@ -84,6 +83,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             System.err.println("IOException when doing getOutputStream on HTTPConnection");
             return null;
         }
+
+        Gson gson = new Gson();
 
         try {
             InputStream is = connection.getInputStream();

@@ -14,6 +14,7 @@ public class Game {
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
     private String gameId;
+    private String[] playerNames;
 
     private Gson gameRoundSerializer;
     private Gson gameStateSerializer;
@@ -35,7 +36,7 @@ public class Game {
         return ret;
     }
 
-    public Game(String id, int[][][] p1Attacks, int[][][] p2Attacks, Map map) {
+    public Game(String id, String[] playerNames, int[][][] p1Attacks, int[][][] p2Attacks, Map map) {
         this.gameId = id;
         this.map = map;
         Position[] p1Positions = map.getP1InitialPositions();
