@@ -54,10 +54,10 @@ public class Main {
     }
 
     static void printInitialState(Game game) {
-        System.out.println(game.getRecentVisualizerJson() + "\n");
+        System.out.println(game.getInitialVisualizerJson() + "\n");
     }
 
     static void printVisualizerJson(Game game) {
-        System.out.println(game.getRecentVisualizerJson() + "\n");
+        System.out.println(game.getRoundVisualizerJson() + "\n");
     }
 }
