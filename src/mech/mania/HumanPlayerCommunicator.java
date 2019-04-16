@@ -75,12 +75,14 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      * Prompt user for initial attack patterns
      */
     @Override
-    public int[][][] getAttackPatterns(){
+    public int[][][] getAttackPatterns(String gameID, Map map){
         int numBots = 3;
 
         int[][][] attackPatterns = new int[numBots][][];
         int[][][] attackPatternsTransform = new int[numBots][][];
 
+        // Print the map for player view
+        System.out.print("Map:\n" + map.toString() + "\n");
         // Iterate over bots
         for(int botId = 0; botId < numBots; botId++){
             System.out.println("Configuring attack pattern for bot " + botId);

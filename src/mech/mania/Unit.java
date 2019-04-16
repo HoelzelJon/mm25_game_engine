@@ -5,6 +5,7 @@ package mech.mania;
  */
 public class Unit {
     private static int globalId;
+
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
@@ -17,14 +18,12 @@ public class Unit {
     private static int numUnits;
 
     public Unit(Position pos, int[][] attack) {
+        hp = 5;
         id = globalId++;
-        hp = 2;
         speed = 4;
         this.pos = pos;
         this.attack = attack;
 
-        this.id = numUnits;
-        numUnits++;
         isAlive = true;
     }
 

@@ -6,39 +6,25 @@ package mech.mania;
 public class Main {
     public static void main(String[] args) {
         String gameID = args[0];
+        String mapDirectory = args[1];
+        String p1Name = args[2];
+        String p2Name = args[3];
+        String p1URL = args[4];
+        String p2URL = args[5];
 
-        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
-        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
+        Map map = new Map(mapDirectory);
 
-//        int[][] attack = {{0, 0, 1, 0, 0},
-//                          {0, 0, 1, 0, 0},
-//                          {1, 1, 0, 1, 1},
-//                          {0, 0, 1, 0, 1},
-//                          {0, 0, 1, 0, 0}}; // when printed in-game, the 1's should be pointing up
-//        int[][][] p1Attacks = {attack, attack, attack};
-//        int[][][] p2Attacks = {attack, attack, attack};
+        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
 
-        int[][][] p1Attacks = player1.getAttackPatterns();
-        int[][][] p2Attacks = player2.getAttackPatterns();
+        int[][][] p1Attacks = player1.getAttackPatterns(gameID, map);
+        int[][][] p2Attacks = player2.getAttackPatterns(gameID, map);
 
-        Game game = new Game(gameID, p1Attacks, p2Attacks);
+        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1Attacks, p2Attacks, map);
+
         printInitialState(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
-//            int[] priorities = {1,2,3};
-//            Direction[][] p1Movements = {
-//                                    {Direction.STAY, Direction.LEFT, Direction.UP},
-//                                    {Direction.DOWN, Direction.STAY, Direction.RIGHT},
-//                                    {Direction.RIGHT, Direction.DOWN}};
-//            Direction[][] p2Movements = {
-//                                    {Direction.STAY, Direction.STAY, Direction.DOWN},
-//                                    {Direction.STAY, Direction.DOWN, Direction.DOWN},
-//                                    {Direction.RIGHT, Direction.DOWN, Direction.DOWN, Direction.LEFT}};
-//
-//            Direction[] attacks = {Direction.STAY, Direction.UP, Direction.STAY};
-
-//            Decision p1Decision = new Decision(priorities, p1Movements, attacks);
-//            Decision p2Decision = new Decision(priorities, p2Movements, attacks);
 
             Decision p1Decision = player1.getDecision(game);
             Decision p2Decision = player2.getDecision(game);
@@ -47,11 +33,11 @@ public class Main {
 
             printGameMap(game);
             printVisualizerJson(game);
-            printPlayerJson(game);
 
             try {
                 Thread.sleep(1000);
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+            }
         }
 
         if (game.getWinner() == Game.TIE) {
@@ -68,14 +54,10 @@ public class Main {
     }
 
     static void printInitialState(Game game) {
-        System.out.println(game.getRecentVisualizerJson() + "\n");
+        System.out.println(game.getInitialVisualizerJson() + "\n");
     }
 
     static void printVisualizerJson(Game game) {
-        System.out.println(game.getRecentVisualizerJson() + "\n");
-    }
-
-    static void printPlayerJson(Game game) {
-        System.out.println(game.getRecentPlayerJson() + "\n");
+        System.out.println(game.getRoundVisualizerJson() + "\n");
     }
 }
