@@ -45,38 +45,40 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
 
         // Iterate through bots
         for(int botId = 0; botId < myUnits.length; botId++){
-            // Ask for priority
-            System.out.println("Specify priority for bot " + botId + " (board ID " + myUnits[botId].getId() + ") (1 to " + myUnits.length + ", 1 is first):");
-            priorities[botId] = sk.hasNextInt()? sk.nextInt() : 0;
-            sk.nextLine();
-            while(priorities[botId] < 1 || priorities[botId] > myUnits.length){
-                System.out.println("Priority must be a number from 1 to 3. Entery priority for bot " + botId + ":");
+            if(myUnits[botId].isAlive()){
+                // Ask for priority
+                System.out.println("Specify priority for bot " + botId + " (board ID " + myUnits[botId].getId() + ") (1 to " + myUnits.length + ", 1 is first):");
                 priorities[botId] = sk.hasNextInt()? sk.nextInt() : 0;
                 sk.nextLine();
-            }
+                while(priorities[botId] < 1 || priorities[botId] > myUnits.length){
+                    System.out.println("Priority must be a number from 1 to 3. Enter priority for bot " + botId + ":");
+                    priorities[botId] = sk.hasNextInt()? sk.nextInt() : 0;
+                    sk.nextLine();
+                }
 
-            // Ask for movement
-            movements[botId] = new Direction[myUnits[botId].getSpeed()];
-            System.out.println("Specify movement steps for bot " + botId + ". U = up, D = down, L = left, R = right, S = stay");
-            String moveSteps = sk.nextLine();
-            for(int step = 0; step < movements[botId].length; step++){
+                // Ask for movement
+                movements[botId] = new Direction[myUnits[botId].getSpeed()];
+                System.out.println("Specify movement steps for bot " + botId + ". U = up, D = down, L = left, R = right, S = stay");
+                String moveSteps = sk.nextLine();
+                for(int step = 0; step < movements[botId].length; step++){
+                    try{
+                        movements[botId][step] = dirFromChar(moveSteps.charAt(step));
+                    }
+                    catch(Exception e){
+                        // Triggers if user didn't enter all 4 movement steps
+                        movements[botId][step] = Direction.STAY;
+                    }
+                }
+
+                // Ask for attack direction
+                System.out.println("Specify attack direction for bot " + botId + ". U = up, D = down, L = left, R = right, S = stay");
                 try{
-                    movements[botId][step] = dirFromChar(moveSteps.charAt(step));
+                    attackDirs[botId] = dirFromChar(sk.nextLine().charAt(0));
                 }
                 catch(Exception e){
-                    // Triggers if user didn't enter all 4 movement steps
-                    movements[botId][step] = Direction.STAY;
+                    // Triggers if user doesn't enter anything
+                    attackDirs[botId] = Direction.STAY;
                 }
-            }
-
-            // Ask for attack direction
-            System.out.println("Specify attack direction for bot " + botId + ". U = up, D = down, L = left, R = right, S = stay");
-            try{
-                attackDirs[botId] = dirFromChar(sk.nextLine().charAt(0));
-            }
-            catch(Exception e){
-                // Triggers if user doesn't enter anything
-                attackDirs[botId] = Direction.STAY;
             }
         }
 
@@ -88,12 +90,15 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      * Prompt user for initial attack patterns
      */
     @Override
-    public UnitSetup[] getUnitsSetup(){
+    public UnitSetup[] getUnitsSetup(String gameID, Map map){
         int numBots = InputValidator.BOTS_PER_PLAYER;
         UnitSetup[] setups = new UnitSetup[numBots];
+
         int[][][] attackPatterns = new int[numBots][][];
         int[][][] attackPatternsTransform = new int[numBots][][];
 
+        // Print the map for player view
+        System.out.print("Map:\n" + map.toString() + "\n");
         // Iterate over bots
         for(int botId = 0; botId < numBots; botId++){
             System.out.println("Configuring attack pattern for bot " + botId);

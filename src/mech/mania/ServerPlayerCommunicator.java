@@ -1,7 +1,6 @@
 package mech.mania;
 
 import com.google.gson.Gson;
-//import org.omg.CORBA.NameValuePair;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -10,8 +9,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Scanner;
 
 public class ServerPlayerCommunicator extends PlayerCommunicator {
@@ -22,17 +19,35 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
         this.urlString = urlString;
-
-
     }
 
     @Override
-    public UnitSetup[] getUnitsSetup() {
-        return new UnitSetup[3]; //TODO
+    public UnitSetup[] getUnitsSetup(String gameID, Map map) {
+        HttpURLConnection connection;
+
+        try {
+            URL url = new URL(urlString + "pattern");
+
+            connection = (HttpURLConnection) url.openConnection();
+            connection.setReadTimeout(MAX_TURN_TIME_MILIS);
+        } catch (MalformedURLException ex) {
+            System.err.println("MalformedURLException found when getting attack pattern for player #" + playerNum);
+            System.err.println("URL= " + urlString);
+            return null;
+        } catch (IOException ex) {
+            System.err.println("IOException when opening URL connection to player #" + playerNum);
+            System.err.print("URL= " + urlString);
+            return null;
+        }
+
+        Gson gson = new Gson();
+        String mapJson = gson.toJson(map);
+
+        //TODO
+        return new UnitSetup[] {};
     }
 
     public Decision getDecision(Game gameState) {
-        Gson gson = new Gson();
 
         HttpURLConnection connection;
 
@@ -42,7 +57,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             connection = (HttpURLConnection) url.openConnection();
             connection.setReadTimeout(MAX_TURN_TIME_MILIS);
         } catch (MalformedURLException ex) {
-            System.err.println("MalformedURLException found when starting player #" + playerNum);
+            System.err.println("MalformedURLException found when connecting to player #" + playerNum);
             System.err.println("URL= " + urlString);
             return null;
         } catch (IOException ex) {
@@ -51,15 +66,15 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             return null;
         }
 
-        String gameJson = gson.toJson(gameState);
-         try {
-             connection.setRequestMethod("POST");
-             connection.setDoOutput(true);
-             connection.setDoInput(true);
-         } catch (ProtocolException ex) {
-             System.err.println("ProtocolException when setting request method to POST");
-             return null;
-         }
+        String gameJson = gameState.getRecentPlayerJson();
+        try {
+            connection.setRequestMethod("POST");
+            connection.setDoOutput(true);
+            connection.setDoInput(true);
+        } catch (ProtocolException ex) {
+            System.err.println("ProtocolException when setting request method to POST");
+            return null;
+        }
 
         try  {
             OutputStream os = connection.getOutputStream();
@@ -68,6 +83,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             System.err.println("IOException when doing getOutputStream on HTTPConnection");
             return null;
         }
+
+        Gson gson = new Gson();
 
         try {
             InputStream is = connection.getInputStream();

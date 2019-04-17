@@ -1,17 +1,24 @@
 package mech.mania;
 
-import java.util.ArrayList;
-
 /**
  * Main class -- where the magic happens
  */
 public class Main {
     public static void main(String[] args) {
-        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, "http://127.0.0.1:5000/");
-        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, "http://127.0.0.1:5000/");
+        String gameID = args[0];
+        String mapDirectory = args[1];
+        String p1Name = args[2];
+        String p2Name = args[3];
+        String p1URL = args[4];
+        String p2URL = args[5];
 
-        UnitSetup[] p1setup = player1.getUnitsSetup();
-        UnitSetup[] p2setup = player2.getUnitsSetup();
+        Map map = new Map(mapDirectory);
+
+        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
+
+        UnitSetup[] p1setup = player1.getUnitsSetup(gameID, map);
+        UnitSetup[] p2setup = player2.getUnitsSetup(gameID, map);
 
         for (int i = 0; i < 3; i++) {
             System.out.println("p1 bot " + i + " setup health: " + p1setup[i].health);
@@ -24,7 +31,9 @@ public class Main {
             InputValidator.printAttackPattern(p2setup[i].attackPattern);
         }
 
-        Game game = new Game(p1setup, p2setup);
+        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
+
+        printInitialVisualizerJson(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
 
@@ -33,11 +42,12 @@ public class Main {
 
             game.doTurn(p1Decision, p2Decision);
 
-            printTurnLog(game);
+            printRoundVisualizerJson(game);
 
             try {
                 Thread.sleep(1000);
-            } catch (Exception ex) {}
+            } catch (Exception ex) {
+            }
         }
 
         if (game.getWinner() == Game.TIE) {
@@ -49,8 +59,11 @@ public class Main {
         }
     }
 
-    static void printTurnLog(Game g) {
-        //System.out.println(g.getMapString() + "\n");
-        //TODO
+    static void printInitialVisualizerJson(Game game) {
+        System.out.println(game.getInitialVisualizerJson() + "\n");
+    }
+
+    static void printRoundVisualizerJson(Game game) {
+        System.out.println(game.getRoundVisualizerJson() + "\n");
     }
 }

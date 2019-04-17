@@ -4,7 +4,11 @@ package mech.mania;
  * Represents a single square on the game board.
  */
 public class Tile {
-    private Position pos; // x,y coordinates of this tile
+    public static final int COLLISION_DAMAGE = 1;
+    private static long globalId;
+
+
+    private long id;
     private Unit unit; // the Unit present on this tile (or null, if no unit is present)
     private Type type; // the type of tile this is (see Type enum below)
     private int hp; // health of this tile (only important for DESTRUCTIBLE type)
@@ -17,11 +21,15 @@ public class Tile {
                        // units cannot be on INDESTRUCTIBLE-type tiles
     }
 
-    public Tile(Position pos) {
-        this.pos = pos;
+    public Tile() {
+        id = globalId++;
         unit = null;
         type = Type.BLANK;
         hp = 5;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public Type getType() {
@@ -62,7 +70,7 @@ public class Tile {
      * should only be called on a terrain tile -- doesn't affect units present on this tile
      */
     public void collided() {
-        hp --;
+        hp -= COLLISION_DAMAGE;
 
         if (hp <= 0 && type == Type.DESTRUCTIBLE) {
             type = Type.BLANK;
@@ -74,7 +82,11 @@ public class Tile {
      * @param dmg
      */
     public void takeDamage(int dmg) {
-        //TODO
+        if (type == Type.BLANK) {
+            // blank tiles cannot be damaged
+            return;
+        }
+
         if (unit == null) {
             hp -= dmg;
 
