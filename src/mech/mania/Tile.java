@@ -1,18 +1,17 @@
 package mech.mania;
 
-import com.google.gson.annotations.Expose;
-
 /**
  * Represents a single square on the game board.
  */
 public class Tile {
+    public static final int COLLISION_DAMAGE = 1;
     private static long globalId;
+
+
     private long id;
-    private Position pos; // x,y coordinates of this tile
     private Unit unit; // the Unit present on this tile (or null, if no unit is present)
     private Type type; // the type of tile this is (see Type enum below)
     private int hp; // health of this tile (only important for DESTRUCTIBLE type)
-    public static final int COLLISION_DAMAGE = 1;
 
     enum Type {
         BLANK, // blank tile -- nothing is on it (except maybe a unit)
@@ -22,9 +21,8 @@ public class Tile {
                        // units cannot be on INDESTRUCTIBLE-type tiles
     }
 
-    public Tile(Position pos) {
+    public Tile() {
         id = globalId++;
-        this.pos = pos;
         unit = null;
         type = Type.BLANK;
         hp = 5;

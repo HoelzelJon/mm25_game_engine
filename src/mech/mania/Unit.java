@@ -5,6 +5,7 @@ package mech.mania;
  */
 public class Unit {
     private static int globalId;
+
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit

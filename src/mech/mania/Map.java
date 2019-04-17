@@ -1,5 +1,10 @@
 package mech.mania;
 
+import com.google.gson.ExclusionStrategy;
+import com.google.gson.FieldAttributes;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -11,8 +16,6 @@ import java.util.List;
  * May also be responsible for generating random boards, if that is what we end up doing.
  */
 public class Map {
-    private static final String DIRECTORY = "./Maps/";
-
     private Tile[][] tiles; // 2-D array of all tiles on the board
     private Position[][] init_positions; // init_positions[0] = array of player 1's initial positions
                                         // init_positions[1] = array of player 2's initial positions
@@ -26,8 +29,8 @@ public class Map {
      *      - the first # is replaced by either 1 or 2, based on which player owns that unit
      *      - the second # is replaced by 0, 1, or 2, based on which unit it is
      */
-    public Map() {
-        File folder = new File(DIRECTORY);
+    public Map(String directory) {
+        File folder = new File(directory);
         File[] files = folder.listFiles();
 
         int fileIndex = (int)(Math.random() * files.length);
@@ -60,7 +63,7 @@ public class Map {
 
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
-                Tile t = new Tile(new Position(x, y));
+                Tile t = new Tile();
 
                 if (stringGrid.get(height - y - 1).length > x) {
                     String s = stringGrid.get(height - y - 1)[x].trim();
@@ -203,5 +206,25 @@ public class Map {
     public static int[][] toVisualCoords(int map[][]){
         // Since a horizontal reflect works both ways, both coordinate conversions are the same
         return toGameCoords(map);
+    }
+
+    public String toInitialPlayerJSON() {
+        Gson serializer = new GsonBuilder().addSerializationExclusionStrategy(
+                new ExclusionStrategy() {
+                    @Override
+                    public boolean shouldSkipField(FieldAttributes fieldAttributes) {
+                        if (fieldAttributes.getDeclaringClass() == Tile.class) {
+                            return fieldAttributes.getName().equals("id") ||
+                                    fieldAttributes.getName().equals("unit");
+                        }
+                        return false;
+                    }
+
+                    @Override
+                    public boolean shouldSkipClass(Class<?> aClass) {
+                        return false;
+                    }
+                }).create();
+        return serializer.toJson(this);
     }
 }

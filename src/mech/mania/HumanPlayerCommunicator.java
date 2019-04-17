@@ -96,6 +96,8 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         int[][][] attackPatterns = new int[numBots][][];
         int[][][] attackPatternsTransform = new int[numBots][][];
 
+        // Print the map for player view
+        System.out.print("Map:\n" + map.toString() + "\n");
         // Iterate over bots
         for(int botId = 0; botId < numBots; botId++){
             System.out.println("Configuring attack pattern for bot " + botId);

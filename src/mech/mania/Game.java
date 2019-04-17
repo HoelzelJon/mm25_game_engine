@@ -14,12 +14,12 @@ public class Game {
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
     private String gameId;
+    private String[] playerNames;
 
     private Gson gameRoundSerializer;
     private Gson gameStateSerializer;
-    
-    private String recentVisualizerJson = "";
-    private String recentPlayerJson = "";
+
+    private GameRound recentRound;
 
     /**
      * @param positions array of positions for each unit to be initialized to
@@ -74,17 +74,9 @@ public class Game {
             new ExclusionStrategy() {
                 @Override
                 public boolean shouldSkipField(FieldAttributes fieldAttributes) {
-                    if (fieldAttributes.getDeclaringClass() == Unit.class) {
-                        // we don't need isAlive for beginning
-                        return fieldAttributes.getName().equals("isAlive");
-                    }
-
-                    else if (fieldAttributes.getDeclaringClass() == Game.class) {
-                        // serializing this Game object, we want everything that
-                        // doesn't start with the word game:
-                        // map, p1Units, p2Units
-                        return fieldAttributes.getName().startsWith("game") ||
-                                fieldAttributes.getName().contains("Json");
+                    if (fieldAttributes.getDeclaringClass() == Game.class) {
+                        return fieldAttributes.getName().contains("Serializer") ||
+                                fieldAttributes.getName().equals("recentRound");
                     }
 
                     return false;
@@ -95,8 +87,6 @@ public class Game {
                     return false;
                 }
             }).create();
-        // serialize myself, which has starting information
-        recentVisualizerJson = gameStateSerializer.toJson(this);
     }
 
     /**
@@ -254,15 +244,11 @@ public class Game {
         doDeaths();
 
         // create a container class that allows us to serialize to a JSON
-        GameRound gameRound = new GameRound(
+        recentRound = new GameRound(
                 roundMovements.toArray(new RoundMovement[0]),
                 damagedTiles.toArray(new DamagedTile[0]),
                 damagedUnits.toArray(new DamagedUnit[0]),
                 attacks.toArray(new Attack[0]));
-
-        // use our custom serializer to convert the GameRound to a JSON String
-        recentVisualizerJson = gameRoundSerializer.toJson(gameRound);
-        recentPlayerJson = gameStateSerializer.toJson(this);
     }
 
     /**
@@ -505,11 +491,15 @@ public class Game {
     public static final int TIE = 2;
     public static final int NO_WINNER = 3;
 
-    public String getRecentVisualizerJson() {
-        return recentVisualizerJson;
+    public String getInitialVisualizerJson() {
+        return gameStateSerializer.toJson(this);
+    }
+
+    public String getRoundVisualizerJson() {
+        return gameRoundSerializer.toJson(recentRound);
     }
 
     public String getRecentPlayerJson() {
-        return recentPlayerJson;
+        return gameStateSerializer.toJson(this);
     }
 }
