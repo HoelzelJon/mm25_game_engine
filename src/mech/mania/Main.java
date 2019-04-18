@@ -20,6 +20,11 @@ public class Main {
         UnitSetup[] p1setup = player1.getUnitsSetup(gameID, map);
         UnitSetup[] p2setup = player2.getUnitsSetup(gameID, map);
 
+        // use these instead if you want to skip the manual setup portion
+        // UnitSetup[] p1setup = makeDefaultUnitSetup();
+        // UnitSetup[] p2setup = makeDefaultUnitSetup();
+
+
         for (int i = 0; i < 3; i++) {
             System.out.println("p1 bot " + i + " setup health: " + p1setup[i].health);
             System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].speed);
@@ -43,13 +48,9 @@ public class Main {
             game.doTurn(p1Decision, p2Decision);
 
             printRoundVisualizerJson(game);
-
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ex) {
-            }
         }
 
+        // TODO: how will we communicate to visualizer and/or infra which team won?
         if (game.getWinner() == Game.TIE) {
             System.out.println("It's a tie!");
         } else if (game.getWinner() == Game.P1_WINNER) {
@@ -65,5 +66,23 @@ public class Main {
 
     static void printRoundVisualizerJson(Game game) {
         System.out.println(game.getRoundVisualizerJson() + "\n");
+    }
+
+    private static UnitSetup[] makeDefaultUnitSetup() {
+        UnitSetup[] ret = new UnitSetup[3];
+
+        for (int i = 0; i < 3; i ++) {
+            ret[i] = new UnitSetup();
+
+            ret[i].attackPattern = new int[][] {{0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0}};
+        }
+
+        return ret;
     }
 }
