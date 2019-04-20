@@ -120,8 +120,7 @@ public class Unit {
             }
             return ret;
         } else if (dir == Direction.STAY) {
-            int[][] ret = new int[width][height];
-            return ret;
+            return new int[width][height];
         }
 
         return attack;

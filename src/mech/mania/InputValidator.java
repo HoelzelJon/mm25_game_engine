@@ -144,14 +144,14 @@ public class InputValidator {
                                            Direction[] attacks) {
         for (int priority : priorities) {
             if (priority != 1 && priority != 2 && priority != 3) {
-                errorMessage = "priorities must be 1, 2, or 3";
+                errorMessage = "Priorities must be First, Second, or Third.";
                 return false;
             }
         }
 
         for (int i = 0; i < priorities.length - 1; i++) {
             if (priorities[i] == priorities[i + 1]) {
-                errorMessage = "there may not be any duplicate priorities";
+                errorMessage = "There may not be any duplicate priorities.";
                 return false;
             }
         }

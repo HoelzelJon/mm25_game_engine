@@ -19,7 +19,7 @@ public class Game {
     private Gson gameRoundSerializer;
     private Gson gameStateSerializer;
 
-    private GameRound recentRound;
+    private List<GameRound> recentRounds = new ArrayList<>();
 
     /**
      * @param positions array of positions for each unit to be initialized to
@@ -132,6 +132,7 @@ public class Game {
      * @param p2Decision the decision for player 2 to take
      */
     public void doTurn(Decision p1Decision, Decision p2Decision) {
+        recentRounds.clear();
 
         for (int priority = 1; priority <= 3; priority ++) {
             ArrayList<Unit> unitsToMove = new ArrayList<>();
@@ -244,11 +245,11 @@ public class Game {
         doDeaths();
 
         // create a container class that allows us to serialize to a JSON
-        recentRound = new GameRound(
+        recentRounds.add(new GameRound(
                 roundMovements.toArray(new RoundMovement[0]),
                 damagedTiles.toArray(new DamagedTile[0]),
                 damagedUnits.toArray(new DamagedUnit[0]),
-                attacks.toArray(new Attack[0]));
+                attacks.toArray(new Attack[0])));
     }
 
     /**
@@ -459,9 +460,9 @@ public class Game {
 
         for (int i = 0; i < p1Units.length; i++) {
             if (p1Units[i].isAlive()) {
-                ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t\t");
+                ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t\t\t");
             } else {
-                ret.append("        \t\t\t");
+                ret.append("        \t\t\t\t");
             }
 
             if (p2Units[i].isAlive()) {
@@ -496,7 +497,7 @@ public class Game {
     }
 
     public String getRoundVisualizerJson() {
-        return gameRoundSerializer.toJson(recentRound);
+        return gameRoundSerializer.toJson(recentRounds);
     }
 
     public String getRecentPlayerJson() {

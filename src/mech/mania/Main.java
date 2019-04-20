@@ -32,6 +32,8 @@ public class Main {
                 p2Decision = player2.getDecision(game);
             } catch (Exception e) {
                 GUIPlayerCommunicator.onGameEnd();
+                e.printStackTrace();
+                System.exit(0);
             }
 
             game.doTurn(p1Decision, p2Decision);

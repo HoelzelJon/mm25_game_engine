@@ -62,27 +62,21 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         }
 
         for (int i = 0; i < NUM_UNITS; i++) {
-            int[][] transformedMap = transformMap(allPatterns[i]);
+            int[][] transformedMap = transformMap(allPatterns[i]); //Map.toVisualCoords(allPatterns[i]);
             allUnits[i] = new UnitSetup(transformedMap, allHps[i], allSpeeds[i]);
         }
 
         return allUnits;
     }
 
-    // TODO: fix this function so attacking in a direction works
-    private int[][] transformMap(int[][] map) {
-        // for this method of input, the map needs to be transformed as follows:
-        // 1 2 3       1 4 7
-        // 4 5 6  -->  2 5 8
-        // 7 8 9       3 6 9
-        // or switch across x-y axis
-        int[][] newMap = new int[map.length][map[0].length];
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[i].length; j++) {
-                newMap[i][j] = map[map.length - 1 - j][i];
+    private static int[][] transformMap(int[][] map) {
+        int[][] transform = new int[map.length][map[0].length];
+        for(int r = 0; r < transform.length; r++){
+            for (int c = 0; c < transform[0].length; c++){
+                transform[r][c] = map[r][map[0].length - c - 1];
             }
         }
-        return newMap;
+        return transform;
     }
 
     @Override
@@ -94,13 +88,12 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
 
         System.out.println("**********Player " + playerNum + "**********");
 
-        // don't show in GUI if the Unit is dead
         Unit[] units = gameState.getPlayerUnits(playerNum);
 
         Platform.runLater(() -> applicationInstance.launchDecisionGui(playerNum, units));
 
         // re-get the instance (not necessary to set to the static variable again,
-        // but it's the same name variable so why Unither creating a new variable.
+        // but it's the same name variable so why bother creating a new variable.
         applicationInstance = GUIInitialUnitInput.awaitAndGetInstance();
         int[] priorities = applicationInstance.getPriorities();
         Direction[][] movements = applicationInstance.getMovements();

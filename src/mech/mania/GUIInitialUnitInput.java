@@ -13,9 +13,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 import static java.util.Map.entry;
@@ -30,8 +28,8 @@ public class GUIInitialUnitInput extends Application {
     private Direction[] attacks;
 
     private int playerNum = 1;
-    private static final int DEFAULT_HP = 4;
-    private static final int DEFAULT_SPEED = 5;
+    public static final int DEFAULT_HP = 4;
+    public static final int DEFAULT_SPEED = 5;
     private static final int DEFAULT_SCENE_WIDTH = 600;
     private static final int DEFAULT_SCENE_HEIGHT = 350;
     private static final int NUM_UNITS = 3;
@@ -181,6 +179,13 @@ public class GUIInitialUnitInput extends Application {
             entry("Down", Direction.DOWN)
     );
 
+    private static final java.util.Map<String, Integer> PRIORITY_MAP = java.util.Map.of(
+            "First", 1,
+            "Second", 2,
+            "Third", 3,
+            "", 0
+    );
+
     /**
      * Launch the Decision input GUI. Requires a running instance of Application, but
      * will create its own Stage to display the GUI onto.
@@ -237,8 +242,8 @@ public class GUIInitialUnitInput extends Application {
 
                 // if the unit is still alive, then get the corresponding values from
                 // each of the TextFields and ChoiceBoxes that were displayed on screen
-                priorities[i] = getNumFromTextField(allUnitDerivationObjs[i].priority, -1);
-                attacks[i] = DIRECTION_MAP.get(allUnitDerivationObjs[i].attack);
+                priorities[i] = PRIORITY_MAP.get(allUnitDerivationObjs[i].priority.getValue());
+                attacks[i] = DIRECTION_MAP.get(allUnitDerivationObjs[i].attack.getValue());
 
                 Direction[] myMovements = new Direction[units[i].getSpeed()];
                 for (int j = 0; j < units[i].getSpeed(); j++) {
@@ -253,7 +258,9 @@ public class GUIInitialUnitInput extends Application {
             // the window and countdown the latch (which will allow the next part of
             // the code to run (awaitAndGetInstance() in this file and 
             // GUIPlayerCommunicator.getDecision())
-            if (InputValidator.hasValidDecision(priorities, movements, attacks)) {
+            int[] filteredPriorities = Arrays.stream(priorities).filter(n -> n != 0).toArray();
+
+            if (InputValidator.hasValidDecision(filteredPriorities, movements, attacks)) {
                 this.priorities = priorities;
                 this.movements = movements;
                 this.attacks = attacks;
@@ -346,10 +353,11 @@ public class GUIInitialUnitInput extends Application {
  */
 class DecisionInputHBox {
 
+    private static final String[] PRIORITY_CHOICES = {"", "First", "Second", "Third"};
     private static final String[] MOVEMENT_CHOICES = {"Stay", "Left", "Right", "Up", "Down"};
     private static final String[] ATTACK_CHOICES = {"Don't Attack", "Left", "Right", "Up", "Down"};
 
-    TextField priority;
+    ChoiceBox<String> priority;
     ChoiceBox<String>[] movements;
     ChoiceBox<String> attack;
 
@@ -362,8 +370,9 @@ class DecisionInputHBox {
         Text titleText = new Text(title);
 
         // priority
-        priority = new TextField();
-        priority.setMaxWidth(30);
+        priority = new ChoiceBox<>();
+        priority.getItems().addAll(PRIORITY_CHOICES);
+        priority.getSelectionModel().selectFirst();
 
         // movements
         HBox allMovements = new HBox();
@@ -407,12 +416,12 @@ class InitializationInputVBox {
 
         HBox hpBox = new HBox();
         Text hpText = new Text("hp: ");
-        hpField = new TextField();
+        hpField = new TextField("" + GUIInitialUnitInput.DEFAULT_HP);
         hpBox.getChildren().addAll(hpText, hpField);
 
         HBox speedBox = new HBox();
         Text speedText = new Text("speed: ");
-        speedField = new TextField();
+        speedField = new TextField("" + GUIInitialUnitInput.DEFAULT_SPEED);
         speedBox.getChildren().addAll(speedText, speedField);
 
         // add to 1 VBox, then return
