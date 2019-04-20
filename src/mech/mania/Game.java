@@ -35,11 +35,11 @@ public class Game {
         return ret;
     }
 
-    public Game(String setGameId, UnitSetup[] p1UnitSetups, UnitSetup[] p2UnitSetups) {
+    public Game(Map map, String setGameId, UnitSetup[] p1UnitSetups, UnitSetup[] p2UnitSetups) {
 
         gameId = setGameId;
 
-        map = new Map();
+        this.map = map;
         Position[] p1Positions = map.getP1InitialPositions();
         Position[] p2Positions = map.getP2InitialPositions();
 

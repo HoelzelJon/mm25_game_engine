@@ -17,17 +17,22 @@ public class Main {
         PlayerCommunicator player1 = new GUIPlayerCommunicator(1); //new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
         PlayerCommunicator player2 = new GUIPlayerCommunicator(2); //new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
 
-        int[][][] p1Attacks = player1.getAttackPatterns(gameID, map);
-        int[][][] p2Attacks = player2.getAttackPatterns(gameID, map);
+        UnitSetup[] p1Units = player1.getUnitsSetup();
+        UnitSetup[] p2Units = player2.getUnitsSetup();
 
-        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1Attacks, p2Attacks, map);
+        Game game = new Game(map, gameID, p1Units, p2Units);
 
         printInitialState(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
 
-            Decision p1Decision = player1.getDecision(game);
-            Decision p2Decision = player2.getDecision(game);
+            Decision p1Decision = null, p2Decision = null;
+            try {
+                p1Decision = player1.getDecision(game);
+                p2Decision = player2.getDecision(game);
+            } catch (Exception e) {
+                GUIPlayerCommunicator.onGameEnd();
+            }
 
             game.doTurn(p1Decision, p2Decision);
 
@@ -36,8 +41,7 @@ public class Main {
 
             try {
                 Thread.sleep(1000);
-            } catch (Exception ex) {
-            }
+            } catch (Exception ex) {}
         }
 
         if (game.getWinner() == Game.TIE) {

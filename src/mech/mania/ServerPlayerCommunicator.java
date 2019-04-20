@@ -22,34 +22,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-<<<<<<< HEAD
     public UnitSetup[] getUnitsSetup() {
-        return new UnitSetup[3]; //TODO
-=======
-    public int[][][] getAttackPatterns(String gameID, Map map) {
-        HttpURLConnection connection;
-
-        try {
-            URL url = new URL(urlString + "pattern");
-
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(MAX_TURN_TIME_MILIS);
-        } catch (MalformedURLException ex) {
-            System.err.println("MalformedURLException found when getting attack pattern for player #" + playerNum);
-            System.err.println("URL= " + urlString);
-            return null;
-        } catch (IOException ex) {
-            System.err.println("IOException when opening URL connection to player #" + playerNum);
-            System.err.print("URL= " + urlString);
-            return null;
-        }
-
-        Gson gson = new Gson();
-        String mapJson = gson.toJson(map);
-
-        //TODO
-        return new int[][][] {{{0}}};
->>>>>>> origin/master
+        return new UnitSetup[3];
     }
 
     public Decision getDecision(Game gameState) {
