@@ -14,15 +14,30 @@ public class Main {
 
         Map map = new Map(mapDirectory);
 
-        PlayerCommunicator player1 = new GUIPlayerCommunicator(1); //new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
-        PlayerCommunicator player2 = new GUIPlayerCommunicator(2); //new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
+        PlayerCommunicator player1 = new GUIPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new GUIPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
 
-        UnitSetup[] p1Units = player1.getUnitsSetup();
-        UnitSetup[] p2Units = player2.getUnitsSetup();
+        UnitSetup[] p1setup = player1.getUnitsSetup(gameID, map);
+        UnitSetup[] p2setup = player2.getUnitsSetup(gameID, map);
 
-        Game game = new Game(map, gameID, p1Units, p2Units);
+        // use these instead if you want to skip the manual setup portion
+        // UnitSetup[] p1setup = makeDefaultUnitSetup();
+        // UnitSetup[] p2setup = makeDefaultUnitSetup();
 
-        printInitialState(game);
+        for (int i = 0; i < 3; i++) {
+            System.out.println("p1 bot " + i + " setup health: " + p1setup[i].health);
+            System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].speed);
+            InputValidator.printAttackPattern(p1setup[i].attackPattern);
+        }
+        for (int i = 0; i < 3; i++) {
+            System.out.println("p2 bot " + i + "setup health: " + p2setup[i].health);
+            System.out.println("p2 bot " + i + "setup speed: " + p2setup[i].speed);
+            InputValidator.printAttackPattern(p2setup[i].attackPattern);
+        }
+
+        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
+
+        printInitialVisualizerJson(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
 
@@ -38,14 +53,14 @@ public class Main {
 
             game.doTurn(p1Decision, p2Decision);
 
-            printGameMap(game);
-            printVisualizerJson(game);
+            printRoundVisualizerJson(game);
 
             try {
                 Thread.sleep(1000);
             } catch (Exception ex) {}
         }
 
+        // TODO: how will we communicate to visualizer and/or infra which team won?
         if (game.getWinner() == Game.TIE) {
             System.out.println("It's a tie!");
         } else if (game.getWinner() == Game.P1_WINNER) {
@@ -57,15 +72,29 @@ public class Main {
         GUIPlayerCommunicator.onGameEnd();
     }
 
-    static void printGameMap(Game game) {
-        System.out.println(game.getMapString() + "\n");
-    }
-
-    static void printInitialState(Game game) {
+    static void printInitialVisualizerJson(Game game) {
         System.out.println(game.getInitialVisualizerJson() + "\n");
     }
 
-    static void printVisualizerJson(Game game) {
+    static void printRoundVisualizerJson(Game game) {
         System.out.println(game.getRoundVisualizerJson() + "\n");
+    }
+
+    private static UnitSetup[] makeDefaultUnitSetup() {
+        UnitSetup[] ret = new UnitSetup[3];
+
+        for (int i = 0; i < 3; i ++) {
+            ret[i] = new UnitSetup();
+
+            ret[i].attackPattern = new int[][] {{0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0}};
+        }
+
+        return ret;
     }
 }

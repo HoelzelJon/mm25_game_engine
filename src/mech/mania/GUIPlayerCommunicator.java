@@ -39,7 +39,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public UnitSetup[] getUnitsSetup() {
+    public UnitSetup[] getUnitsSetup(String gameId, Map map) {
         UnitSetup[] allUnits = new UnitSetup[NUM_UNITS];
 
         // pass in argument of the player number to display in title
