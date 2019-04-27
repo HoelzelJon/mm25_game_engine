@@ -16,6 +16,7 @@ import java.util.List;
  * May also be responsible for generating random boards, if that is what we end up doing.
  */
 public class Map {
+    private String gameId;
     private Tile[][] tiles; // 2-D array of all tiles on the board
     private Position[][] init_positions; // init_positions[0] = array of player 1's initial positions
                                         // init_positions[1] = array of player 2's initial positions
@@ -29,7 +30,9 @@ public class Map {
      *      - the first # is replaced by either 1 or 2, based on which player owns that unit
      *      - the second # is replaced by 0, 1, or 2, based on which unit it is
      */
-    public Map(String directory) {
+    public Map(String directory, String gameId) {
+        this.gameId = gameId;
+
         File folder = new File(directory);
         File[] files = folder.listFiles();
 

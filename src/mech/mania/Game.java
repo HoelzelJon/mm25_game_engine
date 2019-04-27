@@ -285,8 +285,6 @@ public class Game {
         // handle collisions between units and terrain (or the map boundary)
         for (int i = 0; i < goalPositions.size(); i ++) {
             if (! inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
-                System.out.println("Terrain Collision");
-
                 collided[i] = true;
                 units.get(i).takeCollisionDamage();
 
@@ -312,8 +310,6 @@ public class Game {
                 }
 
                 if (!isMoving) {
-                    System.out.println("Stationary Unit Collision");
-
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
                     map.tileAt(goalPositions.get(i)).getUnit().takeCollisionDamage();
@@ -335,8 +331,6 @@ public class Game {
                         (goalPositions.get(i).equals(goalPositions.get(j)) || // two units moving onto the same tile
                         (goalPositions.get(i).equals(initialPositions.get(j)) && // two units trying to move through each other
                         goalPositions.get(j).equals(initialPositions.get(i))))) {
-                    System.out.println("2-Unit collision");
-
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
                     collided[j] = true;
@@ -361,7 +355,6 @@ public class Game {
                 if (!collided[i]) { // only check for ripple collisions for bots that haven't already collided
                     for (int j = 0; j < goalPositions.size(); j++) {
                         if (collided[j] && initialPositions.get(j).equals(goalPositions.get(i))) {
-                            System.out.println("Ripple Collision");
                             foundRipple = true;
                             collided[i] = true;
                             units.get(i).takeCollisionDamage();

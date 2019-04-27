@@ -12,17 +12,17 @@ public class Main {
         String p1URL = args[4];
         String p2URL = args[5];
 
-        Map map = new Map(mapDirectory);
+        Map map = new Map(mapDirectory, gameID);
 
-        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
-        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
+        PlayerCommunicator player1 = new /*HumanPlayerCommunicator(1); */ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new /*HumanPlayerCommunicator(2); */ServerPlayerCommunicator(2, p2URL);
 
         int[][][] p1Attacks = player1.getAttackPatterns(gameID, map);
         int[][][] p2Attacks = player2.getAttackPatterns(gameID, map);
 
         Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1Attacks, p2Attacks, map);
 
-        printInitialState(game);
+        printInitialVisualizerJson(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
 
@@ -31,8 +31,8 @@ public class Main {
 
             game.doTurn(p1Decision, p2Decision);
 
-            printGameMap(game);
-            printVisualizerJson(game);
+            //printGameMap(game);
+            printRoundVisualizerJson(game);
 
             try {
                 Thread.sleep(1000);
@@ -41,11 +41,11 @@ public class Main {
         }
 
         if (game.getWinner() == Game.TIE) {
-            System.out.println("It's a tie!");
+            System.out.println("{\"Winner\": 1}");
         } else if (game.getWinner() == Game.P1_WINNER) {
-            System.out.println("Player 1 wins!");
+            System.out.println("{\"Winner\": 2}");
         } else if (game.getWinner() == Game.P2_WINNER) {
-            System.out.println("Player 2 wins!");
+            System.out.println("{\"Winner\": 3}");
         }
     }
 
@@ -53,11 +53,11 @@ public class Main {
         System.out.println(game.getMapString() + "\n");
     }
 
-    static void printInitialState(Game game) {
-        System.out.println(game.getInitialVisualizerJson() + "\n");
+    static void printInitialVisualizerJson(Game game) {
+        System.out.println(game.getInitialVisualizerJson());
     }
 
-    static void printVisualizerJson(Game game) {
-        System.out.println(game.getRoundVisualizerJson() + "\n");
+    static void printRoundVisualizerJson(Game game) {
+        System.out.println(game.getRoundVisualizerJson());
     }
 }
