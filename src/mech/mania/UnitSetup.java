@@ -12,10 +12,17 @@ public class UnitSetup {
     private int health;
     private int speed;
 
+    // GETTERS
     int getHealth() { return health; }
     int getSpeed() { return speed; }
     int[][] getAttackPattern() { return attackPattern; }
 
+    // SETTERS (no validation for now)
+    void setHealth(int setHealth) { health = setHealth; }
+    void setSpeed(int setSpeed) { speed = setSpeed; }
+    void setAttackPattern(int[][] setAttackPattern) { attackPattern = setAttackPattern; }
+
+    // CONSTRUCTORS
     public UnitSetup() {
         health = BASE_HEALTH;
         speed = BASE_SPEED;
@@ -33,19 +40,20 @@ public class UnitSetup {
     public static String getErrorMessage() { return errorMessage; }
 
     public static boolean hasValidStartingConditions(UnitSetup[] units) {
-        return Arrays.stream(units).allMatch(UnitSetup::hasValidStartingConditions);
+        return Arrays.stream(units).allMatch(u ->
+                UnitSetup.hasValidStartingConditions(u.health, u.speed, u.attackPattern));
     }
 
     // validate for EACH bot
-    public static boolean hasValidStartingConditions(UnitSetup unit) {
-        if (unit.getHealth() < BASE_HEALTH || unit.getSpeed() < BASE_SPEED) {
+    static boolean hasValidStartingConditions(int setHealth, int setSpeed, int[][] setAttackPattern) {
+        if (setHealth < BASE_HEALTH || setSpeed < BASE_SPEED) {
             errorMessage = String.format("hp and speed must be >= %d and >= %d, respectively",
                     BASE_HEALTH, BASE_SPEED);
             return false;
         }
 
         int sum = 0;
-        for (int[] row : unit.getAttackPattern()) {
+        for (int[] row : setAttackPattern) {
             for (int col : row) {
                 if (col > 1) {
                     sum += EXTRA_ATTACK_MULTIPLIER * (col - 1); // extra points to pattern cost 2 each
@@ -57,11 +65,33 @@ public class UnitSetup {
         if (sum > MAX_POINTS) {
             errorMessage = "too many points allotted in grid";
             return false;
-        } else if (unit.getHealth() - BASE_HEALTH + unit.getSpeed() - BASE_SPEED + sum > MAX_POINTS) {
+        } else if (setHealth - BASE_HEALTH + setSpeed - BASE_SPEED + sum > MAX_POINTS) {
             errorMessage = "too many extra points in hp and speed";
             return false;
         }
 
+        return true;
+    }
+
+    static boolean hasValidDecision(int[] priorities,
+                                    Direction[][] movements,
+                                    Direction[] attacks) {
+        for (int priority : priorities) {
+            if (priority != 1 && priority != 2 && priority != 3) {
+                errorMessage = "Priorities must be First, Second, or Third.";
+                return false;
+            }
+        }
+
+        for (int i = 0; i < priorities.length - 1; i++) {
+            if (priorities[i] == priorities[i + 1]) {
+                errorMessage = "There may not be any duplicate priorities.";
+                return false;
+            }
+        }
+
+        // attacks and movements do not have to be validated since they are
+        // already Direction objects
         return true;
     }
 }

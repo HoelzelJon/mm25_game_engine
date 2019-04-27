@@ -17,14 +17,13 @@ public class Unit {
     private int id;
     private static int numUnits;
 
-    public Unit(UnitSetup setup) {
-        hp = 5;
+    public Unit(Position setPosition, UnitSetup setup) {
         id = globalId++;
         hp = setup.getHealth();
         speed = setup.getSpeed();
-        this.pos = pos;
-        this.attack = setup.getAttackPattern();
-        this.id = numUnits;
+        pos = setPosition;
+        attack = setup.getAttackPattern();
+        id = numUnits;
         numUnits++;
         isAlive = true;
     }
@@ -121,8 +120,7 @@ public class Unit {
             }
             return ret;
         } else if (dir == Direction.STAY) {
-            int[][] ret = new int[width][height];
-            return ret;
+            return new int[width][height];
         }
 
         return attack;

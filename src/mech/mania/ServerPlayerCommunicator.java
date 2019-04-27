@@ -14,7 +14,7 @@ import java.util.Scanner;
 public class ServerPlayerCommunicator extends PlayerCommunicator {
     String urlString;
 
-    private static final int MAX_TURN_TIME_MILIS = 5000;
+    private static final int MAX_TURN_TIME_MILLIS = 5000;
 
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
@@ -22,14 +22,14 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public int[][][] getAttackPatterns(String gameID, Map map) {
+    public UnitSetup[] getUnitsSetup(String gameID, Map map) {
         HttpURLConnection connection;
 
         try {
             URL url = new URL(urlString + "pattern");
 
             connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(MAX_TURN_TIME_MILIS);
+            connection.setReadTimeout(MAX_TURN_TIME_MILLIS);
         } catch (MalformedURLException ex) {
             System.err.println("MalformedURLException found when getting attack pattern for player #" + playerNum);
             System.err.println("URL= " + urlString);
@@ -44,7 +44,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         String mapJson = gson.toJson(map);
 
         //TODO
-        return new int[][][] {{{0}}};
+        return new UnitSetup[] {};
     }
 
     public Decision getDecision(Game gameState) {
@@ -55,7 +55,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             URL url = new URL(urlString + "turn");
 
             connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(MAX_TURN_TIME_MILIS);
+            connection.setReadTimeout(MAX_TURN_TIME_MILLIS);
         } catch (MalformedURLException ex) {
             System.err.println("MalformedURLException found when connecting to player #" + playerNum);
             System.err.println("URL= " + urlString);

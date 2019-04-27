@@ -46,14 +46,14 @@ public class Map {
 
         List<String[]> stringGrid = new ArrayList<>();
 
-        for (int y = 0; y < height; y ++) {
-            stringGrid.add(fileStr.get(y).split(","));
+        for (String s1 : fileStr) {
+            stringGrid.add(s1.split(","));
         }
 
         int width = 0;
-        for (int y = 0; y < stringGrid.size(); y ++) {
-            if (stringGrid.get(y).length > width) {
-                width = stringGrid.get(y).length;
+        for (String[] strings : stringGrid) {
+            if (strings.length > width) {
+                width = strings.length;
             }
         }
 
@@ -149,6 +149,10 @@ public class Map {
             if (x0 + x >= 0 && x0 + x < width()){
                 for (int y = 0; y < attackHeight; y++) {
                     if (y0 + y >= 0 && y0 + y < height()) {
+                        if (attack[x][y] <= 0) {
+                            continue;
+                        }
+
                         tiles[x0 + x][y0 + y].takeDamage(attack[x][y]);
 
                         // if there is a Unit on the tile then make sure damage is applied to it
@@ -186,10 +190,10 @@ public class Map {
      * 
      * @return The map transformed to game coordinates
      */
-    public static int[][] toGameCoords(int map[][]){
+    public static int[][] toGameCoords(int[][] map){
         int[][] transform = new int[map.length][map[0].length];
         for(int r = 0; r < transform.length; r++){
-            for(int c = 0; c < transform[0].length; c++){
+            for (int c = 0; c < transform[0].length; c++){
                 transform[r][c] = map[map.length - r - 1][c];
             }
         }

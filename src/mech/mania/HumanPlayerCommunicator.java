@@ -1,9 +1,35 @@
 package mech.mania;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class HumanPlayerCommunicator extends PlayerCommunicator {
+    private static final int NUM_ROWS = 7;
+    private static final int NUM_COLS = 7;
+    private static final int MAX_POINTS = 14;
+
     private Scanner sk;
+    //TODO: check that input priorities are different
+
+    //Maps rows of attack pattern array to valid indices in that row (since attack pattern is a diamond and array is a square)
+    private static java.util.HashMap<Integer, ArrayList<Integer>> attackPatternRowIdxMap;
+    static {
+        attackPatternRowIdxMap = new HashMap<Integer, ArrayList<Integer>>();
+        recurse(0, attackPatternRowIdxMap);
+    }
+
+
+    private void printAttackPatternInfo() {
+        System.out.println(" X X X 0 X X X");
+        System.out.println(" X X 0 0 0 X X");
+        System.out.println(" X 0 0 0 0 0 X");
+        System.out.println(" 0 0 0 M 0 0 0");
+        System.out.println(" X 0 0 0 0 0 X");
+        System.out.println(" X X 0 0 0 X X");
+        System.out.println(" X X X 0 X X X");
+    }
 
     public HumanPlayerCommunicator(int playerNum){
         super(playerNum);
@@ -71,69 +97,80 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         return new Decision(priorities, movements, attackDirs);
     }
 
+
     /**
      * Prompt user for initial attack patterns
      */
     @Override
-    public int[][][] getAttackPatterns(String gameID, Map map){
-        int numBots = 3;
+    public UnitSetup[] getUnitsSetup(String gameID, Map map){
+        int numBots = Game.UNITS_PER_PLAYER;
+        UnitSetup[] setups = new UnitSetup[numBots];
 
         int[][][] attackPatterns = new int[numBots][][];
         int[][][] attackPatternsTransform = new int[numBots][][];
 
         // Print the map for player view
-        System.out.print("Map:\n" + map.toString() + "\n");
+//        System.out.print("Map:\n" + map.toString() + "\n");
+
         // Iterate over bots
         for(int botId = 0; botId < numBots; botId++){
             System.out.println("Configuring attack pattern for bot " + botId);
-            // Ask for numRows
-            System.out.println("How many rows (y-values) does the attack pattern span?");
-            int numRows = sk.hasNextInt()? sk.nextInt() : 0; // only get int if there is one -- avoids exceptions
-            sk.nextLine();
-            while(numRows < 0 || numRows%2 == 0){
-                System.out.println("Must have a positive, odd number of rows. Enter a new value:");
-                numRows = sk.hasNextInt()? sk.nextInt() : 0;
-                sk.nextLine();
-            }
-            
-            // ASSUMING SQUARE MATRIX
-            System.out.println("Assuming square attack matrix");
-            int numCols = numRows;
-            /*
-            // Ask for columns
-            System.out.println("How many columns (x-values) does the attack pattern span?");
-            int numCols = sk.nextInt();
-            sk.nextLine();
-            while(numCols < 0 || numCols%2 == 0){
-                System.out.println("Must have a positive, odd number of columns. Enter a new value:");
-                numCols = sk.nextInt();
-                sk.nextLine();
-            }
-            */
-
-            // Fill in attack pattern values
-            attackPatterns[botId] = new int[numRows][numCols];
-            System.out.println("Enter attack pattern with spaces between columns and newlines between rows like so:\n" +
-                    "0 0 0\n" +
-                    "0 0 0\n" +
-                    "0 0 0");
-            System.out.println("Your bot is in the center of the array.");
-            for(int r = 0; r < numRows; r++){
-                for(int c = 0; c < numCols; c++){
-                    attackPatterns[botId][r][c] = sk.hasNextInt()? sk.nextInt() : 0;
+            attackPatterns[botId] = new int[NUM_ROWS][NUM_COLS];
+            System.out.println("Attack pattern looks like so:");
+            printAttackPatternInfo();
+            System.out.println("Numbers in X and M positions are not counted.");
+            System.out.println("Your bot is at the center of the array.");
+            int totalSum = 0;
+            int maxPoints = MAX_POINTS;
+            for(int r = 0; r < NUM_ROWS; r++) {
+                while (true) {
+                    System.out.println("Enter row " + Integer.toString(r) + " of attack pattern\n");
+                    for (int c = 0; c < NUM_COLS; c++) {
+                        attackPatterns[botId][r][c] = sk.hasNextInt() ? sk.nextInt() : 0;
+                    }
+                    int rowSum = getRowSum(attackPatterns[botId][r], r);
+                    System.out.println("You used " + Integer.toString(rowSum) + " points on this row");
+                    if (totalSum + rowSum > maxPoints) {
+                        System.out.println("Not enough points for this! Try again.");
+                    } else {
+                        totalSum += rowSum;
+                        break;
+                    }
                 }
                 sk.nextLine();
             }
-
+            System.out.println("Selected Pattern:");
+            squareArrayToDiamond(attackPatterns[botId]);
+            System.out.println(Arrays.deepToString(attackPatterns[botId]));
             // Transform attackPatterns matrix into correct coordinates
             // 1 2 3      7 8 9
             // 4 5 6  ->  4 5 6
             // 7 8 9      1 2 3
             attackPatternsTransform[botId] = Map.toGameCoords(attackPatterns[botId]);
-            
+            UnitSetup setup = new UnitSetup();
+            System.out.println("Select extra health for this mech");
+            System.out.println("You have " + (maxPoints - totalSum) + " available");
+            int extraHealth = sk.nextInt();
+            if (totalSum + extraHealth > MAX_POINTS) {
+                System.out.println("Not enough points. set to 0");
+            } else {
+                totalSum += extraHealth;
+                setup.setHealth(setup.getHealth() + extraHealth);
+            }
+
+            System.out.println("Select extra speed for this mech");
+            System.out.println("You have " + (maxPoints - totalSum) + " available");
+            int extraSpeed = sk.nextInt();
+            if (totalSum + extraSpeed > MAX_POINTS) {
+                System.out.println("Not enough points. set to 0");
+            } else {
+                setup.setSpeed(setup.getSpeed() + extraSpeed);
+            }
+            setup.setAttackPattern(attackPatternsTransform[botId]);
+            setups[botId] = setup;
         }
 
-        return attackPatternsTransform;
+        return setups;
     }
 
     /**
@@ -158,4 +195,86 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
                 return Direction.STAY;
         }
     }
+
+    /**
+     * Zeroes out mech position and unused positions in 7x7 attack pattern array to be used as a Diamond pattern.
+     * @param attackPattern
+     */
+    public static void squareArrayToDiamond(int [][] attackPattern) {
+        for (int r = 0; r < NUM_ROWS; r++) {
+            ArrayList<Integer> rowIndices = attackPatternRowIdxMap.get(r);
+            for (int c = 0; c < NUM_COLS; c++) {
+                if (!rowIndices.contains(c)) {
+                    attackPattern[r][c] = 0;
+                }
+            }
+        }
+    }
+
+    /**
+     * Helper function for calculating attack cost.
+     * If attack value is 3 it costs (3 + 2 + 1) 6 points.
+     * @return
+     */
+    public static int getAttackCost(int attack) {
+        int cost = 0;
+        for (int i = 1; i <= attack; i++) {
+            cost += i;
+        }
+        return cost;
+    }
+
+    /**
+     * Helper function to ensure players do not input more than limit points for attack pattern.
+     */
+    public static int getRowSum(int [] attackPatternRow, int rowIdx) {
+        int sum = 0;
+        ArrayList<Integer> rowIndices = attackPatternRowIdxMap.get(rowIdx);
+        for (int c = 0; c < NUM_COLS; c++) {
+            if (rowIndices.contains(c)) {
+                int cost = getAttackCost(attackPatternRow[c]);
+                sum += cost;
+            }
+        }
+        return sum;
+    }
+
+    public static void printAttackPattern(int [][] attackPattern) {
+        for (int r = 0; r < NUM_ROWS; r++) {
+            for (int c = 0; c < NUM_COLS; c++) {
+                System.out.print(attackPattern[r][c] + " ");
+            }
+            System.out.print("\n");
+        }
+    }
+
+    /**
+     * Sets up the hashmap, mapping rows of square attack pattern matrix to valid indices in each row
+     * example: row 0 only has valid index 3
+     * @param r row
+     * @param map
+     */
+    private static void recurse(int r, HashMap<Integer, ArrayList<Integer>> map) {
+        ArrayList<Integer> rowIndices = new ArrayList<>();
+        int middleIdx = NUM_COLS/2;
+
+        if (r != NUM_ROWS/2) rowIndices.add(middleIdx);
+        for (int i = 1; i < r+1; i++) {
+            rowIndices.add(middleIdx + i);
+            rowIndices.add(middleIdx - i);
+        }
+        map.put(r, rowIndices);
+        if (r == NUM_ROWS/2) return;
+        recurse(r + 1, map);
+
+        ArrayList<Integer> oppositeRowIndices = new ArrayList<>();
+        oppositeRowIndices.add(middleIdx);
+        for (int i = 1; i < r+1; i++) {
+            oppositeRowIndices.add(middleIdx + i);
+            oppositeRowIndices.add(middleIdx - i);
+        }
+        map.put(NUM_ROWS - 1 - r, oppositeRowIndices);
+    }
+
+
 }

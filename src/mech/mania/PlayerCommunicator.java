@@ -11,7 +11,7 @@ public abstract class PlayerCommunicator {
         // Do nothing
     }
 
-    public abstract int[][][] getAttackPatterns(String gameID, Map map);
+    public abstract UnitSetup[] getUnitsSetup(String gameID, Map map);
 
     public abstract Decision getDecision(Game gameState);
 }

@@ -1,5 +1,7 @@
 package mech.mania;
 
+import java.util.Arrays;
+
 /**
  * Main class -- where the magic happens
  */
@@ -14,32 +16,49 @@ public class Main {
 
         Map map = new Map(mapDirectory);
 
-        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
-        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
+        PlayerCommunicator player1 = new GUIPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new GUIPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
 
-        int[][][] p1Attacks = player1.getAttackPatterns(gameID, map);
-        int[][][] p2Attacks = player2.getAttackPatterns(gameID, map);
+        UnitSetup[] p1setup = player1.getUnitsSetup(gameID, map);
+        UnitSetup[] p2setup = player2.getUnitsSetup(gameID, map);
 
-        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1Attacks, p2Attacks, map);
+        // use these instead if you want to skip the manual setup portion
+        // UnitSetup[] p1setup = makeDefaultUnitSetup();
+        // UnitSetup[] p2setup = makeDefaultUnitSetup();
 
-        printInitialState(game);
+        for (int i = 0; i < 3; i++) {
+            System.out.println("p1 bot " + i + " setup health: " + p1setup[i].getHealth());
+            System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].getSpeed());
+            System.out.println(Arrays.deepToString(p1setup[i].getAttackPattern()));
+        }
+        for (int i = 0; i < 3; i++) {
+            System.out.println("p2 bot " + i + "setup health: " + p2setup[i].getHealth());
+            System.out.println("p2 bot " + i + "setup speed: " + p2setup[i].getSpeed());
+            System.out.println(Arrays.deepToString(p2setup[i].getAttackPattern()));
+        }
+
+        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
+
+        printInitialVisualizerJson(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
 
-            Decision p1Decision = player1.getDecision(game);
-            Decision p2Decision = player2.getDecision(game);
+            Decision p1Decision = null, p2Decision = null;
+            try {
+                p1Decision = player1.getDecision(game);
+                p2Decision = player2.getDecision(game);
+            } catch (Exception e) {
+                GUIPlayerCommunicator.onGameEnd();
+                e.printStackTrace();
+                System.exit(0);
+            }
 
             game.doTurn(p1Decision, p2Decision);
 
-            printGameMap(game);
-            printVisualizerJson(game);
-
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ex) {
-            }
+            printRoundVisualizerJson(game);
         }
 
+        // TODO: how will we communicate to visualizer and/or infra which team won?
         if (game.getWinner() == Game.TIE) {
             System.out.println("It's a tie!");
         } else if (game.getWinner() == Game.P1_WINNER) {
@@ -47,17 +66,33 @@ public class Main {
         } else if (game.getWinner() == Game.P2_WINNER) {
             System.out.println("Player 2 wins!");
         }
+
+        GUIPlayerCommunicator.onGameEnd();
     }
 
-    static void printGameMap(Game game) {
-        System.out.println(game.getMapString() + "\n");
-    }
-
-    static void printInitialState(Game game) {
+    static void printInitialVisualizerJson(Game game) {
         System.out.println(game.getInitialVisualizerJson() + "\n");
     }
 
-    static void printVisualizerJson(Game game) {
+    static void printRoundVisualizerJson(Game game) {
         System.out.println(game.getRoundVisualizerJson() + "\n");
+    }
+
+    private static UnitSetup[] makeDefaultUnitSetup() {
+        UnitSetup[] ret = new UnitSetup[3];
+
+        for (int i = 0; i < 3; i ++) {
+            ret[i] = new UnitSetup();
+
+            ret[i].setAttackPattern(new int[][] {{0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0}});
+        }
+
+        return ret;
     }
 }

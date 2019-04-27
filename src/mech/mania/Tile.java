@@ -6,7 +6,7 @@ package mech.mania;
 public class Tile {
     public static final int COLLISION_DAMAGE = 1;
     private static long globalId;
-
+    private static final int DEFAULT_TILE_HP = 5;
 
     private long id;
     private Unit unit; // the Unit present on this tile (or null, if no unit is present)
@@ -25,7 +25,7 @@ public class Tile {
         id = globalId++;
         unit = null;
         type = Type.BLANK;
-        hp = 5;
+        hp = DEFAULT_TILE_HP;
     }
 
     public long getId() {
@@ -57,6 +57,10 @@ public class Tile {
      * @return a 3-character representation of this tile
      */
     public String shortString() {
+//        if (unit != null) {
+//            return " *" + unit.getId() + "* ";
+//        }
+//        return String.format(" %03d ", id);
         if (type == Type.DESTRUCTIBLE) {
             return " D ";
         } else if (type == Type.INDESTRUCTIBLE) {
@@ -82,12 +86,12 @@ public class Tile {
      * @param dmg
      */
     public void takeDamage(int dmg) {
-        if (type == Type.BLANK) {
-            // blank tiles cannot be damaged
-            return;
-        }
-
         if (unit == null) {
+            if (type == Type.BLANK) {
+                // blank tiles cannot be damaged
+                return;
+            }
+
             hp -= dmg;
 
             if (hp <= 0 && type == Type.DESTRUCTIBLE) {
