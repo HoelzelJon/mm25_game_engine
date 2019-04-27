@@ -10,7 +10,7 @@ import java.util.List;
  * Stores the state of the game, as well as handling much of the logic during each turn
  */
 public class Game {
-    public static final int UNITS_PER_PLAYER = 3;
+    static final int UNITS_PER_PLAYER = 3;
 
     private Map map; // current map
     private Unit[] p1Units; // array of Player 1's units
@@ -111,7 +111,7 @@ public class Game {
      *         TIE if all bots are dead
      *         NO_WINNER if there are still live bots for each player
      */
-    public int getWinner() {
+    int getWinner() {
         if (hasLiveUnit(p1Units)) {
             if (hasLiveUnit(p2Units)) {
                 return NO_WINNER;
@@ -133,7 +133,7 @@ public class Game {
      * @param p1Decision the decision for player 1 to take
      * @param p2Decision the decision for player 2 to take
      */
-    public void doTurn(Decision p1Decision, Decision p2Decision) {
+    void doTurn(Decision p1Decision, Decision p2Decision) {
         recentRounds.clear();
 
         for (int priority = 1; priority <= 3; priority ++) {
@@ -451,11 +451,11 @@ public class Game {
         return (pos.x >= 0 && pos.x < map.width() && pos.y >= 0 && pos.y < map.height());
     }
 
-    public String getMapString() {
+    String getMapString() {
         return map.toString();
     }
 
-    public String getUnitStatsString(){
+    String getUnitStatsString(){
         StringBuilder ret = new StringBuilder();
 
         ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
@@ -477,7 +477,7 @@ public class Game {
         return ret.toString();
     }
 
-    public Unit[] getPlayerUnits(int playerNum){
+    Unit[] getPlayerUnits(int playerNum){
         if(playerNum == 1){
             return p1Units;
         }
@@ -489,20 +489,20 @@ public class Game {
         }
     }
 
-    public static final int P1_WINNER = 0;
-    public static final int P2_WINNER = 1;
-    public static final int TIE = 2;
-    public static final int NO_WINNER = 3;
+    static final int P1_WINNER = 0;
+    static final int P2_WINNER = 1;
+    static final int TIE = 2;
+    static final int NO_WINNER = 3;
 
-    public String getInitialVisualizerJson() {
+    String getInitialVisualizerJson() {
         return gameStateSerializer.toJson(this);
     }
 
-    public String getRoundVisualizerJson() {
+    String getRoundVisualizerJson() {
         return gameRoundSerializer.toJson(recentRounds);
     }
 
-    public String getRecentPlayerJson() {
+    String getRecentPlayerJson() {
         return gameStateSerializer.toJson(this);
     }
 }

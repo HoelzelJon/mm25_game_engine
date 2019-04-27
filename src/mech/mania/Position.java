@@ -4,10 +4,10 @@ package mech.mania;
  * 'Position' class for representing the position of things on the board
  */
 public class Position {
-    public final int x;
-    public final int y;
+    int x;
+    int y;
 
-    public Position(int x, int y){
+    Position(int x, int y){
         this.x = x;
         this.y = y;
     }

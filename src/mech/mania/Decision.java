@@ -25,4 +25,30 @@ public class Decision {
     public Direction[] getAttacks() {
         return attacks;
     }
+
+
+    private static String errorMessage;
+    static String getErrorMessage() { return errorMessage; }
+
+    static boolean hasValidDecision(int[] priorities,
+                                    Direction[][] movements, // not used (for now?)
+                                    Direction[] attacks) {   // not used (for now?)
+        for (int priority : priorities) {
+            if (priority != 1 && priority != 2 && priority != 3) {
+                errorMessage = "Priorities must be First, Second, or Third.";
+                return false;
+            }
+        }
+
+        for (int i = 0; i < priorities.length - 1; i++) {
+            if (priorities[i] == priorities[i + 1]) {
+                errorMessage = "There may not be any duplicate priorities.";
+                return false;
+            }
+        }
+
+        // attacks and movements do not have to be validated since they are
+        // already Direction objects
+        return true;
+    }
 }

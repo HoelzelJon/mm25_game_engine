@@ -3,9 +3,9 @@ package mech.mania;
 import java.util.Arrays;
 
 public class UnitSetup {
-    private static final int BASE_HEALTH = 4;
-    private static final int BASE_SPEED = 5;
-    private static final int MAX_POINTS = 14;
+    static final int BASE_HEALTH = 1;
+    static final int BASE_SPEED = 1;
+    static final int MAX_POINTS = 14;
     private static final double EXTRA_ATTACK_MULTIPLIER = 2;
 
     private int[][] attackPattern;
@@ -23,12 +23,12 @@ public class UnitSetup {
     void setAttackPattern(int[][] setAttackPattern) { attackPattern = setAttackPattern; }
 
     // CONSTRUCTORS
-    public UnitSetup() {
+    UnitSetup() {
         health = BASE_HEALTH;
         speed = BASE_SPEED;
     }
 
-    public UnitSetup(int[][] setAttackPattern, int setHealth, int setSpeed) {
+    UnitSetup(int[][] setAttackPattern, int setHealth, int setSpeed) {
         attackPattern = setAttackPattern;
         health = setHealth;
         speed = setSpeed;
@@ -37,7 +37,7 @@ public class UnitSetup {
 
     /** Error message in case something fails */
     private static String errorMessage = "";
-    public static String getErrorMessage() { return errorMessage; }
+    static String getErrorMessage() { return errorMessage; }
 
     public static boolean hasValidStartingConditions(UnitSetup[] units) {
         return Arrays.stream(units).allMatch(u ->
@@ -70,28 +70,6 @@ public class UnitSetup {
             return false;
         }
 
-        return true;
-    }
-
-    static boolean hasValidDecision(int[] priorities,
-                                    Direction[][] movements,
-                                    Direction[] attacks) {
-        for (int priority : priorities) {
-            if (priority != 1 && priority != 2 && priority != 3) {
-                errorMessage = "Priorities must be First, Second, or Third.";
-                return false;
-            }
-        }
-
-        for (int i = 0; i < priorities.length - 1; i++) {
-            if (priorities[i] == priorities[i + 1]) {
-                errorMessage = "There may not be any duplicate priorities.";
-                return false;
-            }
-        }
-
-        // attacks and movements do not have to be validated since they are
-        // already Direction objects
         return true;
     }
 }

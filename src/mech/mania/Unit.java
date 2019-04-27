@@ -11,13 +11,13 @@ public class Unit {
     private Position pos; // position of the unit
     private int[][] attack; // 2-D grid of attack damages
     private boolean isAlive;
-    public static final int COLLISION_DAMAGE = 1;
+    static final int COLLISION_DAMAGE = 1;
 
     // ID and ID tracker for HumanPlayer output
     private int id;
     private static int numUnits;
 
-    public Unit(Position setPosition, UnitSetup setup) {
+    Unit(Position setPosition, UnitSetup setup) {
         id = globalId++;
         hp = setup.getHealth();
         speed = setup.getSpeed();
@@ -28,27 +28,27 @@ public class Unit {
         isAlive = true;
     }
 
-    public int getId() {
+    int getId() {
         return id;
     }
 
-    public int getHp() {
+    int getHp() {
         return hp;
     }
 
-    public int getSpeed() {
+    int getSpeed() {
         return speed;
     }
 
-    public Position getPos() {
+    Position getPos() {
         return pos;
     }
 
-    public void setPos(Position pos) {
+    void setPos(Position pos) {
         this.pos = pos;
     }
 
-    public boolean isAlive() {
+    boolean isAlive() {
         return isAlive;
     }
 
@@ -57,7 +57,7 @@ public class Unit {
      *
      * @return true if the unit just died, false otherwise
      */
-    public boolean doDeath() {
+    boolean doDeath() {
         if (hp <= 0) {
             isAlive = false;
             pos = new Position(-10, -10);
@@ -66,13 +66,13 @@ public class Unit {
         return false;
     }
 
-    public void takeCollisionDamage() {
+    void takeCollisionDamage() {
         if (isAlive) {
             hp -= COLLISION_DAMAGE;
         }
     }
     
-    public void takeDamage(int damage) {
+    void takeDamage(int damage) {
         if (isAlive) {
             hp -= damage;
         }
@@ -88,7 +88,7 @@ public class Unit {
      * @param dir direction the attack is facing
      * @return this unit's attack, rotated in direction dir
      */
-    public int[][] getAttack(Direction dir) {
+    int[][] getAttack(Direction dir) {
         int width = attack.length;
         int height = attack[0].length;
 

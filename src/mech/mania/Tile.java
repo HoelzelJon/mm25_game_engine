@@ -4,7 +4,7 @@ package mech.mania;
  * Represents a single square on the game board.
  */
 public class Tile {
-    public static final int COLLISION_DAMAGE = 1;
+    static final int COLLISION_DAMAGE = 1;
     private static long globalId;
     private static final int DEFAULT_TILE_HP = 5;
 

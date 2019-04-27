@@ -27,9 +27,7 @@ public class GUIInitialUnitInput extends Application {
     private Direction[][] movements;
     private Direction[] attacks;
 
-    private int playerNum = 1;
-    public static final int DEFAULT_HP = 4;
-    public static final int DEFAULT_SPEED = 5;
+    private int playerNum;
     private static final int DEFAULT_SCENE_WIDTH = 600;
     private static final int DEFAULT_SCENE_HEIGHT = 350;
     private static final int NUM_UNITS = 3;
@@ -44,7 +42,7 @@ public class GUIInitialUnitInput extends Application {
         instance = this;
     }
 
-    public static GUIInitialUnitInput awaitAndGetInstance() {
+    static GUIInitialUnitInput awaitAndGetInstance() {
         latch = new CountDownLatch(1);
         try {
             // Will await until the player hits the submit button in one of the
@@ -65,7 +63,7 @@ public class GUIInitialUnitInput extends Application {
      * GUI showing will not occur until after Application has started (and don't
      * have to deal with any issues of Application not being launched already)
      */
-    public void launchInitializationGui(int setPlayerNum) {
+    void launchInitializationGui(int setPlayerNum) {
         playerNum = setPlayerNum;
         try {
             start(new Stage());
@@ -119,8 +117,8 @@ public class GUIInitialUnitInput extends Application {
                 // if valid, then set the actual values in the array above
                 if (valid) {
                     allAttackPatterns[i] = unitInputs[i].attackPatternGrid.getAttackPattern();
-                    allHps[i] = getNumFromTextField(unitInputs[i].hpField, DEFAULT_HP);
-                    allSpeeds[i] = getNumFromTextField(unitInputs[i].speedField, DEFAULT_SPEED);
+                    allHps[i] = getNumFromTextField(unitInputs[i].hpField, UnitSetup.BASE_HEALTH);
+                    allSpeeds[i] = getNumFromTextField(unitInputs[i].speedField, UnitSetup.BASE_SPEED);
                 } else {
                     // print out an error message for the user to see
                     errorMessage.setText("invalid conditions\n" +
@@ -192,7 +190,7 @@ public class GUIInitialUnitInput extends Application {
      * @param setPlayerNum player number to display as the title of the GUI
      * @param units an array of Unit objects to be accessed for speed and ID
      */
-    public void launchDecisionGui(final int setPlayerNum, final Unit[] units) {
+    void launchDecisionGui(final int setPlayerNum, final Unit[] units) {
         playerNum = setPlayerNum;
         Stage stage = new Stage();
         stage.setTitle("Player " + setPlayerNum + " Decision");
@@ -269,7 +267,7 @@ public class GUIInitialUnitInput extends Application {
             // the window and countdown the latch (which will allow the next part of
             // the code to run (awaitAndGetInstance() in this file and 
             // GUIPlayerCommunicator.getDecision())
-            if (UnitSetup.hasValidDecision(filteredPriorities, movements, attacks)) {
+            if (Decision.hasValidDecision(filteredPriorities, movements, attacks)) {
                 this.priorities = priorities;
                 this.movements = movements;
                 this.attacks = attacks;
@@ -279,7 +277,7 @@ public class GUIInitialUnitInput extends Application {
             } else {
                 // invalidate the input, don't close the window, and display an
                 // error message for the user to see.
-                errorMessage.setText(UnitSetup.getErrorMessage());
+                errorMessage.setText(Decision.getErrorMessage());
             }
         });
 
@@ -330,27 +328,27 @@ public class GUIInitialUnitInput extends Application {
         return UnitSetup.hasValidStartingConditions(hp, speed, attackPattern);
     }
 
-    public int[][][] getAttackPatterns() {
+    int[][][] getAttackPatterns() {
         return attackPatterns;
     }
 
-    public int[] getHps() {
+    int[] getHps() {
         return hps;
     }
 
-    public int[] getSpeeds() {
+    int[] getSpeeds() {
         return speeds;
     }
 
-    public int[] getPriorities() {
+    int[] getPriorities() {
         return priorities;
     }
 
-    public Direction[][] getMovements() {
+    Direction[][] getMovements() {
         return movements;
     }
 
-    public Direction[] getAttacks() {
+    Direction[] getAttacks() {
         return attacks;
     }
 
@@ -375,7 +373,7 @@ class DecisionInputHBox {
      * that have the choices MOVEMENT_CHOICES and one ChoiceBox containing
      * the choices ATTACK_CHOICES
      */
-    public HBox getDecisionInputHBox(String title, int unitSpeed) {
+    HBox getDecisionInputHBox(String title, int unitSpeed) {
         Text titleText = new Text(title);
 
         // priority
@@ -416,7 +414,7 @@ class InitializationInputVBox {
     TextField speedField;
     AttackPatternGrid attackPatternGrid;
 
-    public VBox getUnitInputVBox(String title) {
+    VBox getUnitInputVBox(String title) {
 
         Text titleText = new Text(title);
 
@@ -425,12 +423,12 @@ class InitializationInputVBox {
 
         HBox hpBox = new HBox();
         Text hpText = new Text("hp: ");
-        hpField = new TextField("" + GUIInitialUnitInput.DEFAULT_HP);
+        hpField = new TextField("" + UnitSetup.BASE_HEALTH);
         hpBox.getChildren().addAll(hpText, hpField);
 
         HBox speedBox = new HBox();
         Text speedText = new Text("speed: ");
-        speedField = new TextField("" + GUIInitialUnitInput.DEFAULT_SPEED);
+        speedField = new TextField("" + UnitSetup.BASE_SPEED);
         speedBox.getChildren().addAll(speedText, speedField);
 
         // add to 1 VBox, then return
@@ -471,7 +469,7 @@ class AttackPatternGrid {
     private static final char VALID = '_';
     private static final char MECH = 'M';
 
-    public int[][] getAttackPattern() {
+    int[][] getAttackPattern() {
         int[][] pattern = new int[SIZE][SIZE];
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -490,7 +488,7 @@ class AttackPatternGrid {
         return pattern;
     }
 
-    public GridPane createGrid() {
+    GridPane createGrid() {
         GridPane grid = new GridPane();
 
         for (int i = 0; i < SIZE; i++) {
