@@ -22,29 +22,11 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         this.urlString = urlString;
     }
 
-
     private String getResponse(String argument, int timeout, String data) {
         HttpURLConnection connection;
 
         try {
             URL url = new URL(urlString + argument);
-
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(timeout);
-        } catch (MalformedURLException ex) {
-            System.err.println("MalformedURLException found when getting attack pattern for player #" + playerNum);
-            System.err.println("URL= " + urlString);
-            return null;
-        } catch (IOException ex) {
-            System.err.println("IOException when opening URL connection to player #" + playerNum);
-            System.err.print("URL= " + urlString);
-            return null;
-        }
-
-        HttpURLConnection connection;
-
-        try {
-            URL url = new URL(urlString + "turn");
 
             connection = (HttpURLConnection) url.openConnection();
             connection.setReadTimeout(MAX_TURN_TIME_MILIS);
@@ -87,7 +69,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public UnitSetup[] getUnitsSetup(String gameID, Map map) {
+    public UnitSetup[] getUnitsSetup(Map map) {
         String mapJson = map.toInitialPlayerJSON();
 
         String setupString = getResponse("game_init", MAX_INIT_DECISION_TIME_MILIS, mapJson);
@@ -95,8 +77,6 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         if (setupString == null) {
             return null;
         } else {
-            System.out.println(setupString);
-
             Gson gson = new Gson();
             return gson.fromJson(setupString, UnitSetup[].class);
         }

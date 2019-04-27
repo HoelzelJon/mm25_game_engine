@@ -17,10 +17,26 @@ public class Main {
         PlayerCommunicator player1 = new /*HumanPlayerCommunicator(1); */ServerPlayerCommunicator(1, p1URL);
         PlayerCommunicator player2 = new /*HumanPlayerCommunicator(2); */ServerPlayerCommunicator(2, p2URL);
 
-        int[][][] p1Attacks = player1.getAttackPatterns(gameID, map);
-        int[][][] p2Attacks = player2.getAttackPatterns(gameID, map);
+        UnitSetup[] p1setup = player1.getUnitsSetup(map);
+        UnitSetup[] p2setup = player2.getUnitsSetup(map);
 
-        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1Attacks, p2Attacks, map);
+        // use these instead if you want to skip the manual setup portion
+        // UnitSetup[] p1setup = makeDefaultUnitSetup();
+        // UnitSetup[] p2setup = makeDefaultUnitSetup();
+
+
+        /*for (int i = 0; i < 3; i++) {
+            System.out.println("p1 bot " + i + " setup health: " + p1setup[i].health);
+            System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].speed);
+            InputValidator.printAttackPattern(p1setup[i].attackPattern);
+        }
+        for (int i = 0; i < 3; i++) {
+            System.out.println("p2 bot " + i + "setup health: " + p2setup[i].health);
+            System.out.println("p2 bot " + i + "setup speed: " + p2setup[i].speed);
+            InputValidator.printAttackPattern(p2setup[i].attackPattern);
+        }*/
+
+        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
 
         printInitialVisualizerJson(game);
 
@@ -31,13 +47,7 @@ public class Main {
 
             game.doTurn(p1Decision, p2Decision);
 
-            //printGameMap(game);
             printRoundVisualizerJson(game);
-
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ex) {
-            }
         }
 
         if (game.getWinner() == Game.TIE) {
@@ -59,5 +69,23 @@ public class Main {
 
     static void printRoundVisualizerJson(Game game) {
         System.out.println(game.getRoundVisualizerJson());
+    }
+
+    private static UnitSetup[] makeDefaultUnitSetup() {
+        UnitSetup[] ret = new UnitSetup[3];
+
+        for (int i = 0; i < 3; i ++) {
+            ret[i] = new UnitSetup();
+
+            ret[i].attackPattern = new int[][] {{0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0},
+                                                {0, 0, 0, 0, 0, 0, 0}};
+        }
+
+        return ret;
     }
 }

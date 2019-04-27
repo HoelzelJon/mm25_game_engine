@@ -1,9 +1,23 @@
 package mech.mania;
-
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Scanner;
 
 public class HumanPlayerCommunicator extends PlayerCommunicator {
     private Scanner sk;
+    //TODO: check that input priorities are different
+
+
+    private void printAttackPatternInfo() {
+        System.out.println(" X X X 0 X X X");
+        System.out.println(" X X 0 0 0 X X");
+        System.out.println(" X 0 0 0 0 0 X");
+        System.out.println(" 0 0 0 M 0 0 0");
+        System.out.println(" X 0 0 0 0 0 X");
+        System.out.println(" X X 0 0 0 X X");
+        System.out.println(" X X X 0 X X X");
+    }
 
     public HumanPlayerCommunicator(int playerNum){
         super(playerNum);
@@ -71,12 +85,14 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         return new Decision(priorities, movements, attackDirs);
     }
 
+
     /**
      * Prompt user for initial attack patterns
      */
     @Override
-    public int[][][] getAttackPatterns(String gameID, Map map){
-        int numBots = 3;
+    public UnitSetup[] getUnitsSetup(Map map){
+        int numBots = InputValidator.BOTS_PER_PLAYER;
+        UnitSetup[] setups = new UnitSetup[numBots];
 
         int[][][] attackPatterns = new int[numBots][][];
         int[][][] attackPatternsTransform = new int[numBots][][];
@@ -86,54 +102,62 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         // Iterate over bots
         for(int botId = 0; botId < numBots; botId++){
             System.out.println("Configuring attack pattern for bot " + botId);
-            // Ask for numRows
-            System.out.println("How many rows (y-values) does the attack pattern span?");
-            int numRows = sk.hasNextInt()? sk.nextInt() : 0; // only get int if there is one -- avoids exceptions
-            sk.nextLine();
-            while(numRows < 0 || numRows%2 == 0){
-                System.out.println("Must have a positive, odd number of rows. Enter a new value:");
-                numRows = sk.hasNextInt()? sk.nextInt() : 0;
-                sk.nextLine();
-            }
-            
-            // ASSUMING SQUARE MATRIX
-            System.out.println("Assuming square attack matrix");
-            int numCols = numRows;
-            /*
-            // Ask for columns
-            System.out.println("How many columns (x-values) does the attack pattern span?");
-            int numCols = sk.nextInt();
-            sk.nextLine();
-            while(numCols < 0 || numCols%2 == 0){
-                System.out.println("Must have a positive, odd number of columns. Enter a new value:");
-                numCols = sk.nextInt();
-                sk.nextLine();
-            }
-            */
-
-            // Fill in attack pattern values
-            attackPatterns[botId] = new int[numRows][numCols];
-            System.out.println("Enter attack pattern with spaces between columns and newlines between rows like so:\n" +
-                    "0 0 0\n" +
-                    "0 0 0\n" +
-                    "0 0 0");
-            System.out.println("Your bot is in the center of the array.");
-            for(int r = 0; r < numRows; r++){
-                for(int c = 0; c < numCols; c++){
-                    attackPatterns[botId][r][c] = sk.hasNextInt()? sk.nextInt() : 0;
+            attackPatterns[botId] = new int[InputValidator.NUM_ROWS][InputValidator.NUM_COLS];
+            System.out.println("Attack pattern looks like so:");
+            printAttackPatternInfo();
+            System.out.println("Numbers in X and M positions are not counted.");
+            System.out.println("Your bot is at the center of the array.");
+            int totalSum = 0;
+            int maxPoints = InputValidator.MAX_POINTS;
+            for(int r = 0; r < InputValidator.NUM_ROWS; r++) {
+                while (true) {
+                    System.out.println("Enter row " + Integer.toString(r) + " of attack pattern\n");
+                    for (int c = 0; c < InputValidator.NUM_COLS; c++) {
+                        attackPatterns[botId][r][c] = sk.hasNextInt() ? sk.nextInt() : 0;
+                    }
+                    int rowSum = InputValidator.getRowSum(attackPatterns[botId][r], r);
+                    System.out.println("You used " + Integer.toString(rowSum) + " points on this row");
+                    if (totalSum + rowSum > maxPoints) {
+                        System.out.println("Not enough points for this! Try again.");
+                    } else {
+                        totalSum += rowSum;
+                        break;
+                    }
                 }
                 sk.nextLine();
             }
-
+            System.out.println("Selected Pattern:");
+            InputValidator.squareArrayToDiamond(attackPatterns[botId]);
+            InputValidator.printAttackPattern(attackPatterns[botId]);
             // Transform attackPatterns matrix into correct coordinates
             // 1 2 3      7 8 9
             // 4 5 6  ->  4 5 6
             // 7 8 9      1 2 3
             attackPatternsTransform[botId] = Map.toGameCoords(attackPatterns[botId]);
-            
+            UnitSetup setup = new UnitSetup();
+            System.out.println("Select extra health for this mech");
+            System.out.println("You have " + (maxPoints - totalSum) + " available");
+            int extraHealth = sk.nextInt();
+            if (totalSum + extraHealth > InputValidator.MAX_POINTS) {
+                System.out.println("Not enough points. set to 0");
+            } else {
+                totalSum += extraHealth;
+                setup.health += extraHealth;
+            }
+
+            System.out.println("Select extra speed for this mech");
+            System.out.println("You have " + (maxPoints - totalSum) + " available");
+            int extraSpeed = sk.nextInt();
+            if (totalSum + extraSpeed > InputValidator.MAX_POINTS) {
+                System.out.println("Not enough points. set to 0");
+            } else {
+                setup.speed += extraSpeed;
+            }
+            setup.attackPattern = attackPatternsTransform[botId];
+            setups[botId] = setup;
         }
 
-        return attackPatternsTransform;
+        return setups;
     }
 
     /**

@@ -17,13 +17,13 @@ public class Unit {
     private int id;
     private static int numUnits;
 
-    public Unit(Position pos, int[][] attack) {
-        hp = 5;
-        id = globalId++;
-        speed = 4;
+    public Unit(Position pos, UnitSetup setup) {
+        hp = setup.health;
+        speed = setup.speed;
         this.pos = pos;
-        this.attack = attack;
-
+        this.attack = setup.attackPattern;
+        this.id = numUnits;
+        numUnits++;
         isAlive = true;
     }
 
