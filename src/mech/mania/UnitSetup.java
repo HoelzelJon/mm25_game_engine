@@ -8,7 +8,7 @@ public class UnitSetup {
     static final int BASE_SPEED = 1;
     static final int MAX_POINTS = 24;
     private static final int[] DAMAGE_SCALING = {
-            1, 3, 6, 10, 15, 21
+            1, 3, 6, 10, 15, 21, 27
     };
     private static final int[] STAT_SCALING = {
             1, 2, 4, 6, 9, 12, 16, 20, 25
@@ -62,8 +62,19 @@ public class UnitSetup {
         for (int[] row : setAttackPattern) {
             for (int cell : row) {
                 if (cell > 1) {
-                    sum += DAMAGE_SCALING[cell - 1]; // extra points to pattern cost 2 each
+                    // avoid ArrayIndexOutOfBounds
+                    if (cell >= DAMAGE_SCALING.length) {
+                        sum = MAX_POINTS + 1;
+                        break;
+                    } else {
+                        sum += DAMAGE_SCALING[cell - 1];
+                    }
+
+                } else if (cell < 0) {
+                    errorMessage = "cannot assign negative points";
+                    return false;
                 }
+
                 sum += cell;
             }
         }
@@ -71,8 +82,13 @@ public class UnitSetup {
         if (sum > MAX_POINTS) {
             errorMessage = "too many points allotted in grid";
             return false;
-        } else if (STAT_SCALING[setHealth - 1] + STAT_SCALING[setSpeed - 1]
-                + sum > MAX_POINTS) {
+
+        // avoid ArrayIndexOutOfBounds
+        } else if (setHealth >= STAT_SCALING.length || setSpeed >= STAT_SCALING.length) {
+            errorMessage = "too many extra points in hp and speed";
+            return false;
+
+        } else if (STAT_SCALING[setHealth - 1] + STAT_SCALING[setSpeed - 1] + sum > MAX_POINTS) {
             errorMessage = "too many extra points in hp and speed";
             return false;
         }
