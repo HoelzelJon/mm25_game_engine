@@ -253,13 +253,22 @@ public class GUIInitialUnitInput extends Application {
                 movements[i] = myMovements;
             }
 
+
+            // get all the priorities for units that are alive to check validity
+            int numAlive = (int) Arrays.stream(units).filter(Unit::isAlive).count();
+            int[] filteredPriorities = new int[numAlive];
+            for (int i = 0, j = 0; i < units.length; i++) {
+                if (units[i].isAlive()) {
+                    filteredPriorities[j++] = priorities[i];
+                }
+            }
+
+
             // if the Decision that the player made was valid (if the priorities were
             // set without any duplicates and only had a 1, 2, or a 3), then close
             // the window and countdown the latch (which will allow the next part of
             // the code to run (awaitAndGetInstance() in this file and 
             // GUIPlayerCommunicator.getDecision())
-            int[] filteredPriorities = Arrays.stream(priorities).filter(n -> n != 0).toArray();
-
             if (InputValidator.hasValidDecision(filteredPriorities, movements, attacks)) {
                 this.priorities = priorities;
                 this.movements = movements;
