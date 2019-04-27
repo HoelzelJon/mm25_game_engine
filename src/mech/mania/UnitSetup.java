@@ -3,10 +3,16 @@ package mech.mania;
 import java.util.Arrays;
 
 public class UnitSetup {
+    // EDIT THESE VALUES IF NECESSARY
     static final int BASE_HEALTH = 1;
     static final int BASE_SPEED = 1;
-    static final int MAX_POINTS = 14;
-    private static final double EXTRA_ATTACK_MULTIPLIER = 2;
+    static final int MAX_POINTS = 24;
+    private static final int[] DAMAGE_SCALING = {
+            1, 3, 6, 10, 15, 21
+    };
+    private static final int[] STAT_SCALING = {
+            1, 2, 4, 6, 9, 12, 16, 20, 25
+    };
 
     private int[][] attackPattern;
     private int health;
@@ -54,18 +60,19 @@ public class UnitSetup {
 
         int sum = 0;
         for (int[] row : setAttackPattern) {
-            for (int col : row) {
-                if (col > 1) {
-                    sum += EXTRA_ATTACK_MULTIPLIER * (col - 1); // extra points to pattern cost 2 each
+            for (int cell : row) {
+                if (cell > 1) {
+                    sum += DAMAGE_SCALING[cell - 1]; // extra points to pattern cost 2 each
                 }
-                sum += col;
+                sum += cell;
             }
         }
 
         if (sum > MAX_POINTS) {
             errorMessage = "too many points allotted in grid";
             return false;
-        } else if (setHealth - BASE_HEALTH + setSpeed - BASE_SPEED + sum > MAX_POINTS) {
+        } else if (STAT_SCALING[setHealth - 1] + STAT_SCALING[setSpeed - 1]
+                + sum > MAX_POINTS) {
             errorMessage = "too many extra points in hp and speed";
             return false;
         }
