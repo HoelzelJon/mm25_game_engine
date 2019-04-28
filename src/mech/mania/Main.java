@@ -50,6 +50,9 @@ public class Main {
             printRoundVisualizerJson(game);
         }
 
+        player1.sendGameOver(gameID);
+        player2.sendGameOver(gameID);
+
         if (game.getWinner() == Game.TIE) {
             System.out.println("{\"Winner\": 1}");
         } else if (game.getWinner() == Game.P1_WINNER) {

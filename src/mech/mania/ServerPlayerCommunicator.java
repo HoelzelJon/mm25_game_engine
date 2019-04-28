@@ -94,4 +94,12 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             return gson.fromJson(decString, Decision.class);
         }
     }
+
+
+    @Override
+    public void sendGameOver(String gameId) {
+        String overMsg = "{\"gameId\": \"" + gameId + "\"}";
+
+        getResponse("game_over", MAX_INIT_DECISION_TIME_MILIS, overMsg);
+    }
 }
