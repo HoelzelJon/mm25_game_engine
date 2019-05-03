@@ -16,8 +16,8 @@ public class Main {
 
         Map map = new Map(mapDirectory);
 
-        PlayerCommunicator player1 = new GUIPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
-        PlayerCommunicator player2 = new GUIPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
+        PlayerCommunicator player1 = new ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new ServerPlayerCommunicator(2, p2URL);
 
         UnitSetup[] p1setup = player1.getUnitsSetup(gameID, map);
         UnitSetup[] p2setup = player2.getUnitsSetup(gameID, map);
@@ -44,7 +44,6 @@ public class Main {
                 p1Decision = player1.getDecision(game);
                 p2Decision = player2.getDecision(game);
             } catch (Exception e) {
-                GUIPlayerCommunicator.onGameEnd();
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -62,8 +61,6 @@ public class Main {
         } else if (game.getWinner() == Game.P2_WINNER) {
             System.out.println("Player 2 wins!");
         }
-
-        GUIPlayerCommunicator.onGameEnd();
     }
 
     static void printInitialVisualizerJson(Game game) {
