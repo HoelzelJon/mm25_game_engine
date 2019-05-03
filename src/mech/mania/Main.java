@@ -1,5 +1,7 @@
 package mech.mania;
 
+import java.util.Arrays;
+
 /**
  * Main class -- where the magic happens
  */
@@ -24,17 +26,18 @@ public class Main {
         // UnitSetup[] p1setup = makeDefaultUnitSetup();
         // UnitSetup[] p2setup = makeDefaultUnitSetup();
 
-
-        /*for (int i = 0; i < 3; i++) {
-            System.out.println("p1 bot " + i + " setup health: " + p1setup[i].health);
-            System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].speed);
-            InputValidator.printAttackPattern(p1setup[i].attackPattern);
+        /*
+        for (int i = 0; i < 3; i++) {
+            System.out.println("p1 bot " + i + " setup health: " + p1setup[i].getHealth());
+            System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].getSpeed());
+            System.out.println(Arrays.deepToString(p1setup[i].getAttackPattern()));
         }
         for (int i = 0; i < 3; i++) {
-            System.out.println("p2 bot " + i + "setup health: " + p2setup[i].health);
-            System.out.println("p2 bot " + i + "setup speed: " + p2setup[i].speed);
-            InputValidator.printAttackPattern(p2setup[i].attackPattern);
-        }*/
+            System.out.println("p2 bot " + i + "setup health: " + p2setup[i].getHealth());
+            System.out.println("p2 bot " + i + "setup speed: " + p2setup[i].getSpeed());
+            System.out.println(Arrays.deepToString(p2setup[i].getAttackPattern()));
+        }
+        */
 
         Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
 
@@ -42,8 +45,15 @@ public class Main {
 
         while (game.getWinner() == Game.NO_WINNER) {
 
-            Decision p1Decision = player1.getDecision(game);
-            Decision p2Decision = player2.getDecision(game);
+            Decision p1Decision = null, p2Decision = null;
+            try {
+                p1Decision = player1.getDecision(game);
+                p2Decision = player2.getDecision(game);
+            } catch (Exception e) {
+                //GUIPlayerCommunicator.onGameEnd();
+                e.printStackTrace();
+                System.exit(0);
+            }
 
             game.doTurn(p1Decision, p2Decision);
 
@@ -60,6 +70,8 @@ public class Main {
         } else if (game.getWinner() == Game.P2_WINNER) {
             System.out.println("{\"Winner\": 3}");
         }
+
+        //GUIPlayerCommunicator.onGameEnd();
     }
 
     static void printGameMap(Game game) {
@@ -72,23 +84,5 @@ public class Main {
 
     static void printRoundVisualizerJson(Game game) {
         System.out.println(game.getRoundVisualizerJson());
-    }
-
-    private static UnitSetup[] makeDefaultUnitSetup() {
-        UnitSetup[] ret = new UnitSetup[3];
-
-        for (int i = 0; i < 3; i ++) {
-            ret[i] = new UnitSetup();
-
-            ret[i].attackPattern = new int[][] {{0, 0, 0, 0, 0, 0, 0},
-                                                {0, 0, 0, 0, 0, 0, 0},
-                                                {0, 0, 0, 0, 0, 0, 0},
-                                                {0, 0, 0, 0, 0, 0, 0},
-                                                {0, 0, 0, 0, 0, 0, 0},
-                                                {0, 0, 0, 0, 0, 0, 0},
-                                                {0, 0, 0, 0, 0, 0, 0}};
-        }
-
-        return ret;
     }
 }
