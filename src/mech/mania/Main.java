@@ -16,28 +16,11 @@ public class Main {
 
         Map map = new Map(mapDirectory, gameID);
 
-        PlayerCommunicator player1 = new /*HumanPlayerCommunicator(1); */ServerPlayerCommunicator(1, p1URL);
-        PlayerCommunicator player2 = new /*HumanPlayerCommunicator(2); */ServerPlayerCommunicator(2, p2URL);
+        PlayerCommunicator player1 = new GUIPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new GUIPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
 
         UnitSetup[] p1setup = player1.getUnitsSetup(map);
         UnitSetup[] p2setup = player2.getUnitsSetup(map);
-
-        // use these instead if you want to skip the manual setup portion
-        // UnitSetup[] p1setup = makeDefaultUnitSetup();
-        // UnitSetup[] p2setup = makeDefaultUnitSetup();
-
-        /*
-        for (int i = 0; i < 3; i++) {
-            System.out.println("p1 bot " + i + " setup health: " + p1setup[i].getHealth());
-            System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].getSpeed());
-            System.out.println(Arrays.deepToString(p1setup[i].getAttackPattern()));
-        }
-        for (int i = 0; i < 3; i++) {
-            System.out.println("p2 bot " + i + "setup health: " + p2setup[i].getHealth());
-            System.out.println("p2 bot " + i + "setup speed: " + p2setup[i].getSpeed());
-            System.out.println(Arrays.deepToString(p2setup[i].getAttackPattern()));
-        }
-        */
 
         Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
 
@@ -50,7 +33,6 @@ public class Main {
                 p1Decision = player1.getDecision(game);
                 p2Decision = player2.getDecision(game);
             } catch (Exception e) {
-                //GUIPlayerCommunicator.onGameEnd();
                 e.printStackTrace();
                 System.exit(0);
             }
@@ -70,8 +52,6 @@ public class Main {
         } else if (game.getWinner() == Game.P2_WINNER) {
             System.out.println("{\"Winner\": 3}");
         }
-
-        //GUIPlayerCommunicator.onGameEnd();
     }
 
     static void printGameMap(Game game) {
