@@ -1,7 +1,5 @@
 package mech.mania;
 
-import java.util.Arrays;
-
 /**
  * Main class -- where the magic happens
  */
@@ -52,10 +50,6 @@ public class Main {
         } else if (game.getWinner() == Game.P2_WINNER) {
             System.out.println("{\"Winner\": 3}");
         }
-    }
-
-    static void printGameMap(Game game) {
-        System.out.println(game.getMapString() + "\n");
     }
 
     static void printInitialVisualizerJson(Game game) {
