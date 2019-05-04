@@ -1,7 +1,5 @@
 package mech.mania;
 
-import java.util.Arrays;
-
 /**
  * Main class -- where the magic happens
  */
@@ -14,24 +12,13 @@ public class Main {
         String p1URL = args[4];
         String p2URL = args[5];
 
-        Map map = new Map(mapDirectory);
+        Map map = new Map(mapDirectory, gameID);
 
         PlayerCommunicator player1 = new ServerPlayerCommunicator(1, p1URL);
         PlayerCommunicator player2 = new ServerPlayerCommunicator(2, p2URL);
 
-        UnitSetup[] p1setup = player1.getUnitsSetup(gameID, map);
-        UnitSetup[] p2setup = player2.getUnitsSetup(gameID, map);
-
-        for (int i = 0; i < 3; i++) {
-            System.out.println("p1 bot " + i + " setup health: " + p1setup[i].getHealth());
-            System.out.println("p1 bot " + i + " setup speed: " + p1setup[i].getSpeed());
-            System.out.println(Arrays.deepToString(p1setup[i].getAttackPattern()));
-        }
-        for (int i = 0; i < 3; i++) {
-            System.out.println("p2 bot " + i + "setup health: " + p2setup[i].getHealth());
-            System.out.println("p2 bot " + i + "setup speed: " + p2setup[i].getSpeed());
-            System.out.println(Arrays.deepToString(p2setup[i].getAttackPattern()));
-        }
+        UnitSetup[] p1setup = player1.getUnitsSetup(map);
+        UnitSetup[] p2setup = player2.getUnitsSetup(map);
 
         Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
 
@@ -53,21 +40,23 @@ public class Main {
             printRoundVisualizerJson(game);
         }
 
-        // TODO: how will we communicate to visualizer and/or infra which team won?
+        player1.sendGameOver(gameID);
+        player2.sendGameOver(gameID);
+
         if (game.getWinner() == Game.TIE) {
-            System.out.println("It's a tie!");
+            System.out.println("{\"Winner\": 1}");
         } else if (game.getWinner() == Game.P1_WINNER) {
-            System.out.println("Player 1 wins!");
+            System.out.println("{\"Winner\": 2}");
         } else if (game.getWinner() == Game.P2_WINNER) {
-            System.out.println("Player 2 wins!");
+            System.out.println("{\"Winner\": 3}");
         }
     }
 
     static void printInitialVisualizerJson(Game game) {
-        System.out.println(game.getInitialVisualizerJson() + "\n");
+        System.out.println(game.getInitialVisualizerJson());
     }
 
     static void printRoundVisualizerJson(Game game) {
-        System.out.println(game.getRoundVisualizerJson() + "\n");
+        System.out.println(game.getRoundVisualizerJson());
     }
 }

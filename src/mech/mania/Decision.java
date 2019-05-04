@@ -1,28 +1,31 @@
 package mech.mania;
 
+import java.util.HashSet;
+import java.util.Set;
+
 /**
  * Represents one turn's worth of decisions for a single player.
  */
-public class Decision {
+class Decision {
     private int[] priorities; // priorities for each of the player's bots [1,2,3]
     private Direction[][] movements; // movements[a] is the movement for bot a -- should always have length equal to that bot's speed
     private Direction[] attacks; // direction for each bot's attack
 
-    public Decision(int[] priorities, Direction[][] movements, Direction[] attacks) {
+    Decision(int[] priorities, Direction[][] movements, Direction[] attacks) {
         this.priorities = priorities;
         this.movements = movements;
         this.attacks = attacks;
     }
 
-    public int[] getPriorities() {
+    int[] getPriorities() {
         return priorities;
     }
 
-    public Direction[][] getMovements() {
+    Direction[][] getMovements() {
         return movements;
     }
 
-    public Direction[] getAttacks() {
+    Direction[] getAttacks() {
         return attacks;
     }
 
@@ -33,18 +36,19 @@ public class Decision {
     static boolean hasValidDecision(int[] priorities,
                                     Direction[][] movements, // not used (for now?)
                                     Direction[] attacks) {   // not used (for now?)
+
+        Set<Integer> uniquePriorities = new HashSet<>();
         for (int priority : priorities) {
+            uniquePriorities.add(priority);
             if (priority != 1 && priority != 2 && priority != 3) {
-                errorMessage = "Priorities must be First, Second, or Third.";
+                errorMessage = "Priorities must be First(1), Second(2), or Third(3).";
                 return false;
             }
         }
 
-        for (int i = 0; i < priorities.length - 1; i++) {
-            if (priorities[i] == priorities[i + 1]) {
-                errorMessage = "There may not be any duplicate priorities.";
-                return false;
-            }
+        if (uniquePriorities.size() != priorities.length) {
+            errorMessage = "Cannot have duplicate priorities.";
+            return false;
         }
 
         // attacks and movements do not have to be validated since they are

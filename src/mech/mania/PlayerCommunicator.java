@@ -11,7 +11,9 @@ public abstract class PlayerCommunicator {
         // Do nothing
     }
 
-    public abstract UnitSetup[] getUnitsSetup(String gameID, Map map);
+    public abstract UnitSetup[] getUnitsSetup(Map map);
 
     public abstract Decision getDecision(Game gameState);
+
+    public void sendGameOver(String gameID) {};
 }

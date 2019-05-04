@@ -102,7 +102,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      * Prompt user for initial attack patterns
      */
     @Override
-    public UnitSetup[] getUnitsSetup(String gameID, Map map){
+    public UnitSetup[] getUnitsSetup(Map map){
         int numBots = Game.UNITS_PER_PLAYER;
         UnitSetup[] setups = new UnitSetup[numBots];
 
