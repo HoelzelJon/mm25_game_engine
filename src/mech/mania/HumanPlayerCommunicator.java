@@ -16,7 +16,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
     //Maps rows of attack pattern array to valid indices in that row (since attack pattern is a diamond and array is a square)
     private static java.util.HashMap<Integer, ArrayList<Integer>> attackPatternRowIdxMap;
     static {
-        attackPatternRowIdxMap = new HashMap<Integer, ArrayList<Integer>>();
+        attackPatternRowIdxMap = new HashMap<>();
         recurse(0, attackPatternRowIdxMap);
     }
 

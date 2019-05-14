@@ -16,8 +16,6 @@ import javafx.stage.Stage;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-import static java.util.Map.entry;
-
 public class GUIInitialUnitInput extends Application {
 
     private int[][][] attackPatterns;
@@ -168,21 +166,23 @@ public class GUIInitialUnitInput extends Application {
      * has a certain amount of variables already set) to Direction object that
      * needs to be returned later.
      */
-    private static final java.util.Map<String, Direction> DIRECTION_MAP = java.util.Map.ofEntries(
-            entry("Stay", Direction.STAY),
-            entry("Don't Attack", Direction.STAY),
-            entry("Left", Direction.LEFT),
-            entry("Right", Direction.RIGHT),
-            entry("Up", Direction.UP),
-            entry("Down", Direction.DOWN)
-    );
+    private static final java.util.Map<String, Direction> DIRECTION_MAP = new HashMap<>();
+    static {
+        DIRECTION_MAP.put("Stay", Direction.STAY);
+        DIRECTION_MAP.put("Don't Attack", Direction.STAY);
+        DIRECTION_MAP.put("Left", Direction.LEFT);
+        DIRECTION_MAP.put("Right", Direction.RIGHT);
+        DIRECTION_MAP.put("Up", Direction.UP);
+        DIRECTION_MAP.put("Down", Direction.DOWN);
+    }
 
-    private static final java.util.Map<String, Integer> PRIORITY_MAP = java.util.Map.of(
-            "First", 1,
-            "Second", 2,
-            "Third", 3,
-            "", 0
-    );
+    private static final java.util.Map<String, Integer> PRIORITY_MAP = new HashMap<>();
+    static {
+        PRIORITY_MAP.put("First", 1);
+        PRIORITY_MAP.put("Second", 2);
+        PRIORITY_MAP.put("Third", 3);
+        PRIORITY_MAP.put("", 0);
+    }
 
     /**
      * Launch the Decision input GUI. Requires a running instance of Application, but
