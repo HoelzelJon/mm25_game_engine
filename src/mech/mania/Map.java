@@ -16,6 +16,7 @@ import java.util.List;
  * May also be responsible for generating random boards, if that is what we end up doing.
  */
 public class Map {
+    private String gameId;
     private Tile[][] tiles; // 2-D array of all tiles on the board
     private Position[][] init_positions; // init_positions[0] = array of player 1's initial positions
                                         // init_positions[1] = array of player 2's initial positions
@@ -29,7 +30,8 @@ public class Map {
      *      - the first # is replaced by either 1 or 2, based on which player owns that unit
      *      - the second # is replaced by 0, 1, or 2, based on which unit it is
      */
-    public Map(String directory) {
+    public Map(String directory, String gameId) {
+        this.gameId = gameId;
         File folder = new File(directory);
         File[] files = folder.listFiles();
 
@@ -46,14 +48,14 @@ public class Map {
 
         List<String[]> stringGrid = new ArrayList<>();
 
-        for (int y = 0; y < height; y ++) {
-            stringGrid.add(fileStr.get(y).split(","));
+        for (String s1 : fileStr) {
+            stringGrid.add(s1.split(","));
         }
 
         int width = 0;
-        for (int y = 0; y < stringGrid.size(); y ++) {
-            if (stringGrid.get(y).length > width) {
-                width = stringGrid.get(y).length;
+        for (String[] strings : stringGrid) {
+            if (strings.length > width) {
+                width = strings.length;
             }
         }
 
@@ -91,23 +93,23 @@ public class Map {
         }
     }
 
-    public Position[] getP1InitialPositions() {
+    Position[] getP1InitialPositions() {
         return init_positions[0];
     }
 
-    public Position[] getP2InitialPositions() {
+    Position[] getP2InitialPositions() {
         return init_positions[1];
     }
 
-    public Tile tileAt(Position pos) {
+    Tile tileAt(Position pos) {
         return tiles[pos.x][pos.y];
     }
 
-    public int width() {
+    int width() {
         return tiles.length;
     }
 
-    public int height() {
+    int height() {
         return tiles[0].length;
     }
 
@@ -116,7 +118,7 @@ public class Map {
      *  (concurrency is required because if we do them one at a time, then some
      *   units will overwrite others on some tiles)
      */
-    public void moveUnits(List<Unit> units, List<Position> destinations) {
+    void moveUnits(List<Unit> units, List<Position> destinations) {
         // remove units from the tiles they're on right now
         for (Unit u : units) {
             tileAt(u.getPos()).setUnit(null);
@@ -136,7 +138,7 @@ public class Map {
      * @param center Position of the center of the attack
      * @return `Tile` objects that were affected by attack, along with the damage they took
      */
-    public HashMap<Object, Integer> doAttackDamage(int[][] attack, Position center) {
+    HashMap<Object, Integer> doAttackDamage(int[][] attack, Position center) {
         HashMap<Object, Integer> collisions = new HashMap<>();
 
         int attackWidth = attack.length;
@@ -149,6 +151,10 @@ public class Map {
             if (x0 + x >= 0 && x0 + x < width()){
                 for (int y = 0; y < attackHeight; y++) {
                     if (y0 + y >= 0 && y0 + y < height()) {
+                        if (attack[x][y] <= 0) {
+                            continue;
+                        }
+
                         tiles[x0 + x][y0 + y].takeDamage(attack[x][y]);
 
                         // if there is a Unit on the tile then make sure damage is applied to it
@@ -186,10 +192,10 @@ public class Map {
      * 
      * @return The map transformed to game coordinates
      */
-    public static int[][] toGameCoords(int map[][]){
+    static int[][] toGameCoords(int[][] map){
         int[][] transform = new int[map.length][map[0].length];
         for(int r = 0; r < transform.length; r++){
-            for(int c = 0; c < transform[0].length; c++){
+            for (int c = 0; c < transform[0].length; c++){
                 transform[r][c] = map[map.length - r - 1][c];
             }
         }
@@ -203,12 +209,12 @@ public class Map {
      * 
      * @return The map transformed to visual coordinates
      */
-    public static int[][] toVisualCoords(int map[][]){
+    static int[][] toVisualCoords(int [][] map){
         // Since a horizontal reflect works both ways, both coordinate conversions are the same
         return toGameCoords(map);
     }
 
-    public String toInitialPlayerJSON() {
+    String toInitialPlayerJSON() {
         Gson serializer = new GsonBuilder().addSerializationExclusionStrategy(
                 new ExclusionStrategy() {
                     @Override

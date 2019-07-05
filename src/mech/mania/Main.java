@@ -12,52 +12,51 @@ public class Main {
         String p1URL = args[4];
         String p2URL = args[5];
 
-        Map map = new Map(mapDirectory);
+        Map map = new Map(mapDirectory, gameID);
 
-        PlayerCommunicator player1 = new HumanPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
-        PlayerCommunicator player2 = new HumanPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
+        PlayerCommunicator player1 = new ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new ServerPlayerCommunicator(2, p2URL);
 
-        int[][][] p1Attacks = player1.getAttackPatterns(gameID, map);
-        int[][][] p2Attacks = player2.getAttackPatterns(gameID, map);
+        UnitSetup[] p1setup = player1.getUnitsSetup(map);
+        UnitSetup[] p2setup = player2.getUnitsSetup(map);
 
-        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1Attacks, p2Attacks, map);
+        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
 
-        printInitialState(game);
+        printInitialVisualizerJson(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
 
-            Decision p1Decision = player1.getDecision(game);
-            Decision p2Decision = player2.getDecision(game);
+            Decision p1Decision = null, p2Decision = null;
+            try {
+                p1Decision = player1.getDecision(game);
+                p2Decision = player2.getDecision(game);
+            } catch (Exception e) {
+                e.printStackTrace();
+                System.exit(0);
+            }
 
             game.doTurn(p1Decision, p2Decision);
 
-            printGameMap(game);
-            printVisualizerJson(game);
-
-            try {
-                Thread.sleep(1000);
-            } catch (Exception ex) {
-            }
+            printRoundVisualizerJson(game);
         }
+
+        player1.sendGameOver(gameID);
+        player2.sendGameOver(gameID);
 
         if (game.getWinner() == Game.TIE) {
-            System.out.println("It's a tie!");
+            System.out.println("{\"Winner\": 1}");
         } else if (game.getWinner() == Game.P1_WINNER) {
-            System.out.println("Player 1 wins!");
+            System.out.println("{\"Winner\": 2}");
         } else if (game.getWinner() == Game.P2_WINNER) {
-            System.out.println("Player 2 wins!");
+            System.out.println("{\"Winner\": 3}");
         }
     }
 
-    static void printGameMap(Game game) {
-        System.out.println(game.getMapString() + "\n");
+    static void printInitialVisualizerJson(Game game) {
+        System.out.println(game.getInitialVisualizerJson());
     }
 
-    static void printInitialState(Game game) {
-        System.out.println(game.getInitialVisualizerJson() + "\n");
-    }
-
-    static void printVisualizerJson(Game game) {
-        System.out.println(game.getRoundVisualizerJson() + "\n");
+    static void printRoundVisualizerJson(Game game) {
+        System.out.println(game.getRoundVisualizerJson());
     }
 }

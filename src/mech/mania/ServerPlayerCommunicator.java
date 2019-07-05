@@ -15,47 +15,22 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     String urlString;
 
     private static final int MAX_TURN_TIME_MILIS = 5000;
+    private static final int MAX_INIT_DECISION_TIME_MILIS = 5000;
+    private static final int MAX_TURN_TIME_MILLIS = 5000;
 
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
         this.urlString = urlString;
     }
 
-    @Override
-    public int[][][] getAttackPatterns(String gameID, Map map) {
+    private String getResponse(String argument, int timeout, String data) {
         HttpURLConnection connection;
 
         try {
-            URL url = new URL(urlString + "pattern");
+            URL url = new URL(urlString + argument);
 
             connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(MAX_TURN_TIME_MILIS);
-        } catch (MalformedURLException ex) {
-            System.err.println("MalformedURLException found when getting attack pattern for player #" + playerNum);
-            System.err.println("URL= " + urlString);
-            return null;
-        } catch (IOException ex) {
-            System.err.println("IOException when opening URL connection to player #" + playerNum);
-            System.err.print("URL= " + urlString);
-            return null;
-        }
-
-        Gson gson = new Gson();
-        String mapJson = gson.toJson(map);
-
-        //TODO
-        return new int[][][] {{{0}}};
-    }
-
-    public Decision getDecision(Game gameState) {
-
-        HttpURLConnection connection;
-
-        try {
-            URL url = new URL(urlString + "turn");
-
-            connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(MAX_TURN_TIME_MILIS);
+            connection.setReadTimeout(MAX_TURN_TIME_MILLIS);
         } catch (MalformedURLException ex) {
             System.err.println("MalformedURLException found when connecting to player #" + playerNum);
             System.err.println("URL= " + urlString);
@@ -66,7 +41,6 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             return null;
         }
 
-        String gameJson = gameState.getRecentPlayerJson();
         try {
             connection.setRequestMethod("POST");
             connection.setDoOutput(true);
@@ -78,23 +52,55 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
 
         try  {
             OutputStream os = connection.getOutputStream();
-            os.write(gameJson.getBytes());
+            os.write(data.getBytes());
         } catch (IOException ex) {
             System.err.println("IOException when doing getOutputStream on HTTPConnection");
             return null;
         }
 
-        Gson gson = new Gson();
-
         try {
             InputStream is = connection.getInputStream();
             // taken from https://stackoverflow.com/questions/309424/how-do-i-read-convert-an-inputstream-into-a-string-in-java
             Scanner s = new Scanner(is).useDelimiter("\\A");
-            String result = s.hasNext() ? s.next() : "";
-            return gson.fromJson(result, Decision.class);
+            return s.hasNext() ? s.next() : "";
         } catch (IOException ex) {
             System.err.println("IOException when doing getInputStream on HTTPConnection");
             return null;
         }
+    }
+
+    @Override
+    public UnitSetup[] getUnitsSetup(Map map) {
+        String mapJson = map.toInitialPlayerJSON();
+
+        String setupString = getResponse("game_init", MAX_INIT_DECISION_TIME_MILIS, mapJson);
+
+        if (setupString == null) {
+            return null;
+        } else {
+            Gson gson = new Gson();
+            return gson.fromJson(setupString, UnitSetup[].class);
+        }
+    }
+
+    public Decision getDecision(Game gameState) {
+        String gameJson = gameState.getRecentPlayerJson();
+
+        String decString = getResponse("turn", MAX_TURN_TIME_MILIS, gameJson);
+
+        if (decString == null) {
+            return null;
+        } else {
+            Gson gson = new Gson();
+            return gson.fromJson(decString, Decision.class);
+        }
+    }
+
+
+    @Override
+    public void sendGameOver(String gameId) {
+        String overMsg = "{\"gameId\": \"" + gameId + "\"}";
+
+        getResponse("game_over", MAX_INIT_DECISION_TIME_MILIS, overMsg);
     }
 }
