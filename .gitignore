@@ -1,6 +1,6 @@
 # IntelliJ Files
 /.idea/*
-/out/*
+/out/production/*
 *.iml
 
 # VS Code Files
