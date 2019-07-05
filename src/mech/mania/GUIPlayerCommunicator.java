@@ -8,7 +8,7 @@ import javafx.application.Platform;
  * for starting the game.
  */
 public class GUIPlayerCommunicator extends PlayerCommunicator {
-    
+
     private static final int NUM_UNITS = 3;
 
     // keep the JavaFX application running throughout

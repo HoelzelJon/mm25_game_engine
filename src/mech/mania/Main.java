@@ -14,8 +14,8 @@ public class Main {
 
         Map map = new Map(mapDirectory, gameID);
 
-        PlayerCommunicator player1 = new GUIPlayerCommunicator(1); //ServerPlayerCommunicator(1, p1URL);
-        PlayerCommunicator player2 = new GUIPlayerCommunicator(2); //ServerPlayerCommunicator(2, p2URL);
+        PlayerCommunicator player1 = new ServerPlayerCommunicator(1, p1URL);
+        PlayerCommunicator player2 = new ServerPlayerCommunicator(2, p2URL);
 
         UnitSetup[] p1setup = player1.getUnitsSetup(map);
         UnitSetup[] p2setup = player2.getUnitsSetup(map);
