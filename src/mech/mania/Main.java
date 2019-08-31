@@ -20,9 +20,11 @@ public class Main {
         UnitSetup[] p1setup = player1.getUnitsSetup(map);
         UnitSetup[] p2setup = player2.getUnitsSetup(map);
 
-        Game game = new Game(gameID, new String[] {p1Name, p2Name}, p1setup, p2setup, map);
+        Game game = new Game(gameID, p1Name, p2Name, p1setup, p2setup, map);
 
-        printInitialVisualizerJson(game);
+        VisualizerOutputter visualizerOutput = new VisualizerOutputter();
+
+        visualizerOutput.printInitialVisualizerJson(game);
 
         while (game.getWinner() == Game.NO_WINNER) {
 
@@ -32,12 +34,12 @@ public class Main {
                 p2Decision = player2.getDecision(game);
             } catch (Exception e) {
                 e.printStackTrace();
-                System.exit(0);
+                System.exit(1);
             }
 
             game.doTurn(p1Decision, p2Decision);
 
-            printRoundVisualizerJson(game);
+            visualizerOutput.printRoundVisualizerJson(game);
         }
 
         player1.sendGameOver(gameID);
@@ -50,13 +52,5 @@ public class Main {
         } else if (game.getWinner() == Game.P2_WINNER) {
             System.out.println("{\"Winner\": 3}");
         }
-    }
-
-    static void printInitialVisualizerJson(Game game) {
-        System.out.println(game.getInitialVisualizerJson());
-    }
-
-    static void printRoundVisualizerJson(Game game) {
-        System.out.println(game.getRoundVisualizerJson());
     }
 }

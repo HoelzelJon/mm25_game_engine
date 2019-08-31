@@ -37,8 +37,8 @@ public class Game {
         return ret;
     }
 
-    public Game(String id, String[] playerNames, UnitSetup[] p1UnitSetups, UnitSetup[] p2UnitSetups, Map map) {
-        this.playerNames = playerNames;
+    public Game(String id, String player1Name, String player2Name, UnitSetup[] p1UnitSetups, UnitSetup[] p2UnitSetups, Map map) {
+        this.playerNames = new String[] {player1Name, player2Name};
         this.gameId = id;
         this.map = map;
 
