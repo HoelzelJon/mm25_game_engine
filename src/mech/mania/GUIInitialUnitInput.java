@@ -119,8 +119,7 @@ public class GUIInitialUnitInput extends Application {
                     allSpeeds[i] = getNumFromTextField(unitInputs[i].speedField, UnitSetup.BASE_SPEED);
                 } else {
                     // print out an error message for the user to see
-                    errorMessage.setText("invalid conditions\n" +
-                            UnitSetup.getErrorMessage());
+                    errorMessage.setText("invalid conditions\n");
                     allValid = false;
                     break;
                 }

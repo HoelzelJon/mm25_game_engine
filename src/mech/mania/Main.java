@@ -1,5 +1,7 @@
 package mech.mania;
 
+import static mech.mania.UnitSetup.hasValidStartingConditions;
+
 /**
  * Main class -- where the magic happens
  */
@@ -20,9 +22,22 @@ public class Main {
         UnitSetup[] p1setup = player1.getUnitsSetup(map);
         UnitSetup[] p2setup = player2.getUnitsSetup(map);
 
+        VisualizerOutputter visualizerOutput = new VisualizerOutputter();
+
+        if (!hasValidStartingConditions(p1setup)) {
+            if (!hasValidStartingConditions(p2setup)) {
+                visualizerOutput.printWinnerJSON(Game.TIE);
+            } else {
+                visualizerOutput.printWinnerJSON(Game.P2_WINNER);
+            }
+            return;
+        } else if (!hasValidStartingConditions(p2setup)) {
+            visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+            return;
+        }
+
         Game game = new Game(gameID, p1Name, p2Name, p1setup, p2setup, map);
 
-        VisualizerOutputter visualizerOutput = new VisualizerOutputter();
 
         visualizerOutput.printInitialVisualizerJson(game);
 
@@ -45,12 +60,6 @@ public class Main {
         player1.sendGameOver(gameID);
         player2.sendGameOver(gameID);
 
-        if (game.getWinner() == Game.TIE) {
-            System.out.println("{\"Winner\": 1}");
-        } else if (game.getWinner() == Game.P1_WINNER) {
-            System.out.println("{\"Winner\": 2}");
-        } else if (game.getWinner() == Game.P2_WINNER) {
-            System.out.println("{\"Winner\": 3}");
-        }
+        visualizerOutput.printWinnerJSON(game.getWinner());
     }
 }
