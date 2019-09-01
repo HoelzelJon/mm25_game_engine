@@ -3,6 +3,7 @@ package mech.mania;
 import com.google.gson.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -96,15 +97,8 @@ public class Game {
      * @return true if any of the units in the array are alive
      */
     private static boolean hasLiveUnit(Unit[] units){
-        for (Unit u : units) {
-            if (u.isAlive()) {
-                return true;
-            }
-        }
-        return false;
+        return Arrays.stream(units).anyMatch(Unit::isAlive);
     }
-
-
 
     /**
      * @return P1_WINNER or P2_WINNER, if the other player's bots are all dead
@@ -141,7 +135,6 @@ public class Game {
             ArrayList<Direction[]> movements = new ArrayList<>();
             ArrayList<Direction> attackDirections = new ArrayList<>();
 
-
             for (int unitNum = 0; unitNum < 3; unitNum ++) {
                 if (p1Decision.getPriorities()[unitNum] == priority) {
                     unitsToMove.add(p1Units[unitNum]);
@@ -169,17 +162,16 @@ public class Game {
      * @param attackDirections  the direction for each bot's attack
      */
     private void doRound(List<Unit> units, List<Direction[]> movements, List<Direction> attackDirections) {
-        int maxBotSpeed = 0;
+        int numMovementSteps = 0;
         for (int i = 0; i < movements.size(); i ++) {
-            if (movements.get(i).length > maxBotSpeed) {
-                maxBotSpeed = movements.get(i).length;
+            if (movements.get(i).length > numMovementSteps) {
+                numMovementSteps = movements.get(i).length;
             }
         }
 
         List<RoundMovement> roundMovements = new ArrayList<>();
 
-
-        for (int stepNum = 0; stepNum < maxBotSpeed; stepNum ++) {
+        for (int stepNum = 0; stepNum < numMovementSteps; stepNum ++) {
 
             List<Direction> stepDirections = new ArrayList<>();
 
@@ -290,7 +282,7 @@ public class Game {
 
         // handle collisions between units and terrain (or the map boundary)
         for (int i = 0; i < goalPositions.size(); i ++) {
-            if (! inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
+            if (! map.inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
                 collided[i] = true;
                 units.get(i).takeCollisionDamage();
 
@@ -301,7 +293,7 @@ public class Game {
                         Unit.COLLISION_DAMAGE,
                         0));
 
-                if (inBounds(goalPositions.get(i))) {
+                if (map.inBounds(goalPositions.get(i))) {
                     // add the terrain to the list of terrain to damage
                     collidedTiles.add(map.tileAt(goalPositions.get(i)));
                 }
@@ -434,14 +426,6 @@ public class Game {
                 }
             }
         }
-    }
-
-    /**
-     * @param pos a position that may or may not be on the map
-     * @return true if the position lies within the map, false otherwise
-     */
-    private boolean inBounds(Position pos) {
-        return (pos.x >= 0 && pos.x < map.width() && pos.y >= 0 && pos.y < map.height());
     }
 
     String getMapString() {

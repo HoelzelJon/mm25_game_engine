@@ -203,6 +203,14 @@ public class Map {
     }
 
     /**
+     * @param pos a position that may or may not be on the map
+     * @return true if the position lies within the map, false otherwise
+     */
+    boolean inBounds(Position pos) {
+        return (pos.x >= 0 && pos.x < width() && pos.y >= 0 && pos.y < height());
+    }
+
+    /**
      * Transform from game coordinate to visual coordinate by reflecting horizontally
      * 
      * @param map The map (in game coordinates) to transform to visual coordinates
