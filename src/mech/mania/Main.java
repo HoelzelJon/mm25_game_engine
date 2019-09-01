@@ -7,6 +7,10 @@ import static mech.mania.UnitSetup.hasValidStartingConditions;
  */
 public class Main {
     public static void main(String[] args) {
+        if (args.length < 6) {
+            System.out.println("Invalid arguments. Expected [gameId] [mapDirectory] [player1Name] [player2Name] [player1URL (or 'HUMAN')] [player2URL (or 'HUMAN)]");
+        }
+
         String gameID = args[0];
         String mapDirectory = args[1];
         String p1Name = args[2];
@@ -14,10 +18,11 @@ public class Main {
         String p1URL = args[4];
         String p2URL = args[5];
 
-        Map map = new Map(mapDirectory, gameID);
 
-        PlayerCommunicator player1 = new ServerPlayerCommunicator(1, p1URL);
-        PlayerCommunicator player2 = new ServerPlayerCommunicator(2, p2URL);
+        PlayerCommunicator player1 = getPlayerForURL(p1URL, 1);
+        PlayerCommunicator player2 = getPlayerForURL(p2URL, 2);
+
+        Map map = new Map(mapDirectory, gameID);
 
         UnitSetup[] p1setup = player1.getUnitsSetup(map);
         UnitSetup[] p2setup = player2.getUnitsSetup(map);
@@ -61,5 +66,13 @@ public class Main {
         player2.sendGameOver(gameID);
 
         visualizerOutput.printWinnerJSON(game.getWinner());
+    }
+
+    private static PlayerCommunicator getPlayerForURL(String url, int playerNum) {
+        if (url.equals("HUMAN")) {
+            return new GUIPlayerCommunicator(playerNum);
+        } else {
+            return new ServerPlayerCommunicator(playerNum, url);
+        }
     }
 }
