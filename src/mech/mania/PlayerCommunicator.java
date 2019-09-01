@@ -13,7 +13,7 @@ public abstract class PlayerCommunicator {
 
     public abstract UnitSetup[] getUnitsSetup(Map map);
 
-    public abstract Decision getDecision(Game gameState);
+    public abstract Decision getDecision(Game gameState) throws InvalidDecisionException;
 
     public void sendGameOver(String gameID) {};
 }

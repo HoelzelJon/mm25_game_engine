@@ -85,7 +85,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public Decision getDecision(Game gameState) {
+    public Decision getDecision(Game gameState) throws InvalidDecisionException {
 
         // Print gameState and Unit's stats for user to see (copied from HumanPlayerCommunicator)
         System.out.println(gameState.getMapString());

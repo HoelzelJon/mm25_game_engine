@@ -41,7 +41,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      * Prompt user for priorities, movements, and attacks
      */
     @Override
-    public Decision getDecision(Game gameState){
+    public Decision getDecision(Game gameState) throws InvalidDecisionException {
         // Print gameState and Unit's stats for user to see
         System.out.println(gameState.getMapString());
         System.out.println(gameState.getUnitStatsString());
