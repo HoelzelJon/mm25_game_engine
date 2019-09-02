@@ -11,6 +11,7 @@ import java.util.List;
  * Stores the state of the game, as well as handling much of the logic during each turn
  */
 public class Game {
+    static int GLOBAL_ID;
     static final int UNITS_PER_PLAYER = 3;
 
     private Map map; // current map
