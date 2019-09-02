@@ -3,7 +3,7 @@ package mech.mania;
 /**
  * Represents a single mech.
  */
-public class Unit {
+public class Unit implements Damageable {
     private static int globalId;
 
     private int hp; // unit's current health
@@ -71,8 +71,9 @@ public class Unit {
             hp -= COLLISION_DAMAGE;
         }
     }
-    
-    void takeDamage(int damage) {
+
+    @Override
+    public void takeDamage(int damage) {
         if (isAlive) {
             hp -= damage;
         }

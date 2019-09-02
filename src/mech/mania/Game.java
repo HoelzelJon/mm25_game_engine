@@ -203,13 +203,13 @@ public class Game {
 
         for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
             if (units.get(unitNum).isAlive()) {
-                HashMap<Object, Integer> affectedTiles =
+                HashMap<Damageable, Integer> affectedTiles =
                         map.doAttackDamage(units.get(unitNum).getAttack(attackDirections.get(unitNum)),
                                            units.get(unitNum).getPos());
 
                 // loop through the payload, Pair of a Tile/Unit and a damage value
                 // and link that with the unit that attacked in order to create DamagedUnit object
-                for (java.util.Map.Entry<Object, Integer> affectedTile : affectedTiles.entrySet()) {
+                for (java.util.Map.Entry<Damageable, Integer> affectedTile : affectedTiles.entrySet()) {
                     // two possibilities: the Object (key) is a Unit or a Tile
                     if (affectedTile.getKey() instanceof Unit) {
                         damagedUnits.add(new DamagedUnit(

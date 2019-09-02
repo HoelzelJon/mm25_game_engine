@@ -3,7 +3,7 @@ package mech.mania;
 /**
  * Represents a single square on the game board.
  */
-public class Tile {
+public class Tile implements Damageable {
     static final int COLLISION_DAMAGE = 1;
     private static long globalId;
     private static final int DEFAULT_TILE_HP = 5;

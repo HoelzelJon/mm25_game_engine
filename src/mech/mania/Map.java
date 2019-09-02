@@ -138,8 +138,8 @@ public class Map {
      * @param center Position of the center of the attack
      * @return `Tile` objects that were affected by attack, along with the damage they took
      */
-    HashMap<Object, Integer> doAttackDamage(int[][] attack, Position center) {
-        HashMap<Object, Integer> collisions = new HashMap<>();
+    HashMap<Damageable, Integer> doAttackDamage(int[][] attack, Position center) {
+        HashMap<Damageable, Integer> collisions = new HashMap<>();
 
         int attackWidth = attack.length;
         int attackHeight = attack[0].length;
