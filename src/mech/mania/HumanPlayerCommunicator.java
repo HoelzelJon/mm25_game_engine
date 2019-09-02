@@ -11,7 +11,6 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
     private static final int MAX_POINTS = 14;
 
     private Scanner sk;
-    //TODO: check that input priorities are different
 
     //Maps rows of attack pattern array to valid indices in that row (since attack pattern is a diamond and array is a square)
     private static java.util.HashMap<Integer, ArrayList<Integer>> attackPatternRowIdxMap;
@@ -34,7 +33,6 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
     public HumanPlayerCommunicator(int playerNum){
         super(playerNum);
         sk = new Scanner(System.in);
-        // Do nothing
     }
 
     /**

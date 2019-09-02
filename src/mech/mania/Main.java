@@ -45,7 +45,9 @@ public class Main {
 
         Game game = new Game(gameID, p1Name, p2Name, p1setup, p2setup, map);
 
-        visualizerOutput.printInitialVisualizerJson(game);
+        if (!hasHumanPlayer) {
+            visualizerOutput.printInitialVisualizerJson(game);
+        }
 
         while (game.getWinner() == Game.NO_WINNER) {
 
@@ -82,13 +84,17 @@ public class Main {
 
             game.doTurn(p1Decision, p2Decision);
 
-            visualizerOutput.printRoundVisualizerJson(game);
+            if (!hasHumanPlayer) {
+                visualizerOutput.printRoundVisualizerJson(game);
+            }
         }
 
         player1.sendGameOver(gameID);
         player2.sendGameOver(gameID);
 
-        visualizerOutput.printWinnerJSON(game.getWinner());
+        if (!hasHumanPlayer) {
+            visualizerOutput.printWinnerJSON(game.getWinner());
+        }
     }
 
     private static PlayerCommunicator getPlayerForURL(String url, int playerNum) {
