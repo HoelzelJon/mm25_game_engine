@@ -12,11 +12,10 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class ServerPlayerCommunicator extends PlayerCommunicator {
-    String urlString;
+    private String urlString;
 
     private static final int MAX_TURN_TIME_MILIS = 5000;
     private static final int MAX_INIT_DECISION_TIME_MILIS = 5000;
-    private static final int MAX_TURN_TIME_MILLIS = 5000;
 
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
@@ -30,7 +29,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             URL url = new URL(urlString + argument);
 
             connection = (HttpURLConnection) url.openConnection();
-            connection.setReadTimeout(MAX_TURN_TIME_MILLIS);
+            connection.setReadTimeout(timeout);
         } catch (MalformedURLException ex) {
             System.err.println("MalformedURLException found when connecting to player #" + playerNum);
             System.err.println("URL= " + urlString);
@@ -66,6 +65,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         } catch (IOException ex) {
             System.err.println("IOException when doing getInputStream on HTTPConnection");
             return null;
+        } finally {
+            connection.disconnect();
         }
     }
 

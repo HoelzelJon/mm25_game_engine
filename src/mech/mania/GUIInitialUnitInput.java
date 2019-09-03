@@ -119,8 +119,7 @@ public class GUIInitialUnitInput extends Application {
                     allSpeeds[i] = getNumFromTextField(unitInputs[i].speedField, UnitSetup.BASE_SPEED);
                 } else {
                     // print out an error message for the user to see
-                    errorMessage.setText("invalid conditions\n" +
-                            UnitSetup.getErrorMessage());
+                    errorMessage.setText("invalid conditions\n");
                     allValid = false;
                     break;
                 }
@@ -251,33 +250,37 @@ public class GUIInitialUnitInput extends Application {
                 movements[i] = myMovements;
             }
 
-
-            // get all the priorities for units that are alive to check validity
-            int numAliveUnits = (int) Arrays.stream(units).filter(Unit::isAlive).count();
-            int[] filteredPriorities = new int[numAliveUnits];
-            for (int i = 0, j = 0; i < units.length; i++) {
-                if (units[i].isAlive()) {
-                    filteredPriorities[j++] = priorities[i];
+            // this part is here to set priorities in a valid manner when not all units are alive
+            // TODO: find a better way to handle priorities for dead units
+            Set<Integer> unusedPriorities = new HashSet<>(Arrays.asList(1, 2, 3));
+            for (int i = 0; i < priorities.length; i ++) {
+                if (priorities[i] != 0) {
+                    unusedPriorities.remove(priorities[i]);
                 }
             }
-
+            for (int i = 0; i < priorities.length; i ++) {
+                if (priorities[i] == 0) {
+                    priorities[i] = unusedPriorities.stream().findFirst().get();
+                    unusedPriorities.remove(priorities[i]);
+                }
+            }
 
             // if the Decision that the player made was valid (if the priorities were
             // set without any duplicates and only had a 1, 2, or a 3), then close
             // the window and countdown the latch (which will allow the next part of
             // the code to run (awaitAndGetInstance() in this file and
             // GUIPlayerCommunicator.getDecision())
-            if (Decision.hasValidDecision(filteredPriorities, movements, attacks)) {
+            try {
+                Decision ignoredDecisionToCheckIfValid = new Decision(priorities, movements, attacks);
+
                 this.priorities = priorities;
                 this.movements = movements;
                 this.attacks = attacks;
 
                 stage.close();
                 latch.countDown();
-            } else {
-                // invalidate the input, don't close the window, and display an
-                // error message for the user to see.
-                errorMessage.setText(Decision.getErrorMessage());
+            } catch (InvalidDecisionException ex) {
+                errorMessage.setText(ex.getMessage());
             }
         });
 

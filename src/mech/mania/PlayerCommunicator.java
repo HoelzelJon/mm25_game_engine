@@ -8,12 +8,13 @@ public abstract class PlayerCommunicator {
 
     PlayerCommunicator(int playerNum){
         this.playerNum = playerNum;
-        // Do nothing
     }
 
     public abstract UnitSetup[] getUnitsSetup(Map map);
 
-    public abstract Decision getDecision(Game gameState);
+    public abstract Decision getDecision(Game gameState) throws InvalidDecisionException;
 
-    public void sendGameOver(String gameID) {};
+    public void sendGameOver(String gameID) {
+        // do nothing by default
+    }
 }

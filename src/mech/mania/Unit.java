@@ -3,28 +3,21 @@ package mech.mania;
 /**
  * Represents a single mech.
  */
-public class Unit {
-    private static int globalId;
-
+public class Unit implements Damageable {
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
     private int[][] attack; // 2-D grid of attack damages
     private boolean isAlive;
     static final int COLLISION_DAMAGE = 1;
-
-    // ID and ID tracker for HumanPlayer output
     private int id;
-    private static int numUnits;
 
     Unit(Position setPosition, UnitSetup setup) {
-        id = globalId++;
+        id = Game.GLOBAL_ID++;
         hp = setup.getHealth();
         speed = setup.getSpeed();
         pos = setPosition;
         attack = setup.getAttackPattern();
-        id = numUnits;
-        numUnits++;
         isAlive = true;
     }
 
@@ -71,8 +64,9 @@ public class Unit {
             hp -= COLLISION_DAMAGE;
         }
     }
-    
-    void takeDamage(int damage) {
+
+    @Override
+    public void takeDamage(int damage) {
         if (isAlive) {
             hp -= damage;
         }
