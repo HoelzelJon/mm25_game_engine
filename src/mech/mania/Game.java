@@ -97,6 +97,15 @@ public class Game {
         return map;
     }
 
+    public Unit[] getP1Units(){
+        return p1Units;
+    }
+
+    public Unit[] getP2Units(){
+        return p2Units;
+    }
+
+
     /**
      * @param units array of units to check
      * @return true if any of the units in the array are alive
