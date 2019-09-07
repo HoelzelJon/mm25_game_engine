@@ -93,6 +93,10 @@ public class Game {
             }).create();
     }
 
+    public Map getMap(){
+        return map;
+    }
+
     /**
      * @param units array of units to check
      * @return true if any of the units in the array are alive
@@ -472,6 +476,7 @@ public class Game {
     static final int TIE = 2;
     static final int NO_WINNER = 3;
 
+    
     String getInitialVisualizerJson() {
         return gameStateSerializer.toJson(this);
     }
