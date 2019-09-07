@@ -80,7 +80,7 @@ public class Game {
                 public boolean shouldSkipField(FieldAttributes fieldAttributes) {
                     if (fieldAttributes.getDeclaringClass() == Game.class) {
                         return fieldAttributes.getName().contains("Serializer") ||
-                                fieldAttributes.getName().equals("recentRound");
+                                fieldAttributes.getName().equals("recentRounds");
                     }
 
                     return false;

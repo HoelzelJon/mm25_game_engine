@@ -241,4 +241,6 @@ public class Map {
                 }).create();
         return serializer.toJson(this);
     }
+
+    public String getGameId(){ return gameId; }
 }

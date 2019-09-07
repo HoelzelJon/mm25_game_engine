@@ -72,9 +72,9 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
 
     @Override
     public UnitSetup[] getUnitsSetup(Map map) {
-        String mapJson = map.toInitialPlayerJSON();
+        String initJson = "{\n\"playerNum\":" + this.playerNum + ",\n\"gameId\":\"" + map.getGameId() + "\"\n}";
 
-        String setupString = getResponse("game_init", MAX_INIT_DECISION_TIME_MILIS, mapJson);
+        String setupString = getResponse("game_init", MAX_INIT_DECISION_TIME_MILIS, initJson);
 
         if (setupString == null) {
             return null;
