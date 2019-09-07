@@ -34,7 +34,7 @@ public class game_API {
 	}
 	
 	public Unit getUnitAt(Position pos) {
-		return null;
+		return game.getMap().tileAt(pos).getUnit();
 	}
 	
 	public Tile getTile(Position pos) {
