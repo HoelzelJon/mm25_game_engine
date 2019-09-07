@@ -7,6 +7,11 @@ public class game_API {
 		this.game = g;
 		this.playerName = playerName;
 	}
+
+	public Decision getTurnDecision(){
+		return null;
+	}
+
 	public Unit[] getMyUnits() {		
 		return null;
 	}
