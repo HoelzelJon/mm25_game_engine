@@ -131,12 +131,12 @@ public class Game {
     void doTurn(Decision p1Decision, Decision p2Decision) {
         recentRounds.clear();
 
-        for (int priority = 1; priority <= 3; priority ++) {
+        for (int priority = 1; priority <= UNITS_PER_PLAYER; priority ++) {
             ArrayList<Unit> unitsToMove = new ArrayList<>();
             ArrayList<Direction[]> movements = new ArrayList<>();
             ArrayList<Direction> attackDirections = new ArrayList<>();
 
-            for (int unitNum = 0; unitNum < 3; unitNum ++) {
+            for (int unitNum = 0; unitNum < UNITS_PER_PLAYER; unitNum ++) {
                 if (p1Decision.getPriorities()[unitNum] == priority) {
                     unitsToMove.add(p1Units[unitNum]);
                     movements.add(p1Decision.getMovements()[unitNum]);
