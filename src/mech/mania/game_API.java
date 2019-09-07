@@ -1,5 +1,7 @@
 package mech.mania;
 
+import com.google.gson.Gson;
+
 public class game_API {
 	Game game;
 	String playerName;
@@ -9,12 +11,16 @@ public class game_API {
 		this.playerName = playerName;
 	}
 
-	public Decision getTurnDecision(){
-		return null;
+	public void getTurnDecision(){ 
+		/*
+		Their code here
+		*/
 	}
 
-	public UnitSetup[] getUnitSetups(){
-		return null;
+	public void getUnitSetups(){
+		/*
+		Their code here
+		*/
 	}
 
 	public Direction[] pathTo(Position start, Position end, Position[] tilesToAvoid){
