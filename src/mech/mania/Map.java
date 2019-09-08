@@ -61,7 +61,7 @@ public class Map {
 
         tiles = new Tile[width][height];
 
-        init_positions = new Position[2][3];
+        init_positions = new Position[2][Game.UNITS_PER_PLAYER];
 
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
@@ -75,8 +75,10 @@ public class Map {
                     } else if (s.length() >= 3 && s.charAt(0) == 'U') {
                         int playerNum = s.charAt(1) - '0';
                         int unitNum = s.charAt(2) - '0';
-
-                        init_positions[playerNum - 1][unitNum] = new Position(x, y);
+                        try { // Only do this if unitNum is under array size
+                            // (will catch exception if Game.UNITS_PER_PLAYER < 3)
+                            init_positions[playerNum - 1][unitNum] = new Position(x, y);
+                        } catch (ArrayIndexOutOfBoundsException e){}
                     } else if (s.length() > 0) {
                         // should be a Destructible tile, so entry should be a number
                         try {
@@ -241,4 +243,6 @@ public class Map {
                 }).create();
         return serializer.toJson(this);
     }
+
+    public String getGameId(){ return gameId; }
 }

@@ -1,5 +1,7 @@
 package mech.mania;
 
+import java.io.IOException;
+
 import static mech.mania.UnitSetup.hasValidStartingConditions;
 
 /**
@@ -7,10 +9,11 @@ import static mech.mania.UnitSetup.hasValidStartingConditions;
  */
 public class Main {
     private static String URL_FOR_HUMAN_PLAYER = "HUMAN";
+    private static String OUTPUT_FILE_FOR_STDOUT = "STDOUT";
 
     public static void main(String[] args) {
         if (args.length < 6) {
-            System.out.println("Invalid arguments. Expected [gameId] [mapDirectory] [player1Name] [player2Name] [player1URL (or 'HUMAN')] [player2URL (or 'HUMAN)]");
+            System.out.println("Invalid arguments. Expected [gameId] [mapDirectory] [player1Name] [player2Name] [player1URL (or 'HUMAN')] [player2URL (or 'HUMAN')] [outputFile or 'STDOUT']");
         }
 
         String gameID = args[0];
@@ -19,6 +22,7 @@ public class Main {
         String p2Name = args[3];
         String p1URL = args[4];
         String p2URL = args[5];
+        String outputFile = args[6];
 
         PlayerCommunicator player1 = getPlayerForURL(p1URL, 1);
         PlayerCommunicator player2 = getPlayerForURL(p2URL, 2);
@@ -29,24 +33,38 @@ public class Main {
         UnitSetup[] p1setup = player1.getUnitsSetup(map);
         UnitSetup[] p2setup = player2.getUnitsSetup(map);
 
-        VisualizerOutputter visualizerOutput = new VisualizerOutputter();
+        VisualizerOutputter visualizerOutput;
+        if (outputFile.equals(OUTPUT_FILE_FOR_STDOUT)) {
+            visualizerOutput = new VisualizerOutputter();
+        } else{
+            visualizerOutput = new VisualizerOutputter(outputFile);
+        }
 
-        if (!hasValidStartingConditions(p1setup)) {
-            if (!hasValidStartingConditions(p2setup)) {
-                visualizerOutput.printWinnerJSON(Game.TIE);
-            } else {
-                visualizerOutput.printWinnerJSON(Game.P2_WINNER);
+        try {
+            if (!hasValidStartingConditions(p1setup)) {
+                if (!hasValidStartingConditions(p2setup)) {
+                    visualizerOutput.printWinnerJSON(Game.TIE);
+                } else {
+                    visualizerOutput.printWinnerJSON(Game.P2_WINNER);
+                }
+                return;
+            } else if (!hasValidStartingConditions(p2setup)) {
+                visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+                return;
             }
-            return;
-        } else if (!hasValidStartingConditions(p2setup)) {
-            visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+        } catch (IOException e){
+            System.err.println(e.getMessage());
             return;
         }
 
         Game game = new Game(gameID, p1Name, p2Name, p1setup, p2setup, map);
 
-        if (!hasHumanPlayer) {
+        // Print initial visualizer Json
+        try {
             visualizerOutput.printInitialVisualizerJson(game);
+        } catch (IOException e){
+            System.err.println(e.getMessage());
+            return;
         }
 
         while (game.getWinner() == Game.NO_WINNER) {
@@ -70,30 +88,42 @@ public class Main {
                 e.printStackTrace();
                 System.exit(1);
             }
-
-            if (!p1MadeValidDecision && !p2MadeValidDecision) {
-                visualizerOutput.printWinnerJSON(Game.TIE);
-                return;
-            } else if (!p1MadeValidDecision) {
-                visualizerOutput.printWinnerJSON(Game.P2_WINNER);
-                return;
-            } else if (!p2MadeValidDecision) {
-                visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+            try {
+                if (!p1MadeValidDecision && !p2MadeValidDecision) {
+                    visualizerOutput.printWinnerJSON(Game.TIE);
+                    return;
+                } else if (!p1MadeValidDecision) {
+                    visualizerOutput.printWinnerJSON(Game.P2_WINNER);
+                    return;
+                } else if (!p2MadeValidDecision) {
+                    visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+                    return;
+                }
+            } catch (IOException e){
+                System.err.println(e.getMessage());
                 return;
             }
 
             game.doTurn(p1Decision, p2Decision);
 
-            if (!hasHumanPlayer) {
+            // Print visualizer Json for this round
+            try {
                 visualizerOutput.printRoundVisualizerJson(game);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+                return;
             }
         }
 
         player1.sendGameOver(gameID);
         player2.sendGameOver(gameID);
 
-        if (!hasHumanPlayer) {
+        try {
             visualizerOutput.printWinnerJSON(game.getWinner());
+            visualizerOutput.sendGameOver();
+        } catch (IOException e){
+            System.err.println(e.getMessage());
+            return;
         }
     }
 
