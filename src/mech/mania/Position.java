@@ -6,8 +6,8 @@ import java.util.Objects;
  * 'Position' class for representing the position of things on the board
  */
 public class Position {
-    int x;
-    int y;
+    public int x;
+    public int y;
 
     Position(int x, int y){
         this.x = x;

@@ -1,36 +1,36 @@
 package mech.mania;
 
 import com.google.gson.*;
+import mech.mania.visualizer.perTurn.MovementRepresentation;
+import mech.mania.visualizer.perTurn.MovementType;
+import mech.mania.visualizer.perTurn.RoundRepresentation;
+import mech.mania.visualizer.perTurn.TurnRepresentation;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 
 /**
  * Stores the state of the game, as well as handling much of the logic during each turn
  */
 public class Game {
-    static int GLOBAL_ID;
     static final int UNITS_PER_PLAYER = 3;
 
-    private Map map; // current map
+    private Board map; // current map
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
     private String gameId;
     private String[] playerNames;
+    private int turnsTaken;
 
-    private Gson gameRoundSerializer;
     private Gson gameStateSerializer;
-
-    private List<GameRound> recentRounds = new ArrayList<>();
 
     /**
      * @param positions array of positions for each unit to be initialized to
      * @param map       map to add the units onto
      * @return array of units
      */
-    private static Unit[] initUnitList(Position[] positions, UnitSetup[] setups, Map map) {
+    private static Unit[] initUnitList(Position[] positions, UnitSetup[] setups, Board map) {
         Unit[] ret = new Unit[positions.length];
         for (int i = 0; i < positions.length; i ++) {
             ret[i] = new Unit(positions[i], setups[i]);
@@ -39,40 +39,17 @@ public class Game {
         return ret;
     }
 
-    public Game(String id, String player1Name, String player2Name, UnitSetup[] p1UnitSetups, UnitSetup[] p2UnitSetups, Map map) {
+    public Game(String id, String player1Name, String player2Name, UnitSetup[] p1UnitSetups, UnitSetup[] p2UnitSetups, Board map) {
         this.playerNames = new String[] {player1Name, player2Name};
         this.gameId = id;
         this.map = map;
+        turnsTaken = 0;
 
         Position[] p1Positions = map.getP1InitialPositions();
         Position[] p2Positions = map.getP2InitialPositions();
 
         p1Units = initUnitList(p1Positions, p1UnitSetups, map);
         p2Units = initUnitList(p2Positions, p2UnitSetups, map);
-
-        // add custom serializer to only serialize the ID section of Unit and Tile
-        gameRoundSerializer = new GsonBuilder().addSerializationExclusionStrategy(
-            new ExclusionStrategy() {
-                @Override
-                public boolean shouldSkipField(FieldAttributes fieldAttributes) {
-                    if (fieldAttributes.getDeclaringClass() == Unit.class) {
-                        // if we are serializing the Unit class then only take the ID field
-                        return !fieldAttributes.getName().equals("id");
-                    }
-
-                    else if (fieldAttributes.getDeclaringClass() == Tile.class) {
-                        // if we are serializing the Tile class then only take the ID field
-                        return !fieldAttributes.getName().equals("id");
-                    }
-
-                    return false;
-                }
-
-                @Override
-                public boolean shouldSkipClass(Class<?> aClass) {
-                    return false;
-                }
-            }).create();
 
         gameStateSerializer = new GsonBuilder().addSerializationExclusionStrategy(
             new ExclusionStrategy() {
@@ -128,8 +105,9 @@ public class Game {
      * @param p1Decision the decision for player 1 to take
      * @param p2Decision the decision for player 2 to take
      */
-    void doTurn(Decision p1Decision, Decision p2Decision) {
-        recentRounds.clear();
+    TurnRepresentation doTurn(Decision p1Decision, Decision p2Decision) {
+        turnsTaken ++;
+        TurnRepresentation turnRepresentation = new TurnRepresentation(turnsTaken);
 
         for (int priority = 1; priority <= UNITS_PER_PLAYER; priority ++) {
             ArrayList<Unit> unitsToMove = new ArrayList<>();
@@ -151,8 +129,10 @@ public class Game {
             }
 
 
-            doRound(unitsToMove, movements, attackDirections);
+            turnRepresentation.addRound(doRound(priority, unitsToMove, movements, attackDirections));
         }
+
+        return turnRepresentation;
     }
 
     /**
@@ -162,89 +142,48 @@ public class Game {
      * @param movements movements.get(i) is an array representing the movement of units.get(i)
      * @param attackDirections  the direction for each bot's attack
      */
-    private void doRound(List<Unit> units, List<Direction[]> movements, List<Direction> attackDirections) {
+    private RoundRepresentation doRound(int roundIndex, List<Unit> units, List<Direction[]> movements, List<Direction> attackDirections) {
+        RoundRepresentation roundRepresentation = new RoundRepresentation(roundIndex);
+
         int numMovementSteps = 0;
-        for (int i = 0; i < movements.size(); i ++) {
-            if (movements.get(i).length > numMovementSteps) {
-                numMovementSteps = movements.get(i).length;
+        for (Direction[] unitMovements : movements) {
+            if (unitMovements.length > numMovementSteps) {
+                numMovementSteps = unitMovements.length;
             }
         }
 
-        List<RoundMovement> roundMovements = new ArrayList<>();
+        List<Integer> botIdsThatCollidedThisRound = new ArrayList<>();
 
         for (int stepNum = 0; stepNum < numMovementSteps; stepNum ++) {
-
             List<Direction> stepDirections = new ArrayList<>();
 
             for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
-                if (movements.get(unitNum).length <= stepNum || units.get(unitNum).getSpeed() <= stepNum) {
-                    // if the movement array isn't large enough or if the unit's speed isn't high enough, don't let that unit move
-                    stepDirections.add(unitNum, Direction.STAY);
-                } else {
+                if (movements.get(unitNum).length > stepNum
+                        && units.get(unitNum).getSpeed() > stepNum
+                        && !botIdsThatCollidedThisRound.contains(units.get(unitNum).getId())) {
                     stepDirections.add(unitNum, movements.get(unitNum)[stepNum]);
+                } else {
+                    stepDirections.add(unitNum, Direction.STAY);
                 }
             }
 
-            boolean[] collided = doMovementStep(units, stepDirections, roundMovements);
+            List<MovementRepresentation> movementStepRepresentation = doMovementStep(units, stepDirections);
+            roundRepresentation.addMovementStep(movementStepRepresentation);
 
-            // should stop units from moving after colliding in a round
-            for (int unitNum = units.size() - 1; unitNum >= 0; unitNum --) {
-                if (collided[unitNum]) {
-                    units.remove(unitNum);
-                    movements.remove(unitNum);
+            for (MovementRepresentation move : movementStepRepresentation) {
+                if (move.getMovementType() == MovementType.Collision) {
+                    botIdsThatCollidedThisRound.add(move.getBotId());
                 }
             }
+
+            doDeaths();
         }
+
+        roundRepresentation.addAttacks(map.doAttacks(units, attackDirections));
 
         doDeaths();
 
-        List<Attack> attacks = new ArrayList<>();
-        List<DamagedTile> damagedTiles = new ArrayList<>();
-        List<DamagedUnit> damagedUnits = new ArrayList<>();
-
-        for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
-            if (units.get(unitNum).isAlive()) {
-                HashMap<Damageable, Integer> affectedTiles =
-                        map.doAttackDamage(units.get(unitNum).getAttack(attackDirections.get(unitNum)),
-                                           units.get(unitNum).getPos());
-
-                // loop through the payload, Pair of a Tile/Unit and a damage value
-                // and link that with the unit that attacked in order to create DamagedUnit object
-                for (java.util.Map.Entry<Damageable, Integer> affectedTile : affectedTiles.entrySet()) {
-                    // two possibilities: the Object (key) is a Unit or a Tile
-                    if (affectedTile.getKey() instanceof Unit) {
-                        damagedUnits.add(new DamagedUnit(
-                                units.get(unitNum),           // offender unit
-                                (Unit) affectedTile.getKey(), // who was damaged
-                                affectedTile.getValue()       // amount damaged for
-                        ));
-                    }
-
-                    // if affected Object was a tile (no Unit standing on it)
-                    else if (affectedTile.getKey() instanceof Tile) {
-                        damagedTiles.add(new DamagedTile(
-                                units.get(unitNum),           // who did damaging
-                                (Tile) affectedTile.getKey(), // tile that was damaged
-                                affectedTile.getValue()       // amount damaged for
-                        ));
-                    }
-                }
-
-                // STAY means that attack isn't executed
-                if (attackDirections.get(unitNum) != Direction.STAY) {
-                    attacks.add(new Attack(units.get(unitNum), attackDirections.get(unitNum)));
-                }
-            }
-        }
-
-        doDeaths();
-
-        // create a container class that allows us to serialize to a JSON
-        recentRounds.add(new GameRound(
-                roundMovements.toArray(new RoundMovement[0]),
-                damagedTiles.toArray(new DamagedTile[0]),
-                damagedUnits.toArray(new DamagedUnit[0]),
-                attacks.toArray(new Attack[0])));
+        return roundRepresentation;
     }
 
     /**
@@ -252,15 +191,14 @@ public class Game {
      *
      * @param units         a list of units to move
      * @param directions    the directions to move each unit (i.e. units.get(i) should move in direction directions.get(i))
-     * @param roundMovements List of RoundMovement objects that gets updated with result from function
      * @return a boolean array indicating whether each unit has collided during this movement step
      */
-    private boolean[] doMovementStep(List<Unit> units,
-                                     List<Direction> directions,
-                                     List<RoundMovement> roundMovements) {
-        List<Movement> unitMovements = new ArrayList<>();
-        List<UnitCollision> unitCollisions = new ArrayList<>();
-        List<TileCollision> tileCollisions = new ArrayList<>();
+    private List<MovementRepresentation> doMovementStep(List<Unit> units,
+                                                  List<Direction> directions) {
+        List<MovementRepresentation> movementRepresentation = new ArrayList<>();
+        for (int unitIndex = 0; unitIndex < units.size(); unitIndex ++) {
+            movementRepresentation.add(unitIndex, new MovementRepresentation(units.get(unitIndex).getId(), directions.get(unitIndex)));
+        }
 
         // list of each unit's initial position
         List<Position> initialPositions = new ArrayList<>(units.size());
@@ -276,7 +214,6 @@ public class Game {
 
         // list of whether a given unit has collided during this movement step
         boolean[] collided = new boolean[units.size()];
-        // this array will be filled first with the positions of colliding units, then the rest
 
         // list of terrain tiles to damage through collisions
         List<Tile> collidedTiles = new ArrayList<>();
@@ -288,11 +225,7 @@ public class Game {
                 units.get(i).takeCollisionDamage();
 
                 // add to game log
-                tileCollisions.add(new TileCollision(
-                        units.get(i),
-                        null,
-                        Unit.COLLISION_DAMAGE,
-                        0));
+                movementRepresentation.get(i).setCollision(goalPositions.get(i));
 
                 if (map.inBounds(goalPositions.get(i))) {
                     // add the terrain to the list of terrain to damage
@@ -300,13 +233,7 @@ public class Game {
                 }
             } else if (map.tileAt(goalPositions.get(i)).getUnit() != null) {
                 // handle collision with stationary unit
-                boolean isMoving = false;
-                for (Unit moving : units) {
-                    if (moving == map.tileAt(goalPositions.get(i)).getUnit()) {
-                        isMoving = true;
-                        break;
-                    }
-                }
+                boolean isMoving = units.contains(map.tileAt(goalPositions.get(i)).getUnit());
 
                 if (!isMoving) {
                     collided[i] = true;
@@ -314,11 +241,7 @@ public class Game {
                     map.tileAt(goalPositions.get(i)).getUnit().takeCollisionDamage();
 
                     // add to game log
-                    tileCollisions.add(new TileCollision(
-                            units.get(i),
-                            map.tileAt(goalPositions.get(i)),
-                            Unit.COLLISION_DAMAGE,
-                            Tile.COLLISION_DAMAGE));
+                    movementRepresentation.get(i).setCollision(goalPositions.get(i));
                 }
             }
         }
@@ -336,12 +259,8 @@ public class Game {
                     units.get(j).takeCollisionDamage();
 
                     // add to game log
-                    unitCollisions.add(new UnitCollision(
-                            units.get(i),
-                            units.get(j),
-                            Unit.COLLISION_DAMAGE,
-                            Unit.COLLISION_DAMAGE
-                    ));
+                    movementRepresentation.get(i).setCollision(goalPositions.get(i));
+                    movementRepresentation.get(j).setCollision(goalPositions.get(j));
                 }
             }
         }
@@ -360,13 +279,8 @@ public class Game {
                             units.get(j).takeCollisionDamage();
 
                             // add to game log
-                            unitCollisions.add(
-                                    new UnitCollision(
-                                            units.get(i),
-                                            units.get(j),
-                                            Unit.COLLISION_DAMAGE,
-                                            Unit.COLLISION_DAMAGE
-                                    ));
+                            movementRepresentation.get(i).setCollision(goalPositions.get(i));
+                            movementRepresentation.get(j).setCollision(goalPositions.get(j));
                             break;
                         }
                     }
@@ -386,47 +300,41 @@ public class Game {
             if (!collided[i]) {
                 moving.add(units.get(i));
                 destinations.add(goalPositions.get(i));
-                unitMovements.add(new Movement(
-                        units.get(i),     // same indices as above
-                        directions.get(i) // same indices as above
-                ));
             }
         }
 
-        roundMovements.add(new RoundMovement(
-                unitMovements.toArray(new Movement[0]),
-                unitCollisions.toArray(new UnitCollision[0]),
-                tileCollisions.toArray(new TileCollision[0])
-        ));
-
         map.moveUnits(moving, destinations);
 
-        // necessary to return this array; can't return roundMovements here
-        return collided;
+        return movementRepresentation;
     }
 
     /**
      * For any dead units, removes them from the board
      */
-    private void doDeaths() {
-        doDeaths(p1Units);
-        doDeaths(p2Units);
+    private List<Integer> doDeaths() {
+        List<Integer> ret = new ArrayList<>();
+        ret.addAll(doDeaths(p1Units));
+        ret.addAll(doDeaths(p2Units));
+        return ret;
     }
 
     /**
      * handles death for an array of units
      * @param units array of units to check death conditions for
      */
-    private void doDeaths(Unit[] units) {
+    private List<Integer> doDeaths(Unit[] units) {
+        List<Integer> ret = new ArrayList<>();
         for (Unit u : units) {
             if (u.isAlive()) {
                 Position oldPos = u.getPos();
 
                 if (u.doDeath()) {
                     map.tileAt(oldPos).setUnit(null);
+                    ret.add(u.getId());
                 }
             }
         }
+        return ret;
     }
 
     String getMapString() {
@@ -455,7 +363,7 @@ public class Game {
         return ret.toString();
     }
 
-    Unit[] getPlayerUnits(int playerNum){
+    public Unit[] getPlayerUnits(int playerNum){
         if(playerNum == 1){
             return p1Units;
         }
@@ -467,17 +375,21 @@ public class Game {
         }
     }
 
-    static final int P1_WINNER = 0;
-    static final int P2_WINNER = 1;
-    static final int TIE = 2;
-    static final int NO_WINNER = 3;
-
-    String getInitialVisualizerJson() {
-        return gameStateSerializer.toJson(this);
+    public String getPlayerName(int playerNum) {
+        if (playerNum > 0 && playerNum <= 2) {
+            return playerNames[playerNum-1];
+        } else {
+            return "";
+        }
     }
 
-    String getRoundVisualizerJson() {
-        return gameRoundSerializer.toJson(recentRounds);
+    public static final int P1_WINNER = 0;
+    public static final int P2_WINNER = 1;
+    public static final int TIE = 2;
+    public static final int NO_WINNER = 3;
+
+    public String getInitialVisualizerJson() {
+        return gameStateSerializer.toJson(this);
     }
 
     String getRecentPlayerJson() {

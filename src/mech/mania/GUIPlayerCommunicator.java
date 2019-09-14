@@ -44,7 +44,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public UnitSetup[] getUnitsSetup(Map map) {
+    public UnitSetup[] getUnitsSetup(Board map) {
         UnitSetup[] allUnits = new UnitSetup[NUM_UNITS];
 
         // pass in argument of the player number to display in title
@@ -57,18 +57,19 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
 
         // wait until the GUI is finished and get the instance of the application
         applicationInstance = GUIInitialUnitInput.awaitAndGetInstance();
-        int[][][] allPatterns = applicationInstance.getAttackPatterns();
+        int[][][] allAttackPatterns = applicationInstance.getAttackPatterns();
+        boolean[][][] allTerrainPatterns = applicationInstance.getTerrainPatterns();
         int[] allHps = applicationInstance.getHps();
         int[] allSpeeds = applicationInstance.getSpeeds();
 
-        if (allPatterns == null || allHps == null || allSpeeds == null) {
+        if (allAttackPatterns == null || allHps == null || allSpeeds == null) {
             System.err.println("Unit(s) were not initialized correctly.");
             System.exit(0);
         }
 
         for (int i = 0; i < NUM_UNITS; i++) {
-            int[][] transformedMap = transformMap(allPatterns[i]); //Map.toVisualCoords(allPatterns[i]);
-            allUnits[i] = new UnitSetup(transformedMap, allHps[i], allSpeeds[i]);
+            int[][] transformedMap = transformMap(allAttackPatterns[i]); //Map.toVisualCoords(allAttackPatterns[i]);
+            allUnits[i] = new UnitSetup(transformedMap, allTerrainPatterns[i], allHps[i], allSpeeds[i]);
         }
 
         return allUnits;

@@ -3,29 +3,33 @@ package mech.mania;
 /**
  * Represents a single mech.
  */
-public class Unit implements Damageable {
+public class Unit {
+    private static final int COLLISION_DAMAGE = 1;
+    private static int ID_COUNTER = 0;
+
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
     private int[][] attack; // 2-D grid of attack damages
+    private boolean[][] terrain;
     private boolean isAlive;
-    static final int COLLISION_DAMAGE = 1;
     private int id;
 
     Unit(Position setPosition, UnitSetup setup) {
-        id = Game.GLOBAL_ID++;
+        id = ID_COUNTER ++;
         hp = setup.getHealth();
         speed = setup.getSpeed();
         pos = setPosition;
         attack = setup.getAttackPattern();
+        terrain = setup.getTerrainPattern();
         isAlive = true;
     }
 
-    int getId() {
+    public int getId() {
         return id;
     }
 
-    int getHp() {
+    public int getHp() {
         return hp;
     }
 
@@ -65,7 +69,6 @@ public class Unit implements Damageable {
         }
     }
 
-    @Override
     public void takeDamage(int damage) {
         if (isAlive) {
             hp -= damage;
@@ -82,41 +85,54 @@ public class Unit implements Damageable {
      * @param dir direction the attack is facing
      * @return this unit's attack, rotated in direction dir
      */
-    int[][] getAttack(Direction dir) {
+    public AttackTile[][] getAttack(Direction dir) {
         int width = attack.length;
         int height = attack[0].length;
 
         if (dir == Direction.LEFT) {
-            int[][] ret = new int[height][width];
+            AttackTile[][] ret = new AttackTile[height][width];
 
-            for (int y = 0; y < ret[0].length; y ++) {
-                for (int x = 0; x < ret.length; x ++) {
-                    ret[x][y] = attack[y][width - x - 1];
+            for (int y = 0; y < ret[0].length; y++) {
+                for (int x = 0; x < ret.length; x++) {
+                    ret[x][y] = new AttackTile(attack[y][width - x - 1], terrain[y][width - x - 1]);
                 }
             }
             return ret;
         } else if (dir == Direction.DOWN) {
-            int[][] ret = new int[width][height];
+            AttackTile[][] ret = new AttackTile[width][height];
 
-            for (int y = 0; y < ret[0].length; y ++) {
-                for (int x = 0; x < ret.length; x ++) {
-                    ret[x][y] = attack[width - x - 1][height - y - 1];
+            for (int y = 0; y < ret[0].length; y++) {
+                for (int x = 0; x < ret.length; x++) {
+                    ret[x][y] = new AttackTile(attack[width - x - 1][height - y - 1], terrain[width - x - 1][height - y - 1]);
                 }
             }
             return ret;
         } else if (dir == Direction.RIGHT) {
-            int[][] ret = new int[height][width];
+            AttackTile[][] ret = new AttackTile[height][width];
 
-            for (int y = 0; y < ret[0].length; y ++) {
-                for (int x = 0; x < ret.length; x ++) {
-                    ret[x][y] = attack[height - y - 1][x];
+            for (int y = 0; y < ret[0].length; y++) {
+                for (int x = 0; x < ret.length; x++) {
+                    ret[x][y] = new AttackTile(attack[height - y - 1][x], terrain[height - y - 1][x]);
                 }
             }
             return ret;
-        } else if (dir == Direction.STAY) {
-            return new int[width][height];
-        }
+        } else if (dir == Direction.UP) {
+            AttackTile[][] ret = new AttackTile[height][width];
 
-        return attack;
+            for (int y = 0; y < ret[0].length; y++) {
+                for (int x = 0; x < ret.length; x++) {
+                    ret[x][y] = new AttackTile(attack[y][x], terrain[y][x]);
+                }
+            }
+            return ret;
+        } else { // direction = STAY
+            AttackTile[][] ret = new AttackTile[height][width];
+            for (int y = 0; y < ret[0].length; y ++) {
+                for (int x = 0; x < ret.length; x ++) {
+                    ret[x][y] = new AttackTile(0, false);
+                }
+            }
+            return ret;
+        }
     }
 }

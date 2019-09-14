@@ -1,13 +1,22 @@
-package mech.mania;
+package mech.mania.visualizer;
+import com.google.gson.Gson;
+import mech.mania.Game;
+import mech.mania.visualizer.initial.InitialGameRepresentation;
+import mech.mania.visualizer.perTurn.GameRepresentation;
+
 import java.io.FileWriter;
 import java.io.IOException;
 
 public class VisualizerOutputter {
+    Gson gson;
     private boolean useStdOut;
     private FileWriter fileWriter;
+
     public VisualizerOutputter() {
         useStdOut = true;
+        gson = new Gson();
     }
+
     public VisualizerOutputter(String outputFile) {
         useStdOut = false;
         try {
@@ -19,20 +28,20 @@ public class VisualizerOutputter {
         }
     }
 
-    public void printInitialVisualizerJson(Game game) throws IOException{
+    public void printInitialVisualizerJson(InitialGameRepresentation game) throws IOException{
         if (useStdOut) { // Print to stdout
-            System.out.println(game.getInitialVisualizerJson());
+            System.out.println(gson.toJson(game));
         } else { // Print to outputFile
-            fileWriter.write(game.getInitialVisualizerJson() + "\n");
+            fileWriter.write(gson.toJson(game) + "\n");
             fileWriter.flush();
         }
     }
 
-    public void printRoundVisualizerJson(Game game) throws IOException {
+    public void printGameplayVisualizerJson(GameRepresentation game) throws IOException {
         if (useStdOut) { // Print to stdout
-            System.out.println(game.getRoundVisualizerJson());
+            System.out.println(gson.toJson(game));
         } else { // Print to outputFile
-            fileWriter.write(game.getRoundVisualizerJson() + "\n");
+            fileWriter.write(gson.toJson(game) + "\n");
             fileWriter.flush();
         }
     }
