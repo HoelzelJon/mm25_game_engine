@@ -2,7 +2,7 @@ package mech.mania.visualizer;
 import com.google.gson.Gson;
 import mech.mania.Game;
 import mech.mania.visualizer.initial.InitialGameRepresentation;
-import mech.mania.visualizer.perTurn.GameRepresentation;
+import mech.mania.visualizer.perTurn.TurnRepresentation;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -37,11 +37,11 @@ public class VisualizerOutputter {
         }
     }
 
-    public void printGameplayVisualizerJson(GameRepresentation game) throws IOException {
+    public void printSingleTurnVisualizerJson(TurnRepresentation turn) throws IOException {
         if (useStdOut) { // Print to stdout
-            System.out.println(gson.toJson(game));
+            System.out.println(gson.toJson(turn));
         } else { // Print to outputFile
-            fileWriter.write(gson.toJson(game) + "\n");
+            fileWriter.write(gson.toJson(turn) + "\n");
             fileWriter.flush();
         }
     }

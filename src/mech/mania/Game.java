@@ -30,10 +30,10 @@ public class Game {
      * @param map       map to add the units onto
      * @return array of units
      */
-    private static Unit[] initUnitList(Position[] positions, UnitSetup[] setups, Board map) {
+    private static Unit[] initUnitList(Position[] positions, UnitSetup[] setups, int playerNum, Board map) {
         Unit[] ret = new Unit[positions.length];
         for (int i = 0; i < positions.length; i ++) {
-            ret[i] = new Unit(positions[i], setups[i]);
+            ret[i] = new Unit(positions[i], setups[i], playerNum);
             map.tileAt(positions[i]).setUnit(ret[i]);
         }
         return ret;
@@ -48,8 +48,8 @@ public class Game {
         Position[] p1Positions = map.getP1InitialPositions();
         Position[] p2Positions = map.getP2InitialPositions();
 
-        p1Units = initUnitList(p1Positions, p1UnitSetups, map);
-        p2Units = initUnitList(p2Positions, p2UnitSetups, map);
+        p1Units = initUnitList(p1Positions, p1UnitSetups, 1, map);
+        p2Units = initUnitList(p2Positions, p2UnitSetups, 2, map);
 
         gameStateSerializer = new GsonBuilder().addSerializationExclusionStrategy(
             new ExclusionStrategy() {
