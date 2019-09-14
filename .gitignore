@@ -3,7 +3,6 @@
 /out/production/*
 *.iml
 *.MF
-/target/*
 
 # VS Code Files
 /.vscode/*
