@@ -2,6 +2,7 @@
 /.idea/*
 /out/production/*
 *.iml
+*.MF
 
 # VS Code Files
 /.vscode/*
