@@ -3,9 +3,10 @@ package mech.mania;
 /**
  * Represents a single square on the game board.
  */
-public class Tile implements Damageable {
+public class Tile {
     static final int COLLISION_DAMAGE = 1;
     private static final int DEFAULT_TILE_HP = 5;
+    private static int ID_COUNTER = 100;
 
     private long id;
     private Unit unit; // the Unit present on this tile (or null, if no unit is present)
@@ -21,7 +22,7 @@ public class Tile implements Damageable {
     }
 
     public Tile() {
-        id = Game.GLOBAL_ID++;
+        id = ID_COUNTER++;
         unit = null;
         type = Type.BLANK;
         hp = DEFAULT_TILE_HP;
@@ -49,6 +50,10 @@ public class Tile implements Damageable {
 
     public void setHp(int hp) {
         this.hp = hp;
+    }
+
+    public int getHp() {
+        return hp;
     }
 
     /**

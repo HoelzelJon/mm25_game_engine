@@ -1,5 +1,9 @@
 package mech.mania;
 
+import mech.mania.visualizer.initial.InitialGameRepresentation;
+import mech.mania.visualizer.perTurn.GameRepresentation;
+import mech.mania.visualizer.VisualizerOutputter;
+
 import java.io.IOException;
 
 import static mech.mania.UnitSetup.hasValidStartingConditions;
@@ -8,8 +12,8 @@ import static mech.mania.UnitSetup.hasValidStartingConditions;
  * Main class -- where the magic happens
  */
 public class Main {
-    private static String URL_FOR_HUMAN_PLAYER = "HUMAN";
-    private static String OUTPUT_FILE_FOR_STDOUT = "STDOUT";
+    private static final String URL_FOR_HUMAN_PLAYER = "HUMAN";
+    private static final String OUTPUT_FILE_FOR_STDOUT = "STDOUT";
 
     public static void main(String[] args) {
         if (args.length < 6) {
@@ -26,9 +30,8 @@ public class Main {
 
         PlayerCommunicator player1 = getPlayerForURL(p1URL, 1);
         PlayerCommunicator player2 = getPlayerForURL(p2URL, 2);
-        boolean hasHumanPlayer = p1URL.equals(URL_FOR_HUMAN_PLAYER) || p2URL.equals(URL_FOR_HUMAN_PLAYER);
 
-        Map map = new Map(mapDirectory, gameID);
+        Board map = new Board(mapDirectory, gameID);
 
         UnitSetup[] p1setup = player1.getUnitsSetup(map);
         UnitSetup[] p2setup = player2.getUnitsSetup(map);
@@ -61,11 +64,13 @@ public class Main {
 
         // Print initial visualizer Json
         try {
-            visualizerOutput.printInitialVisualizerJson(game);
+            visualizerOutput.printInitialVisualizerJson(new InitialGameRepresentation(game));
         } catch (IOException e){
             System.err.println(e.getMessage());
             return;
         }
+
+        GameRepresentation gameRepresentation = new GameRepresentation();
 
         while (game.getWinner() == Game.NO_WINNER) {
 
@@ -88,7 +93,7 @@ public class Main {
                 e.printStackTrace();
                 System.exit(1);
             }
-            try {
+            try { // TODO: get this out of this loop somehow
                 if (!p1MadeValidDecision && !p2MadeValidDecision) {
                     visualizerOutput.printWinnerJSON(Game.TIE);
                     return;
@@ -104,15 +109,15 @@ public class Main {
                 return;
             }
 
-            game.doTurn(p1Decision, p2Decision);
+            gameRepresentation.addTurn(game.doTurn(p1Decision, p2Decision));
+        }
 
-            // Print visualizer Json for this round
-            try {
-                visualizerOutput.printRoundVisualizerJson(game);
-            } catch (IOException e) {
-                System.err.println(e.getMessage());
-                return;
-            }
+        // Print visualizer Json for this round
+        try {
+            visualizerOutput.printGameplayVisualizerJson(gameRepresentation);
+        } catch (IOException e) {
+            System.err.println(e.getMessage());
+            return;
         }
 
         player1.sendGameOver(gameID);

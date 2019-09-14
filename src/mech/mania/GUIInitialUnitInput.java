@@ -5,6 +5,7 @@ import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
@@ -19,6 +20,7 @@ import java.util.concurrent.CountDownLatch;
 public class GUIInitialUnitInput extends Application {
 
     private int[][][] attackPatterns;
+    private boolean[][][] terrainPatterns;
     private int[] hps;
     private int[] speeds;
     private int[] priorities;
@@ -27,7 +29,7 @@ public class GUIInitialUnitInput extends Application {
 
     private int playerNum;
     private static final int DEFAULT_SCENE_WIDTH = 600;
-    private static final int DEFAULT_SCENE_HEIGHT = 350;
+    private static final int DEFAULT_SCENE_HEIGHT = 550;
     private static final int NUM_UNITS = 3;
     private static final int GRID_SIZE = 7;
 
@@ -80,7 +82,7 @@ public class GUIInitialUnitInput extends Application {
      * window.
      */
     @Override
-    public void start(Stage primaryStage) throws Exception {
+    public void start(Stage primaryStage) {
         primaryStage.setTitle("Player " + playerNum + " : Mechmania 25 Unit Initialization");
 
         InitializationInputVBox[] unitInputs = new InitializationInputVBox[3];
@@ -103,6 +105,7 @@ public class GUIInitialUnitInput extends Application {
 
             boolean allValid = true;
             int[][][] allAttackPatterns = new int[NUM_UNITS][GRID_SIZE][GRID_SIZE];
+            boolean[][][] allTerrainPatterns = new boolean[NUM_UNITS][GRID_SIZE][GRID_SIZE];
             int[] allHps = new int[NUM_UNITS];
             int[] allSpeeds = new int[NUM_UNITS];
 
@@ -110,11 +113,13 @@ public class GUIInitialUnitInput extends Application {
                 // check conditions using helper method below
                 boolean valid = isValid(unitInputs[i].hpField,
                         unitInputs[i].speedField,
-                        unitInputs[i].attackPatternGrid);
+                        unitInputs[i].attackPatternGrid,
+                        unitInputs[i].terrainPatternGrid);
 
                 // if valid, then set the actual values in the array above
                 if (valid) {
                     allAttackPatterns[i] = unitInputs[i].attackPatternGrid.getAttackPattern();
+                    allTerrainPatterns[i] = unitInputs[i].terrainPatternGrid.getTerrainPattern();
                     allHps[i] = getNumFromTextField(unitInputs[i].hpField, UnitSetup.BASE_HEALTH);
                     allSpeeds[i] = getNumFromTextField(unitInputs[i].speedField, UnitSetup.BASE_SPEED);
                 } else {
@@ -134,6 +139,7 @@ public class GUIInitialUnitInput extends Application {
             // continue.
             if (allValid) {
                 attackPatterns = allAttackPatterns;
+                terrainPatterns = allTerrainPatterns;
                 hps = allHps;
                 speeds = allSpeeds;
 
@@ -195,7 +201,7 @@ public class GUIInitialUnitInput extends Application {
         stage.setTitle("Player " + setPlayerNum + " Decision");
 
         Text directions = new Text("Type in a number (1, 2, 3) in the first box " +
-                "for the priority, then choose three movement steps and a direction of attack.");
+                "for the priority, then choose movement step(s) and a direction of attack.");
 
         // DecisionInputHBox is an object that holds the HBox and its internal
         // priority, movements, and attack fields that can be accessed later for
@@ -321,18 +327,24 @@ public class GUIInitialUnitInput extends Application {
     }
 
     /** Helper method for validating a condition given TextFields */
-    private static boolean isValid(TextField hpField, TextField speedField, AttackPatternGrid grid) {
+    private static boolean isValid(TextField hpField, TextField speedField, AttackPatternGrid attackGrid, TerrainPatternGrid terrainGrid) {
         int hp = getNumFromTextField(hpField, 0);
         int speed = getNumFromTextField(speedField, 0);
 
         // get attack pattern from grid
-        int[][] attackPattern = grid.getAttackPattern();
+        int[][] attackPattern = attackGrid.getAttackPattern();
 
-        return UnitSetup.hasValidStartingConditions(hp, speed, attackPattern);
+        boolean[][] terrainCreation = terrainGrid.getTerrainPattern();
+
+        return UnitSetup.hasValidStartingConditions(hp, speed, attackPattern, terrainCreation);
     }
 
     int[][][] getAttackPatterns() {
         return attackPatterns;
+    }
+
+    boolean[][][] getTerrainPatterns() {
+        return terrainPatterns;
     }
 
     int[] getHps() {
@@ -416,13 +428,17 @@ class InitializationInputVBox {
     TextField hpField;
     TextField speedField;
     AttackPatternGrid attackPatternGrid;
+    TerrainPatternGrid terrainPatternGrid;
 
     VBox getUnitInputVBox(String title) {
 
         Text titleText = new Text(title);
 
         attackPatternGrid = new AttackPatternGrid();
-        GridPane gridPane = attackPatternGrid.createGrid();
+        GridPane attackGridPane = attackPatternGrid.createGrid();
+
+        terrainPatternGrid = new TerrainPatternGrid();
+        GridPane terrainGridPane = terrainPatternGrid.createGrid();
 
         HBox hpBox = new HBox();
         Text hpText = new Text("hp: ");
@@ -437,7 +453,13 @@ class InitializationInputVBox {
         // add to 1 VBox, then return
         VBox allComps = new VBox();
         allComps.getChildren().addAll(
-                titleText, hpBox, speedBox, gridPane
+                titleText,
+                hpBox,
+                speedBox,
+                new Text("Attack Pattern:"),
+                attackGridPane,
+                new Text("Terrain Creation:"),
+                terrainGridPane
         );
         return allComps;
     }
@@ -499,6 +521,76 @@ class AttackPatternGrid {
                 switch (POSITIONS[i][j]) {
                     case VALID:
                         TextField field = new TextField();
+                        nodes[i][j] = field;
+                        grid.add(field, i, j);
+                        break;
+
+                    case MECH:
+                        Text text = new Text("M");
+                        grid.add(text, i, j);
+                        grid.setAlignment(Pos.CENTER);
+                    case INVALID:
+                        nodes[i][j] = null;
+                        break;
+                }
+            }
+        }
+        return grid;
+    }
+}
+
+/**
+ * Another wrapper class that has methods to create a grid of CheckBox objects
+ * in the shape defined in the POSITIONS char[][] and the INVALID, VALID, and
+ * MECH final char variables, which denote what should be placed when the program
+ * encounters the character in the position grid.
+ */
+class TerrainPatternGrid {
+
+    private static final int SIZE = 7;
+
+    /** array of the actual Nodes that will be on the grid */
+    private Node[][] nodes = new Node[SIZE][SIZE];
+
+    /** positions on the map where everything is supposed to be. */
+    private static final char[][] POSITIONS = {
+            {'x', 'x', 'x', '_', 'x', 'x', 'x'},
+            {'x', 'x', '_', '_', '_', 'x', 'x'},
+            {'x', '_', '_', '_', '_', '_', 'x'},
+            {'_', '_', '_', 'M', '_', '_', '_'},
+            {'x', '_', '_', '_', '_', '_', 'x'},
+            {'x', 'x', '_', '_', '_', 'x', 'x'},
+            {'x', 'x', 'x', '_', 'x', 'x', 'x'}
+    };
+    /** chars in the board array corresponding to each thing that is supposed
+     * to be on it */
+    private static final char INVALID = 'x';
+    private static final char VALID = '_';
+    private static final char MECH = 'M';
+
+    boolean[][] getTerrainPattern() {
+        boolean[][] pattern = new boolean[SIZE][SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                // if null then it wasn't a textfield, ignore
+                if (nodes[i][j] == null) {
+                    pattern[i][j] = false;
+                } else {
+                    pattern[i][j] = ((CheckBox) nodes[i][j]).isSelected();
+                }
+            }
+        }
+        return pattern;
+    }
+
+    GridPane createGrid() {
+        GridPane grid = new GridPane();
+
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = 0; j < SIZE; j++) {
+                switch (POSITIONS[i][j]) {
+                    case VALID:
+                        CheckBox field = new CheckBox();
                         nodes[i][j] = field;
                         grid.add(field, i, j);
                         break;

@@ -100,7 +100,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
      * Prompt user for initial attack patterns
      */
     @Override
-    public UnitSetup[] getUnitsSetup(Map map){
+    public UnitSetup[] getUnitsSetup(Board map){
         int numBots = Game.UNITS_PER_PLAYER;
         UnitSetup[] setups = new UnitSetup[numBots];
 
@@ -108,7 +108,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
         int[][][] attackPatternsTransform = new int[numBots][][];
 
         // Print the map for player view
-//        System.out.print("Map:\n" + map.toString() + "\n");
+//        System.out.print("Board:\n" + map.toString() + "\n");
 
         // Iterate over bots
         for(int botId = 0; botId < numBots; botId++){
@@ -144,7 +144,7 @@ public class HumanPlayerCommunicator extends PlayerCommunicator {
             // 1 2 3      7 8 9
             // 4 5 6  ->  4 5 6
             // 7 8 9      1 2 3
-            attackPatternsTransform[botId] = Map.toGameCoords(attackPatterns[botId]);
+            attackPatternsTransform[botId] = Board.toGameCoords(attackPatterns[botId]);
             UnitSetup setup = new UnitSetup();
             System.out.println("Select extra health for this mech");
             System.out.println("You have " + (maxPoints - totalSum) + " available");
