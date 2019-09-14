@@ -1,0 +1,7 @@
+# IntelliJ Files
+/.idea/*
+/out/production/*
+*.iml
+
+# VS Code Files
+/.vscode/*
