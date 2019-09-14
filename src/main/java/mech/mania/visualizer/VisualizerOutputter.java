@@ -19,6 +19,7 @@ public class VisualizerOutputter {
 
     public VisualizerOutputter(String outputFile) {
         useStdOut = false;
+        gson = new Gson();
         try {
             fileWriter = new FileWriter(outputFile, true);
         } catch (IOException e){
