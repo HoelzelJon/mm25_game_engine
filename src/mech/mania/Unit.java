@@ -14,8 +14,9 @@ public class Unit {
     private boolean[][] terrain;
     private boolean isAlive;
     private int id;
+    private int playerNum;
 
-    Unit(Position setPosition, UnitSetup setup) {
+    Unit(Position setPosition, UnitSetup setup, int aPlayerNum) {
         id = ID_COUNTER ++;
         hp = setup.getHealth();
         speed = setup.getSpeed();
@@ -23,6 +24,7 @@ public class Unit {
         attack = setup.getAttackPattern();
         terrain = setup.getTerrainPattern();
         isAlive = true;
+        playerNum = aPlayerNum;
     }
 
     public int getId() {

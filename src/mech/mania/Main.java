@@ -1,8 +1,8 @@
 package mech.mania;
 
 import mech.mania.visualizer.initial.InitialGameRepresentation;
-import mech.mania.visualizer.perTurn.GameRepresentation;
 import mech.mania.visualizer.VisualizerOutputter;
+import mech.mania.visualizer.perTurn.TurnRepresentation;
 
 import java.io.IOException;
 
@@ -70,8 +70,6 @@ public class Main {
             return;
         }
 
-        GameRepresentation gameRepresentation = new GameRepresentation();
-
         while (game.getWinner() == Game.NO_WINNER) {
 
             Decision p1Decision = null, p2Decision = null;
@@ -109,16 +107,17 @@ public class Main {
                 return;
             }
 
-            gameRepresentation.addTurn(game.doTurn(p1Decision, p2Decision));
+            // Print visualizer Json for this round
+            TurnRepresentation turn = game.doTurn(p1Decision, p2Decision);
+            try {
+                visualizerOutput.printSingleTurnVisualizerJson(turn);
+            } catch (IOException e) {
+                System.err.println(e.getMessage());
+                return;
+            }
         }
 
-        // Print visualizer Json for this round
-        try {
-            visualizerOutput.printGameplayVisualizerJson(gameRepresentation);
-        } catch (IOException e) {
-            System.err.println(e.getMessage());
-            return;
-        }
+
 
         player1.sendGameOver(gameID);
         player2.sendGameOver(gameID);
