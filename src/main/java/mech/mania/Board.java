@@ -87,6 +87,7 @@ public class Board {
                 tiles[x][y] = t;
             }
         }
+        initUnits.sort(Comparator.comparingInt(UninitializedUnit::getUnitId));
     }
 
     public List<UninitializedUnit> getInitialUnits(int playerNum) {

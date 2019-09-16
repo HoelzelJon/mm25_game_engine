@@ -66,11 +66,15 @@ public class Tile {
 //        }
 //        return String.format(" %03d ", id);
         if (type == Type.DESTRUCTIBLE) {
-            return " D ";
+            return String.format(" %-2d", hp);
         } else if (type == Type.INDESTRUCTIBLE) {
             return " I ";
         } else if (unit != null) {
-            return " " + unit.getId() + " ";
+            if (unit.getPlayerNum() == 1) {
+                return String.format("*%-2d", unit.getId());
+            } else {
+                return String.format("*%-2d", unit.getId());
+            }
         } else return " . ";
     }
 

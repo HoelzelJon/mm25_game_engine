@@ -52,6 +52,10 @@ public class Unit {
         return isAlive;
     }
 
+    public int getPlayerNum() {
+        return playerNum;
+    }
+
     /**
      * Does the death of the unit
      *

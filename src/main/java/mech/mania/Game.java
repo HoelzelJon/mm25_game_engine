@@ -349,13 +349,13 @@ public class Game {
 
         for (int i = 0; i < p1Units.length; i++) {
             if (p1Units[i].isAlive()) {
-                ret.append(p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t\t\t");
+                ret.append("*" + p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t\t\t");
             } else {
                 ret.append("        \t\t\t\t");
             }
 
             if (p2Units[i].isAlive()) {
-                ret.append(p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
+                ret.append("*" + p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
             } else {
                 ret.append("        \n");
             }
