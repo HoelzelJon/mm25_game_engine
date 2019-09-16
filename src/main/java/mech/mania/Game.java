@@ -18,7 +18,7 @@ import java.util.List;
 public class Game {
     public static final int UNITS_PER_PLAYER = 3;
 
-    private Board map; // current map
+    private Board board; // current board
     private Unit[] p1Units; // array of Player 1's units
     private Unit[] p2Units; // array of Player 2's units
     private String gameId;
@@ -27,13 +27,13 @@ public class Game {
 
     private Gson gameStateSerializer;
 
-    private static Unit[] initUnitList(UnitSetup[] setups, int playerNum, Board map) {
-        List<UninitializedUnit> nonSetupUnits = map.getInitialUnits(playerNum);
+    private static Unit[] initUnitList(UnitSetup[] setups, int playerNum, Board board) {
+        List<UninitializedUnit> nonSetupUnits = board.getInitialUnits(playerNum);
 
         Unit[] ret = new Unit[nonSetupUnits.size()];
         for (int i = 0; i < ret.length; i ++) {
             ret[i] = new Unit(nonSetupUnits.get(i), setups[i]);
-            map.tileAt(nonSetupUnits.get(i).getPos()).setUnit(ret[i]);
+            board.tileAt(nonSetupUnits.get(i).getPos()).setUnit(ret[i]);
         }
         return ret;
     }
@@ -43,14 +43,14 @@ public class Game {
                 String player2Name,
                 UnitSetup[] p1UnitSetups,
                 UnitSetup[] p2UnitSetups,
-                Board map) {
+                Board board) {
         this.playerNames = new String[] {player1Name, player2Name};
         this.gameId = id;
-        this.map = map;
+        this.board = board;
         turnsTaken = 0;
 
-        p1Units = initUnitList(p1UnitSetups, 1, map);
-        p2Units = initUnitList(p2UnitSetups, 2, map);
+        p1Units = initUnitList(p1UnitSetups, 1, board);
+        p2Units = initUnitList(p2UnitSetups, 2, board);
 
         gameStateSerializer = new GsonBuilder().addSerializationExclusionStrategy(
             new ExclusionStrategy() {
@@ -180,7 +180,7 @@ public class Game {
             doDeaths();
         }
 
-        roundRepresentation.addAttacks(map.doAttacks(units, attackDirections));
+        roundRepresentation.addAttacks(board.doAttacks(units, attackDirections));
 
         doDeaths();
 
@@ -219,27 +219,27 @@ public class Game {
         // list of terrain tiles to damage through collisions
         List<Tile> collidedTiles = new ArrayList<>();
 
-        // handle collisions between units and terrain (or the map boundary)
+        // handle collisions between units and terrain (or the board boundary)
         for (int i = 0; i < goalPositions.size(); i ++) {
-            if (! map.inBounds(goalPositions.get(i)) || map.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
+            if (! board.inBounds(goalPositions.get(i)) || board.tileAt(goalPositions.get(i)).getType() != Tile.Type.BLANK) {
                 collided[i] = true;
                 units.get(i).takeCollisionDamage();
 
                 // add to game log
                 movementRepresentation.get(i).setCollision(goalPositions.get(i));
 
-                if (map.inBounds(goalPositions.get(i))) {
+                if (board.inBounds(goalPositions.get(i))) {
                     // add the terrain to the list of terrain to damage
-                    collidedTiles.add(map.tileAt(goalPositions.get(i)));
+                    collidedTiles.add(board.tileAt(goalPositions.get(i)));
                 }
-            } else if (map.tileAt(goalPositions.get(i)).getUnit() != null) {
+            } else if (board.tileAt(goalPositions.get(i)).getUnit() != null) {
                 // handle collision with stationary unit
-                boolean isMoving = units.contains(map.tileAt(goalPositions.get(i)).getUnit());
+                boolean isMoving = units.contains(board.tileAt(goalPositions.get(i)).getUnit());
 
                 if (!isMoving) {
                     collided[i] = true;
                     units.get(i).takeCollisionDamage();
-                    map.tileAt(goalPositions.get(i)).getUnit().takeCollisionDamage();
+                    board.tileAt(goalPositions.get(i)).getUnit().takeCollisionDamage();
 
                     // add to game log
                     movementRepresentation.get(i).setCollision(goalPositions.get(i));
@@ -304,7 +304,7 @@ public class Game {
             }
         }
 
-        map.moveUnits(moving, destinations);
+        board.moveUnits(moving, destinations);
 
         return movementRepresentation;
     }
@@ -330,7 +330,7 @@ public class Game {
                 Position oldPos = u.getPos();
 
                 if (u.doDeath()) {
-                    map.tileAt(oldPos).setUnit(null);
+                    board.tileAt(oldPos).setUnit(null);
                     ret.add(u.getId());
                 }
             }
@@ -338,8 +338,8 @@ public class Game {
         return ret;
     }
 
-    public String getMapString() {
-        return map.toString();
+    public String getBoardString() {
+        return board.toString();
     }
 
     public String getUnitStatsString(){

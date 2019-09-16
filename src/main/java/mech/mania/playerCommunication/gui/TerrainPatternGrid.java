@@ -19,7 +19,7 @@ class TerrainPatternGrid {
     /** array of the actual Nodes that will be on the grid */
     private Node[][] nodes = new Node[SIZE][SIZE];
 
-    /** positions on the map where everything is supposed to be. */
+    /** positions on the board where everything is supposed to be. */
     private static final char[][] POSITIONS = {
             {'x', 'x', 'x', '_', 'x', 'x', 'x'},
             {'x', 'x', '_', '_', '_', 'x', 'x'},

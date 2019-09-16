@@ -19,11 +19,11 @@ public class Main {
 
     public static void main(String[] args) {
         if (args.length < 6) {
-            System.out.println("Invalid arguments. Expected [gameId] [mapDirectory] [player1Name] [player2Name] [player1URL (or 'HUMAN')] [player2URL (or 'HUMAN')] [outputFile or 'STDOUT']");
+            System.out.println("Invalid arguments. Expected [gameId] [boardDirectory] [player1Name] [player2Name] [player1URL (or 'HUMAN')] [player2URL (or 'HUMAN')] [outputFile or 'STDOUT']");
         }
 
         String gameID = args[0];
-        String mapDirectory = args[1];
+        String boardDirectory = args[1];
         String p1Name = args[2];
         String p2Name = args[3];
         String p1URL = args[4];
@@ -33,10 +33,10 @@ public class Main {
         PlayerCommunicator player1 = getPlayerForURL(p1URL, 1);
         PlayerCommunicator player2 = getPlayerForURL(p2URL, 2);
 
-        Board map = new Board(mapDirectory, gameID);
+        Board board = new Board(boardDirectory, gameID);
 
-        UnitSetup[] p1setup = player1.getUnitsSetup(map);
-        UnitSetup[] p2setup = player2.getUnitsSetup(map);
+        UnitSetup[] p1setup = player1.getUnitsSetup(board);
+        UnitSetup[] p2setup = player2.getUnitsSetup(board);
 
         VisualizerOutputter visualizerOutput;
         if (outputFile.equals(OUTPUT_FILE_FOR_STDOUT)) {
@@ -62,7 +62,7 @@ public class Main {
             return;
         }
 
-        Game game = new Game(gameID, p1Name, p2Name, p1setup, p2setup, map);
+        Game game = new Game(gameID, p1Name, p2Name, p1setup, p2setup, board);
 
         // Print initial visualizer Json
         try {

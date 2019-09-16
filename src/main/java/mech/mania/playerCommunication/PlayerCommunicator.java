@@ -13,7 +13,7 @@ public abstract class PlayerCommunicator {
         this.playerNum = playerNum;
     }
 
-    public abstract UnitSetup[] getUnitsSetup(Board map);
+    public abstract UnitSetup[] getUnitsSetup(Board board);
 
     public abstract Decision getDecision(Game gameState) throws InvalidDecisionException;
 

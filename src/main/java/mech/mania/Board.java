@@ -26,7 +26,7 @@ public class Board {
     private List<UninitializedUnit> initUnits;
 
     /**
-     * Default map constructor: generates map based on a random file from DIRECTORY, in the following format:
+     * Default board constructor: generates board based on a random file from DIRECTORY, in the following format:
      * - formatted as a .csv file (columns separated by commas, rows separated by newlines)
      * - Indestructible tiles are marked with 'I'
      * - Destructible tiles marked with an integer for their health
@@ -266,23 +266,23 @@ public class Board {
     /**
      * Transform from visual coordinates to game coordinates by reflecting horizontally
      * 
-     * @param map The map (in visual coordinates) to transform to game coordinates
+     * @param board The board (in visual coordinates) to transform to game coordinates
      * 
-     * @return The map transformed to game coordinates
+     * @return The board transformed to game coordinates
      */
-    static int[][] toGameCoords(int[][] map){
-        int[][] transform = new int[map.length][map[0].length];
+    static int[][] toGameCoords(int[][] board){
+        int[][] transform = new int[board.length][board[0].length];
         for(int r = 0; r < transform.length; r++){
             for (int c = 0; c < transform[0].length; c++){
-                transform[r][c] = map[map.length - r - 1][c];
+                transform[r][c] = board[board.length - r - 1][c];
             }
         }
         return transform;
     }
 
     /**
-     * @param pos a position that may or may not be on the map
-     * @return true if the position lies within the map, false otherwise
+     * @param pos a position that may or may not be on the board
+     * @return true if the position lies within the board, false otherwise
      */
     boolean inBounds(Position pos) {
         return (pos.x >= 0 && pos.x < width() && pos.y >= 0 && pos.y < height());
@@ -291,13 +291,13 @@ public class Board {
     /**
      * Transform from game coordinate to visual coordinate by reflecting horizontally
      * 
-     * @param map The map (in game coordinates) to transform to visual coordinates
+     * @param board The board (in game coordinates) to transform to visual coordinates
      * 
-     * @return The map transformed to visual coordinates
+     * @return The board transformed to visual coordinates
      */
-    static int[][] toVisualCoords(int [][] map){
+    static int[][] toVisualCoords(int [][] board){
         // Since a horizontal reflect works both ways, both coordinate conversions are the same
-        return toGameCoords(map);
+        return toGameCoords(board);
     }
 
     String toInitialPlayerJSON() {

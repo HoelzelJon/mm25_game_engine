@@ -57,7 +57,7 @@ public class Tile {
     }
 
     /**
-     * Used for printing out human-readable string of the map
+     * Used for printing out human-readable string of the board
      * @return a 3-character representation of this tile
      */
     public String shortString() {

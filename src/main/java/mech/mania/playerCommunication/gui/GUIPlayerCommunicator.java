@@ -77,18 +77,18 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         }
 
         for (int i = 0; i < NUM_UNITS; i++) {
-            int[][] transformedMap = transformMap(allAttackPatterns[i]); //Map.toVisualCoords(allAttackPatterns[i]);
-            allUnits[i] = new UnitSetup(transformedMap, allTerrainPatterns[i], allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
+            int[][] transformedBoard = transformBoard(allAttackPatterns[i]); //Board.toVisualCoords(allAttackPatterns[i]);
+            allUnits[i] = new UnitSetup(transformedBoard, allTerrainPatterns[i], allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
         }
 
         return allUnits;
     }
 
-    private static int[][] transformMap(int[][] map) {
-        int[][] transform = new int[map.length][map[0].length];
+    private static int[][] transformBoard(int[][] board) {
+        int[][] transform = new int[board.length][board[0].length];
         for(int r = 0; r < transform.length; r++){
             for (int c = 0; c < transform[0].length; c++){
-                transform[r][c] = map[r][map[0].length - c - 1];
+                transform[r][c] = board[r][board[0].length - c - 1];
             }
         }
         return transform;
@@ -98,7 +98,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     public Decision getDecision(Game gameState) throws InvalidDecisionException {
 
         // Print gameState and Unit's stats for user to see (copied from HumanPlayerCommunicator)
-        System.out.println(gameState.getMapString());
+        System.out.println(gameState.getBoardString());
         System.out.println(gameState.getUnitStatsString());
 
         System.out.println("**********Player " + playerNum + "**********");
