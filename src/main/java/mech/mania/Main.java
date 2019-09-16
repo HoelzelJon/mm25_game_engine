@@ -1,12 +1,14 @@
 package mech.mania;
 
+import mech.mania.playerCommunication.*;
+import mech.mania.playerCommunication.gui.GUIPlayerCommunicator;
 import mech.mania.visualizer.initial.InitialGameRepresentation;
 import mech.mania.visualizer.VisualizerOutputter;
 import mech.mania.visualizer.perTurn.TurnRepresentation;
 
 import java.io.IOException;
 
-import static mech.mania.UnitSetup.hasValidStartingConditions;
+import static mech.mania.playerCommunication.UnitSetup.hasValidStartingConditions;
 
 /**
  * Main class -- where the magic happens

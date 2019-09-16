@@ -1,7 +1,12 @@
-package mech.mania;
+package mech.mania.playerCommunication.gui;
 
 import javafx.application.Application;
 import javafx.application.Platform;
+import mech.mania.*;
+import mech.mania.playerCommunication.Decision;
+import mech.mania.playerCommunication.InvalidDecisionException;
+import mech.mania.playerCommunication.PlayerCommunicator;
+import mech.mania.playerCommunication.UnitSetup;
 
 /**
  * Container class that stores values from the GUI that will end up being used
@@ -15,7 +20,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     private static GUIInitialUnitInput applicationInstance;
 
 
-    GUIPlayerCommunicator(int playerNum) {
+    public GUIPlayerCommunicator(int playerNum) {
         super(playerNum);
         // make sure that closing a JavaFX window does not exit the JavaFX thread
         Platform.setImplicitExit(false);

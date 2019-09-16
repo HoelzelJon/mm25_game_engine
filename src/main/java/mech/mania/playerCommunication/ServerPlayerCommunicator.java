@@ -1,6 +1,8 @@
-package mech.mania;
+package mech.mania.playerCommunication;
 
 import com.google.gson.Gson;
+import mech.mania.Board;
+import mech.mania.Game;
 
 import java.io.IOException;
 import java.io.InputStream;

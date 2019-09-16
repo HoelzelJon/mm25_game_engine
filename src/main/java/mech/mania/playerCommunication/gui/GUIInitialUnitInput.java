@@ -1,4 +1,4 @@
-package mech.mania;
+package mech.mania.playerCommunication.gui;
 
 import javafx.application.Application;
 import javafx.geometry.Pos;
@@ -13,6 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import mech.mania.*;
+import mech.mania.playerCommunication.Decision;
+import mech.mania.playerCommunication.InvalidDecisionException;
+import mech.mania.playerCommunication.UnitSetup;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;

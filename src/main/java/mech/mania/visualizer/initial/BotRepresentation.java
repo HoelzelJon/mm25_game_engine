@@ -7,7 +7,7 @@ import mech.mania.Unit;
 import java.util.ArrayList;
 import java.util.List;
 
-import static mech.mania.UnitSetup.ATTACK_PATTERN_SIZE;
+import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
 
 public class BotRepresentation {
     private int botId;

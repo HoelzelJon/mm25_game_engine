@@ -13,7 +13,7 @@ import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
 
-import static mech.mania.UnitSetup.ATTACK_PATTERN_SIZE;
+import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
 
 /**
  * Stores the 2-D array of tiles that makes up the game board.

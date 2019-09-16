@@ -1,6 +1,8 @@
 package mech.mania;
 
 import com.google.gson.*;
+import mech.mania.playerCommunication.Decision;
+import mech.mania.playerCommunication.UnitSetup;
 import mech.mania.visualizer.perTurn.MovementRepresentation;
 import mech.mania.visualizer.perTurn.MovementType;
 import mech.mania.visualizer.perTurn.RoundRepresentation;
@@ -14,7 +16,7 @@ import java.util.List;
  * Stores the state of the game, as well as handling much of the logic during each turn
  */
 public class Game {
-    static final int UNITS_PER_PLAYER = 3;
+    public static final int UNITS_PER_PLAYER = 3;
 
     private Board map; // current map
     private Unit[] p1Units; // array of Player 1's units
@@ -337,11 +339,11 @@ public class Game {
         return ret;
     }
 
-    String getMapString() {
+    public String getMapString() {
         return map.toString();
     }
 
-    String getUnitStatsString(){
+    public String getUnitStatsString(){
         StringBuilder ret = new StringBuilder();
 
         ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
@@ -392,7 +394,7 @@ public class Game {
         return gameStateSerializer.toJson(this);
     }
 
-    String getRecentPlayerJson() {
+    public String getRecentPlayerJson() {
         return gameStateSerializer.toJson(this);
     }
 }

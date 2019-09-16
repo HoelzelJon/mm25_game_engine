@@ -1,11 +1,11 @@
-package mech.mania;
+package mech.mania.playerCommunication;
 
 import java.util.Arrays;
 
 public class UnitSetup {
     public static final int ATTACK_PATTERN_SIZE = 7;
-    static final int BASE_HEALTH = 1;
-    static final int BASE_SPEED = 1;
+    public static final int BASE_HEALTH = 1;
+    public static final int BASE_SPEED = 1;
     static final int MAX_POINTS = 24;
     static final int TERRAIN_COST = 2;
     private static final int[] DAMAGE_SCALING = {
@@ -20,10 +20,10 @@ public class UnitSetup {
     private int health;
     private int speed;
 
-    int getHealth() { return health; }
-    int getSpeed() { return speed; }
-    int[][] getAttackPattern() { return attackPattern; }
-    boolean[][] getTerrainPattern() { return terrainPattern; }
+    public int getHealth() { return health; }
+    public int getSpeed() { return speed; }
+    public int[][] getAttackPattern() { return attackPattern; }
+    public boolean[][] getTerrainPattern() { return terrainPattern; }
 
     void setHealth(int setHealth) { health = setHealth; }
     void setSpeed(int setSpeed) { speed = setSpeed; }
@@ -34,19 +34,19 @@ public class UnitSetup {
         speed = BASE_SPEED;
     }
 
-    UnitSetup(int[][] setAttackPattern, boolean[][] setTerrainCreation, int setHealth, int setSpeed) {
+    public UnitSetup(int[][] setAttackPattern, boolean[][] setTerrainCreation, int setHealth, int setSpeed) {
         attackPattern = setAttackPattern;
         terrainPattern = setTerrainCreation;
         health = setHealth;
         speed = setSpeed;
     }
 
-    static boolean hasValidStartingConditions(UnitSetup[] units) {
+    public static boolean hasValidStartingConditions(UnitSetup[] units) {
         return Arrays.stream(units).allMatch(u ->
                 UnitSetup.hasValidStartingConditions(u.health, u.speed, u.attackPattern, u.terrainPattern));
     }
 
-    static boolean hasValidStartingConditions(int setHealth, int setSpeed, int[][] setAttackPattern, boolean[][] setTerrainCreation) {
+    public static boolean hasValidStartingConditions(int setHealth, int setSpeed, int[][] setAttackPattern, boolean[][] setTerrainCreation) {
         if (setHealth < BASE_HEALTH || setSpeed < BASE_SPEED
                 || setAttackPattern.length != ATTACK_PATTERN_SIZE
                 || setTerrainCreation.length != ATTACK_PATTERN_SIZE) {

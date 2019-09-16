@@ -1,4 +1,7 @@
-package mech.mania;
+package mech.mania.playerCommunication;
+
+import mech.mania.Direction;
+import mech.mania.Game;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -6,13 +9,13 @@ import java.util.Set;
 /**
  * Represents one turn's worth of decisions for a single player.
  */
-class Decision {
+public class Decision {
     private int[] priorities; // priorities for each of the player's bots -- priorities[n] is the priority for bot n.
     // Since there are 3 bots, priorities should be one of [1,2,3]
     private Direction[][] movements; // movements[a] is the movement for bot a -- should always have length equal to that bot's speed
     private Direction[] attacks; // direction for each bot's attack
 
-    Decision(int[] priorities, Direction[][] movements, Direction[] attacks) throws InvalidDecisionException {
+    public Decision(int[] priorities, Direction[][] movements, Direction[] attacks) throws InvalidDecisionException {
         if (!validPriorities(priorities)) {
             throw new InvalidDecisionException("Invalid Priorities. Priorities must be 1, 2, and 3 in some order.");
         } else if (!validMovements(movements)) {
@@ -26,15 +29,15 @@ class Decision {
         this.attacks = attacks;
     }
 
-    int[] getPriorities() {
+    public int[] getPriorities() {
         return priorities;
     }
 
-    Direction[][] getMovements() {
+    public Direction[][] getMovements() {
         return movements;
     }
 
-    Direction[] getAttacks() {
+    public Direction[] getAttacks() {
         return attacks;
     }
 

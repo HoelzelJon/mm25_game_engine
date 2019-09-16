@@ -1,12 +1,15 @@
-package mech.mania;
+package mech.mania.playerCommunication;
+
+import mech.mania.Board;
+import mech.mania.Game;
 
 /**
  * This class will handle communication to and from the player script.
  */
 public abstract class PlayerCommunicator {
-    int playerNum;
+    protected int playerNum;
 
-    PlayerCommunicator(int playerNum){
+    public PlayerCommunicator(int playerNum){
         this.playerNum = playerNum;
     }
 

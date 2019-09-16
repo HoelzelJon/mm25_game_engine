@@ -1,5 +1,7 @@
 package mech.mania;
 
+import mech.mania.playerCommunication.UnitSetup;
+
 /**
  * Represents a single mech.
  */
@@ -35,7 +37,7 @@ public class Unit {
         return hp;
     }
 
-    int getSpeed() {
+    public int getSpeed() {
         return speed;
     }
 
@@ -47,7 +49,7 @@ public class Unit {
         this.pos = pos;
     }
 
-    boolean isAlive() {
+    public boolean isAlive() {
         return isAlive;
     }
 
