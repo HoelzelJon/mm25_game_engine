@@ -27,31 +27,30 @@ public class Game {
 
     private Gson gameStateSerializer;
 
-    /**
-     * @param positions array of positions for each unit to be initialized to
-     * @param map       map to add the units onto
-     * @return array of units
-     */
-    private static Unit[] initUnitList(Position[] positions, UnitSetup[] setups, int playerNum, Board map) {
-        Unit[] ret = new Unit[positions.length];
-        for (int i = 0; i < positions.length; i ++) {
-            ret[i] = new Unit(positions[i], setups[i], playerNum);
-            map.tileAt(positions[i]).setUnit(ret[i]);
+    private static Unit[] initUnitList(UnitSetup[] setups, int playerNum, Board map) {
+        List<UninitializedUnit> nonSetupUnits = map.getInitialUnits(playerNum);
+
+        Unit[] ret = new Unit[nonSetupUnits.size()];
+        for (int i = 0; i < ret.length; i ++) {
+            ret[i] = new Unit(nonSetupUnits.get(i), setups[i]);
+            map.tileAt(nonSetupUnits.get(i).getPos()).setUnit(ret[i]);
         }
         return ret;
     }
 
-    public Game(String id, String player1Name, String player2Name, UnitSetup[] p1UnitSetups, UnitSetup[] p2UnitSetups, Board map) {
+    public Game(String id,
+                String player1Name,
+                String player2Name,
+                UnitSetup[] p1UnitSetups,
+                UnitSetup[] p2UnitSetups,
+                Board map) {
         this.playerNames = new String[] {player1Name, player2Name};
         this.gameId = id;
         this.map = map;
         turnsTaken = 0;
 
-        Position[] p1Positions = map.getP1InitialPositions();
-        Position[] p2Positions = map.getP2InitialPositions();
-
-        p1Units = initUnitList(p1Positions, p1UnitSetups, 1, map);
-        p2Units = initUnitList(p2Positions, p2UnitSetups, 2, map);
+        p1Units = initUnitList(p1UnitSetups, 1, map);
+        p2Units = initUnitList(p2UnitSetups, 2, map);
 
         gameStateSerializer = new GsonBuilder().addSerializationExclusionStrategy(
             new ExclusionStrategy() {

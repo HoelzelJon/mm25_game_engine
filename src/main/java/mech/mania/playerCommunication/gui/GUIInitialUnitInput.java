@@ -25,6 +25,7 @@ public class GUIInitialUnitInput extends Application {
     private int[] priorities;
     private Direction[][] movements;
     private Direction[] attacks;
+    private List<UninitializedUnit> nonSetupUnits;
 
     private int playerNum;
     private static final int DEFAULT_SCENE_WIDTH = 600;
@@ -62,8 +63,9 @@ public class GUIInitialUnitInput extends Application {
      * GUI showing will not occur until after Application has started (and don't
      * have to deal with any issues of Application not being launched already)
      */
-    void launchInitializationGui(int setPlayerNum) {
+    void launchInitializationGui(int setPlayerNum, List<UninitializedUnit> setNonSetupUnits) {
         playerNum = setPlayerNum;
+        nonSetupUnits = setNonSetupUnits;
         try {
             start(new Stage());
         } catch (Exception e) {
@@ -92,7 +94,7 @@ public class GUIInitialUnitInput extends Application {
         HBox allComps = new HBox();
         allComps.setSpacing(10.0);
         for (int i = 0; i < unitInputs.length; i++) {
-            allComps.getChildren().add(unitInputs[i].getUnitInputVBox("Unit " + (i + 1)));
+            allComps.getChildren().add(unitInputs[i].getUnitInputVBox("Unit " + (i+1))); //TODO: nonSetupUnits.get(i).getUnitId()));
         }
 
         // error message to show to user in case of an error

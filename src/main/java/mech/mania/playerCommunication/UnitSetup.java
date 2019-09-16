@@ -19,6 +19,7 @@ public class UnitSetup {
     private int[][] attackPattern;
     private int health;
     private int speed;
+    private int unitId;
 
     public int getHealth() { return health; }
     public int getSpeed() { return speed; }
@@ -34,11 +35,12 @@ public class UnitSetup {
         speed = BASE_SPEED;
     }
 
-    public UnitSetup(int[][] setAttackPattern, boolean[][] setTerrainCreation, int setHealth, int setSpeed) {
+    public UnitSetup(int[][] setAttackPattern, boolean[][] setTerrainCreation, int setHealth, int setSpeed, int setUnitId) {
         attackPattern = setAttackPattern;
         terrainPattern = setTerrainCreation;
         health = setHealth;
         speed = setSpeed;
+        unitId = setUnitId;
     }
 
     public static boolean hasValidStartingConditions(UnitSetup[] units) {

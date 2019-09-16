@@ -93,7 +93,7 @@ public class Main {
                 e.printStackTrace();
                 System.exit(1);
             }
-            try { // TODO: get this out of this loop somehow
+            try {
                 if (!p1MadeValidDecision && !p2MadeValidDecision) {
                     visualizerOutput.printWinnerJSON(Game.TIE);
                     return;

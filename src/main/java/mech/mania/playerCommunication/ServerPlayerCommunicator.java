@@ -99,7 +99,6 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         }
     }
 
-
     @Override
     public void sendGameOver(String gameId) {
         String overMsg = "{\"gameId\": \"" + gameId + "\"}";

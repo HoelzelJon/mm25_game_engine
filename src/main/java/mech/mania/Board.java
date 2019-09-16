@@ -12,6 +12,7 @@ import mech.mania.visualizer.perTurn.TerrainStatusRepresentation;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
 
@@ -22,28 +23,24 @@ import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
 public class Board {
     private String gameId;
     private Tile[][] tiles; // 2-D array of all tiles on the board
-    private Position[][] init_positions; // init_positions[0] = array of player 1's initial positions
-                                        // init_positions[1] = array of player 2's initial positions
+    private List<UninitializedUnit> initUnits;
 
     /**
      * Default map constructor: generates map based on a random file from DIRECTORY, in the following format:
      * - formatted as a .csv file (columns separated by commas, rows separated by newlines)
      * - Indestructible tiles are marked with 'I'
      * - Destructible tiles marked with an integer for their health
-     * - Tiles which are initial spawns for units should be 'U##', where:
-     *      - the first # is replaced by either 1 or 2, based on which player owns that unit
-     *      - the second # is replaced by 0, 1, or 2, based on which unit it is
+     * - Tiles which are initial spawns for units should be 'A#' or 'B#', where:
+     *      - it is player 1's unit if the first character is 'A', or player 2's if the first character is 'B'
+     *      - the # is replaced by the ID of the unit
      */
-    public Board(String directory, String gameId) {
+    public Board(String fileLocation, String gameId) {
         this.gameId = gameId;
-        File folder = new File(directory);
-        File[] files = folder.listFiles();
-
-        int fileIndex = (int)(Math.random() * files.length);
+        File file = new File(fileLocation);
 
         List<String> fileStr = new ArrayList<>();
         try {
-            fileStr = Files.readAllLines(files[fileIndex].toPath());
+            fileStr = Files.readAllLines(file.toPath());
         } catch (Exception ex) {
             System.out.println("Error reading file.");
         }
@@ -65,7 +62,7 @@ public class Board {
 
         tiles = new Tile[width][height];
 
-        init_positions = new Position[2][Game.UNITS_PER_PLAYER];
+        initUnits = new ArrayList<>();
 
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
@@ -76,21 +73,14 @@ public class Board {
 
                     if (s.equalsIgnoreCase("I")) {
                         t.setType(Tile.Type.INDESTRUCTIBLE);
-                    } else if (s.length() >= 3 && s.charAt(0) == 'U') {
-                        int playerNum = s.charAt(1) - '0';
-                        int unitNum = s.charAt(2) - '0';
-                        try { // Only do this if unitNum is under array size
-                            // (will catch exception if Game.UNITS_PER_PLAYER < 3)
-                            init_positions[playerNum - 1][unitNum] = new Position(x, y);
-                        } catch (ArrayIndexOutOfBoundsException e){}
+                    } else if (s.length() >= 2 && (s.charAt(0) == 'A' || s.charAt(0) == 'B')) {
+                        int playerNum = s.charAt(0) == 'A' ? 1 : 2;
+                        int unitId = Integer.parseInt(s.substring(1));
+                        initUnits.add(new UninitializedUnit(unitId, playerNum, new Position(x, y)));
                     } else if (s.length() > 0) {
                         // should be a Destructible tile, so entry should be a number
-                        try {
-                            t.setHp(Integer.parseInt(s));
-                            t.setType(Tile.Type.DESTRUCTIBLE);
-                        } catch (NumberFormatException e) {
-                            System.out.println("Found weird string at position (" + x + "," + y + ") while parsing map: " + s);
-                        }
+                        t.setHp(Integer.parseInt(s));
+                        t.setType(Tile.Type.DESTRUCTIBLE);
                     }
                 }
 
@@ -99,12 +89,8 @@ public class Board {
         }
     }
 
-    Position[] getP1InitialPositions() {
-        return init_positions[0];
-    }
-
-    Position[] getP2InitialPositions() {
-        return init_positions[1];
+    public List<UninitializedUnit> getInitialUnits(int playerNum) {
+        return initUnits.stream().filter(aUnit -> aUnit.getPlayerNum() == playerNum).collect(Collectors.toList());
     }
 
     Tile tileAt(Position pos) {

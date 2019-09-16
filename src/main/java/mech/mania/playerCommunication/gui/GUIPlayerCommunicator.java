@@ -8,6 +8,8 @@ import mech.mania.playerCommunication.InvalidDecisionException;
 import mech.mania.playerCommunication.PlayerCommunicator;
 import mech.mania.playerCommunication.UnitSetup;
 
+import java.util.List;
+
 /**
  * Container class that stores values from the GUI that will end up being used
  * for starting the game.
@@ -49,15 +51,17 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public UnitSetup[] getUnitsSetup(Board map) {
+    public UnitSetup[] getUnitsSetup(Board board) {
         UnitSetup[] allUnits = new UnitSetup[NUM_UNITS];
+
+        List<UninitializedUnit> nonSetupUnits = board.getInitialUnits(playerNum);
 
         // pass in argument of the player number to display in title
         if (applicationInstance == null) {
             new Thread(() -> Application.launch(GUIInitialUnitInput.class, "" + playerNum))
                     .start();
         } else {
-            Platform.runLater(() -> applicationInstance.launchInitializationGui(playerNum));
+            Platform.runLater(() -> applicationInstance.launchInitializationGui(playerNum, nonSetupUnits));
         }
 
         // wait until the GUI is finished and get the instance of the application
@@ -74,7 +78,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
 
         for (int i = 0; i < NUM_UNITS; i++) {
             int[][] transformedMap = transformMap(allAttackPatterns[i]); //Map.toVisualCoords(allAttackPatterns[i]);
-            allUnits[i] = new UnitSetup(transformedMap, allTerrainPatterns[i], allHps[i], allSpeeds[i]);
+            allUnits[i] = new UnitSetup(transformedMap, allTerrainPatterns[i], allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
         }
 
         return allUnits;

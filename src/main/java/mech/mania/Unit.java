@@ -7,7 +7,6 @@ import mech.mania.playerCommunication.UnitSetup;
  */
 public class Unit {
     private static final int COLLISION_DAMAGE = 1;
-    private static int ID_COUNTER = 0;
 
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
@@ -18,15 +17,15 @@ public class Unit {
     private int id;
     private int playerNum;
 
-    Unit(Position setPosition, UnitSetup setup, int aPlayerNum) {
-        id = ID_COUNTER ++;
+    Unit(UninitializedUnit uninitializedUnit, UnitSetup setup) {
+        id = uninitializedUnit.getUnitId();
         hp = setup.getHealth();
         speed = setup.getSpeed();
-        pos = setPosition;
+        pos = uninitializedUnit.getPos();
         attack = setup.getAttackPattern();
         terrain = setup.getTerrainPattern();
         isAlive = true;
-        playerNum = aPlayerNum;
+        playerNum = uninitializedUnit.getPlayerNum();
     }
 
     public int getId() {
