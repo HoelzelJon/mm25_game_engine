@@ -30,7 +30,7 @@ public class GUIInitialUnitInput extends Application {
     private Direction[] attacks;
     private List<UninitializedUnit> nonSetupUnits;
 
-    private int playerNum;
+    private int playerNum = -1;
     private static final int DEFAULT_SCENE_WIDTH = 600;
     private static final int DEFAULT_SCENE_HEIGHT = 550;
 
@@ -85,6 +85,12 @@ public class GUIInitialUnitInput extends Application {
      */
     @Override
     public void start(Stage primaryStage) {
+        if (playerNum == -1) {
+            // hasn't been initialized yet
+            List<String> parameters = getParameters().getRaw();
+            playerNum = Integer.parseInt(parameters.get(0));
+        }
+
         primaryStage.setTitle("Player " + playerNum + " : Mechmania 25 Unit Initialization");
 
         InitializationInputVBox[] unitInputs = new InitializationInputVBox[3];
