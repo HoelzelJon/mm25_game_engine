@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import static mech.mania.Winner.*;
+
 /**
  * Stores the state of the game, as well as handling much of the logic during each turn
  */
@@ -84,7 +86,7 @@ public class Game {
      *         TIE if all bots are dead
      *         NO_WINNER if there are still live bots for each player
      */
-    int getWinner() {
+    Winner getWinner() {
         if (hasLiveUnit(p1Units)) {
             if (hasLiveUnit(p2Units)) {
                 return NO_WINNER;
@@ -383,11 +385,6 @@ public class Game {
             return "";
         }
     }
-
-    public static final int P1_WINNER = 0;
-    public static final int P2_WINNER = 1;
-    public static final int TIE = 2;
-    public static final int NO_WINNER = 3;
 
     public String getInitialVisualizerJson() {
         return gameStateSerializer.toJson(this);

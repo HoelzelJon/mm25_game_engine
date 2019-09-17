@@ -16,6 +16,9 @@ import mech.mania.playerCommunication.UnitSetup;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import static mech.mania.Game.UNITS_PER_PLAYER;
+import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
+
 public class GUIInitialUnitInput extends Application {
 
     private int[][][] attackPatterns;
@@ -30,8 +33,6 @@ public class GUIInitialUnitInput extends Application {
     private int playerNum;
     private static final int DEFAULT_SCENE_WIDTH = 600;
     private static final int DEFAULT_SCENE_HEIGHT = 550;
-    private static final int NUM_UNITS = 3;
-    private static final int GRID_SIZE = 7;
 
     private static GUIInitialUnitInput instance;
     private static CountDownLatch latch;
@@ -105,10 +106,10 @@ public class GUIInitialUnitInput extends Application {
         submit.setOnMouseClicked(event -> {
 
             boolean allValid = true;
-            int[][][] allAttackPatterns = new int[NUM_UNITS][GRID_SIZE][GRID_SIZE];
-            boolean[][][] allTerrainPatterns = new boolean[NUM_UNITS][GRID_SIZE][GRID_SIZE];
-            int[] allHps = new int[NUM_UNITS];
-            int[] allSpeeds = new int[NUM_UNITS];
+            int[][][] allAttackPatterns = new int[UNITS_PER_PLAYER][ATTACK_PATTERN_SIZE][ATTACK_PATTERN_SIZE];
+            boolean[][][] allTerrainPatterns = new boolean[UNITS_PER_PLAYER][ATTACK_PATTERN_SIZE][ATTACK_PATTERN_SIZE];
+            int[] allHps = new int[UNITS_PER_PLAYER];
+            int[] allSpeeds = new int[UNITS_PER_PLAYER];
 
             for (int i = 0; i < unitInputs.length; i++) {
                 // check conditions using helper method below

@@ -10,14 +10,13 @@ import mech.mania.playerCommunication.UnitSetup;
 
 import java.util.List;
 
+import static mech.mania.Game.UNITS_PER_PLAYER;
+
 /**
  * Container class that stores values from the GUI that will end up being used
  * for starting the game.
  */
 public class GUIPlayerCommunicator extends PlayerCommunicator {
-
-    private static final int NUM_UNITS = 3;
-
     // keep the JavaFX application running throughout
     private static GUIInitialUnitInput applicationInstance;
 
@@ -52,7 +51,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
 
     @Override
     public UnitSetup[] getUnitsSetup(Board board) {
-        UnitSetup[] allUnits = new UnitSetup[NUM_UNITS];
+        UnitSetup[] allUnits = new UnitSetup[UNITS_PER_PLAYER];
 
         List<UninitializedUnit> nonSetupUnits = board.getInitialUnits(playerNum);
 
@@ -76,7 +75,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
             System.exit(0);
         }
 
-        for (int i = 0; i < NUM_UNITS; i++) {
+        for (int i = 0; i < UNITS_PER_PLAYER; i++) {
             int[][] transformedBoard = transformBoard(allAttackPatterns[i]); //Board.toVisualCoords(allAttackPatterns[i]);
             allUnits[i] = new UnitSetup(transformedBoard, allTerrainPatterns[i], allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
         }

@@ -6,6 +6,9 @@ import javafx.scene.control.CheckBox;
 import javafx.scene.layout.GridPane;
 import javafx.scene.text.Text;
 
+import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
+import static mech.mania.playerCommunication.gui.AttackPatternGrid.*;
+
 /**
  * Another wrapper class that has methods to create a grid of CheckBox objects
  * in the shape defined in the POSITIONS char[][] and the INVALID, VALID, and
@@ -13,32 +16,13 @@ import javafx.scene.text.Text;
  * encounters the character in the position grid.
  */
 class TerrainPatternGrid {
-
-    private static final int SIZE = 7;
-
     /** array of the actual Nodes that will be on the grid */
-    private Node[][] nodes = new Node[SIZE][SIZE];
-
-    /** positions on the board where everything is supposed to be. */
-    private static final char[][] POSITIONS = {
-            {'x', 'x', 'x', '_', 'x', 'x', 'x'},
-            {'x', 'x', '_', '_', '_', 'x', 'x'},
-            {'x', '_', '_', '_', '_', '_', 'x'},
-            {'_', '_', '_', 'M', '_', '_', '_'},
-            {'x', '_', '_', '_', '_', '_', 'x'},
-            {'x', 'x', '_', '_', '_', 'x', 'x'},
-            {'x', 'x', 'x', '_', 'x', 'x', 'x'}
-    };
-    /** chars in the board array corresponding to each thing that is supposed
-     * to be on it */
-    private static final char INVALID = 'x';
-    private static final char VALID = '_';
-    private static final char MECH = 'M';
+    private Node[][] nodes = new Node[ATTACK_PATTERN_SIZE][ATTACK_PATTERN_SIZE];
 
     boolean[][] getTerrainPattern() {
-        boolean[][] pattern = new boolean[SIZE][SIZE];
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
+        boolean[][] pattern = new boolean[ATTACK_PATTERN_SIZE][ATTACK_PATTERN_SIZE];
+        for (int i = 0; i < ATTACK_PATTERN_SIZE; i++) {
+            for (int j = 0; j < ATTACK_PATTERN_SIZE; j++) {
                 // if null then it wasn't a textfield, ignore
                 if (nodes[i][j] == null) {
                     pattern[i][j] = false;
@@ -53,8 +37,8 @@ class TerrainPatternGrid {
     GridPane createGrid() {
         GridPane grid = new GridPane();
 
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
+        for (int i = 0; i < ATTACK_PATTERN_SIZE; i++) {
+            for (int j = 0; j < ATTACK_PATTERN_SIZE; j++) {
                 switch (POSITIONS[i][j]) {
                     case VALID:
                         CheckBox field = new CheckBox();

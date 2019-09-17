@@ -11,9 +11,13 @@ public class UnitSetup {
     private static final int[] DAMAGE_SCALING = {
             1, 3, 6, 10, 15, 21, 27
     };
-    private static final int[] STAT_SCALING = {
+    private static final int[] SPEED_SCALING = {
             1, 2, 4, 6, 9, 12, 16, 20, 25
     };
+    private static final int[] HEALTH_SCALING = {
+            1, 2, 4, 6, 9, 12, 16, 20, 25
+    };
+
 
     private boolean[][] terrainPattern;
     private int[][] attackPattern;
@@ -93,10 +97,10 @@ public class UnitSetup {
             return false;
 
         // avoid ArrayIndexOutOfBounds
-        } else if (setHealth >= STAT_SCALING.length || setSpeed >= STAT_SCALING.length) {
+        } else if (setHealth >= HEALTH_SCALING.length || setSpeed >= SPEED_SCALING.length) {
             return false;
 
-        } else if (STAT_SCALING[setHealth - 1] + STAT_SCALING[setSpeed - 1] + sum > MAX_POINTS) {
+        } else if (HEALTH_SCALING[setHealth - 1] + SPEED_SCALING[setSpeed - 1] + sum > MAX_POINTS) {
             return false;
         }
 

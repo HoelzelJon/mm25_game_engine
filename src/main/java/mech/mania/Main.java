@@ -8,6 +8,7 @@ import mech.mania.visualizer.perTurn.TurnRepresentation;
 
 import java.io.IOException;
 
+import static mech.mania.Winner.*;
 import static mech.mania.playerCommunication.UnitSetup.hasValidStartingConditions;
 
 /**
@@ -48,13 +49,13 @@ public class Main {
         try {
             if (!hasValidStartingConditions(p1setup)) {
                 if (!hasValidStartingConditions(p2setup)) {
-                    visualizerOutput.printWinnerJSON(Game.TIE);
+                    visualizerOutput.printWinnerJSON(TIE);
                 } else {
-                    visualizerOutput.printWinnerJSON(Game.P2_WINNER);
+                    visualizerOutput.printWinnerJSON(P2_WINNER);
                 }
                 return;
             } else if (!hasValidStartingConditions(p2setup)) {
-                visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+                visualizerOutput.printWinnerJSON(P1_WINNER);
                 return;
             }
         } catch (IOException e){
@@ -72,7 +73,7 @@ public class Main {
             return;
         }
 
-        while (game.getWinner() == Game.NO_WINNER) {
+        while (game.getWinner() == NO_WINNER) {
 
             Decision p1Decision = null, p2Decision = null;
             boolean p1MadeValidDecision = true;
@@ -95,13 +96,13 @@ public class Main {
             }
             try {
                 if (!p1MadeValidDecision && !p2MadeValidDecision) {
-                    visualizerOutput.printWinnerJSON(Game.TIE);
+                    visualizerOutput.printWinnerJSON(TIE);
                     return;
                 } else if (!p1MadeValidDecision) {
-                    visualizerOutput.printWinnerJSON(Game.P2_WINNER);
+                    visualizerOutput.printWinnerJSON(P2_WINNER);
                     return;
                 } else if (!p2MadeValidDecision) {
-                    visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+                    visualizerOutput.printWinnerJSON(P1_WINNER);
                     return;
                 }
             } catch (IOException e){
