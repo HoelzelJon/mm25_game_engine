@@ -1,15 +1,12 @@
 package mech.mania;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import javafx.util.Pair;
 import mech.mania.visualizer.perTurn.AttackRepresentation;
 import mech.mania.visualizer.perTurn.UnitStatusRepresentation;
 import mech.mania.visualizer.perTurn.TerrainStatusRepresentation;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -34,16 +31,11 @@ public class Board {
      *      - it is player 1's unit if the first character is 'A', or player 2's if the first character is 'B'
      *      - the # is replaced by the ID of the unit
      */
-    public Board(String fileLocation, String gameId) {
+    public Board(String fileLocation, String gameId) throws IOException {
         this.gameId = gameId;
         File file = new File(fileLocation);
 
-        List<String> fileStr = new ArrayList<>();
-        try {
-            fileStr = Files.readAllLines(file.toPath());
-        } catch (Exception ex) {
-            System.out.println("Error reading file.");
-        }
+        List<String> fileStr = Files.readAllLines(file.toPath());
 
         int height = fileStr.size();
 
@@ -96,6 +88,10 @@ public class Board {
 
     public List<UninitializedUnit> getInitialUnits(int playerNum) {
         return initUnits.stream().filter(aUnit -> aUnit.getPlayerNum() == playerNum).collect(Collectors.toList());
+    }
+
+    public List<Integer> getUnitIds(int playerNum) {
+        return getInitialUnits(playerNum).stream().map(UninitializedUnit::getUnitId).collect(Collectors.toList());
     }
 
     Tile tileAt(Position pos) {

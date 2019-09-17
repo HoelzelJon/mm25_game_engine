@@ -1,7 +1,7 @@
 package mech.mania;
 
 import com.google.gson.*;
-import mech.mania.playerCommunication.Decision;
+import mech.mania.playerCommunication.UnitDecision;
 import mech.mania.playerCommunication.UnitSetup;
 import mech.mania.visualizer.perTurn.MovementRepresentation;
 import mech.mania.visualizer.perTurn.MovementType;
@@ -9,8 +9,9 @@ import mech.mania.visualizer.perTurn.RoundRepresentation;
 import mech.mania.visualizer.perTurn.TurnRepresentation;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static mech.mania.Winner.*;
 
@@ -21,30 +22,30 @@ public class Game {
     public static final int UNITS_PER_PLAYER = 3;
 
     private Board board; // current board
-    private Unit[] p1Units; // array of Player 1's units
-    private Unit[] p2Units; // array of Player 2's units
+    private List<Unit> p1Units; // array of Player 1's units
+    private List<Unit> p2Units; // array of Player 2's units
     private String gameId;
     private String[] playerNames;
     private int turnsTaken;
 
     private Gson gameStateSerializer;
 
-    private static Unit[] initUnitList(UnitSetup[] setups, int playerNum, Board board) {
-        List<UninitializedUnit> nonSetupUnits = board.getInitialUnits(playerNum);
-
-        Unit[] ret = new Unit[nonSetupUnits.size()];
-        for (int i = 0; i < ret.length; i ++) {
-            ret[i] = new Unit(nonSetupUnits.get(i), setups[i]);
-            board.tileAt(nonSetupUnits.get(i).getPos()).setUnit(ret[i]);
+    private static List<Unit> initUnitList(List<UnitSetup> setups, int playerNum, Board board) {
+        List<Unit> ret = new ArrayList<>();
+        for (UninitializedUnit tempUnit : board.getInitialUnits(playerNum)) {
+            Unit newUnit = new Unit(tempUnit, setups.stream().filter(u -> u.getUnitId() == tempUnit.getUnitId()).findAny().get());
+            ret.add(newUnit);
+            board.tileAt(tempUnit.getPos()).setUnit(newUnit);
         }
+
         return ret;
     }
 
     public Game(String id,
                 String player1Name,
                 String player2Name,
-                UnitSetup[] p1UnitSetups,
-                UnitSetup[] p2UnitSetups,
+                List<UnitSetup> p1UnitSetups,
+                List<UnitSetup> p2UnitSetups,
                 Board board) {
         this.playerNames = new String[] {player1Name, player2Name};
         this.gameId = id;
@@ -74,27 +75,19 @@ public class Game {
     }
 
     /**
-     * @param units array of units to check
-     * @return true if any of the units in the array are alive
-     */
-    private static boolean hasLiveUnit(Unit[] units){
-        return Arrays.stream(units).anyMatch(Unit::isAlive);
-    }
-
-    /**
      * @return P1_WINNER or P2_WINNER, if the other player's bots are all dead
      *         TIE if all bots are dead
      *         NO_WINNER if there are still live bots for each player
      */
     Winner getWinner() {
-        if (hasLiveUnit(p1Units)) {
-            if (hasLiveUnit(p2Units)) {
+        if (!p1Units.isEmpty()) {
+            if (!p2Units.isEmpty()) {
                 return NO_WINNER;
             } else {
                 return P1_WINNER;
             }
         } else { // Player 1 has no live units
-            if (hasLiveUnit(p2Units)) {
+            if (!p2Units.isEmpty()) {
                 return P2_WINNER;
             } else {
                 return TIE;
@@ -108,50 +101,52 @@ public class Game {
      * @param p1Decision the decision for player 1 to take
      * @param p2Decision the decision for player 2 to take
      */
-    TurnRepresentation doTurn(Decision p1Decision, Decision p2Decision) {
+    TurnRepresentation doTurn(List<UnitDecision> p1Decision, List<UnitDecision> p2Decision) {
         turnsTaken ++;
         TurnRepresentation turnRepresentation = new TurnRepresentation(turnsTaken);
 
         for (int priority = 1; priority <= UNITS_PER_PLAYER; priority ++) {
-            ArrayList<Unit> unitsToMove = new ArrayList<>();
-            ArrayList<Direction[]> movements = new ArrayList<>();
-            ArrayList<Direction> attackDirections = new ArrayList<>();
+            List<Unit> unitsToActThisRound = new ArrayList<>();
+            List<UnitDecision> unitDecisionsThisRound = new ArrayList<>();
 
-            for (int unitNum = 0; unitNum < UNITS_PER_PLAYER; unitNum ++) {
-                if (p1Decision.getPriorities()[unitNum] == priority) {
-                    unitsToMove.add(p1Units[unitNum]);
-                    movements.add(p1Decision.getMovements()[unitNum]);
-                    attackDirections.add(p1Decision.getAttacks()[unitNum]);
-                }
+            addUnitsAndDecisionsByPriority(unitsToActThisRound, unitDecisionsThisRound, priority, p1Units, p1Decision);
+            addUnitsAndDecisionsByPriority(unitsToActThisRound, unitDecisionsThisRound, priority, p2Units, p2Decision);
 
-                if (p2Decision.getPriorities()[unitNum] == priority) {
-                    unitsToMove.add(p2Units[unitNum]);
-                    movements.add(p2Decision.getMovements()[unitNum]);
-                    attackDirections.add(p2Decision.getAttacks()[unitNum]);
-                }
-            }
-
-
-            turnRepresentation.addRound(doRound(priority, unitsToMove, movements, attackDirections));
+            turnRepresentation.addRound(doRound(priority, unitsToActThisRound, unitDecisionsThisRound));
         }
 
         return turnRepresentation;
     }
 
+    private static void addUnitsAndDecisionsByPriority(List<Unit> unitListToAddTo,
+                                                       List<UnitDecision> decisionListToAddTo,
+                                                       int priority,
+                                                       List<Unit> unitListToQuery,
+                                                       List<UnitDecision> decisionListToQuery) {
+        Optional<UnitDecision> unitDecision = decisionListToQuery.stream().filter(dec -> dec.getPriority() == priority).findFirst();
+        if (unitDecision.isPresent()) { // list may not contain the priority if a unit has died already
+            Optional<Unit> unitToAdd = unitListToQuery.stream().filter(u -> u.getId() == unitDecision.get().getUnitId()).findFirst();
+
+            if (unitToAdd.isPresent()) { // unit may not exist if it died in a previous round of this turn
+                unitListToAddTo.add(unitToAdd.get());
+                decisionListToAddTo.add(unitDecision.get());
+            }
+        }
+    }
+
     /**
      * Helper function for doTurn -- does all game logic for one round
      *
-     * @param units the units involved in this round (should all have same priority)
-     * @param movements movements.get(i) is an array representing the movement of units.get(i)
-     * @param attackDirections  the direction for each bot's attack
+     * @param units the units involved in this round
+     * @param decisions the decision that each unit in the array should take
      */
-    private RoundRepresentation doRound(int roundIndex, List<Unit> units, List<Direction[]> movements, List<Direction> attackDirections) {
+    private RoundRepresentation doRound(int roundIndex, List<Unit> units, List<UnitDecision> decisions) {
         RoundRepresentation roundRepresentation = new RoundRepresentation(roundIndex);
 
         int numMovementSteps = 0;
-        for (Direction[] unitMovements : movements) {
-            if (unitMovements.length > numMovementSteps) {
-                numMovementSteps = unitMovements.length;
+        for (Unit u : units) {
+            if (u.getSpeed() > numMovementSteps) {
+                numMovementSteps = u.getSpeed();
             }
         }
 
@@ -161,11 +156,11 @@ public class Game {
             List<Direction> stepDirections = new ArrayList<>();
 
             for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
-                if (movements.get(unitNum).length > stepNum
-                        && units.get(unitNum).getSpeed() > stepNum
+                if (units.get(unitNum).getSpeed() > stepNum
                         && !botIdsThatCollidedThisRound.contains(units.get(unitNum).getId())) {
-                    stepDirections.add(unitNum, movements.get(unitNum)[stepNum]);
+                    stepDirections.add(unitNum, decisions.get(unitNum).getMovement().get(stepNum));
                 } else {
+                    // have the non-moving bot do a 'STAY' movement, as visualizer requested
                     stepDirections.add(unitNum, Direction.STAY);
                 }
             }
@@ -182,7 +177,10 @@ public class Game {
             doDeaths();
         }
 
-        roundRepresentation.addAttacks(board.doAttacks(units, attackDirections));
+        roundRepresentation.addAttacks(
+                board.doAttacks(
+                        units,
+                        decisions.stream().map(UnitDecision::getAttack).collect(Collectors.toList())));
 
         doDeaths();
 
@@ -314,30 +312,25 @@ public class Game {
     /**
      * For any dead units, removes them from the board
      */
-    private List<Integer> doDeaths() {
-        List<Integer> ret = new ArrayList<>();
-        ret.addAll(doDeaths(p1Units));
-        ret.addAll(doDeaths(p2Units));
-        return ret;
+    private void doDeaths() {
+        doDeaths(p1Units);
+        doDeaths(p2Units);
     }
 
     /**
      * handles death for an array of units
      * @param units array of units to check death conditions for
      */
-    private List<Integer> doDeaths(Unit[] units) {
-        List<Integer> ret = new ArrayList<>();
+    private void doDeaths(List<Unit> units) {
+        List<Unit> unitsToRemove = new ArrayList<>();
         for (Unit u : units) {
-            if (u.isAlive()) {
-                Position oldPos = u.getPos();
-
-                if (u.doDeath()) {
-                    board.tileAt(oldPos).setUnit(null);
-                    ret.add(u.getId());
-                }
+            if (u.shouldDie()) {
+                board.tileAt(u.getPos()).setUnit(null);
+                unitsToRemove.add(u);
             }
         }
-        return ret;
+
+        units.removeAll(unitsToRemove);
     }
 
     public String getBoardString() {
@@ -349,15 +342,15 @@ public class Game {
 
         ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
 
-        for (int i = 0; i < p1Units.length; i++) {
-            if (p1Units[i].isAlive()) {
-                ret.append("*" + p1Units[i].getId() + ": hp = " + p1Units[i].getHp() + "\t\t\t\t");
+        for (int i = 0; i < Math.max(p1Units.size(), p2Units.size()); i++) {
+            if (p1Units.size() > i) {
+                ret.append("*" + p1Units.get(i).getId() + ": hp = " + p1Units.get(i).getHp() + "\t\t\t\t");
             } else {
                 ret.append("        \t\t\t\t");
             }
 
-            if (p2Units[i].isAlive()) {
-                ret.append("*" + p2Units[i].getId() + ": hp = " + p2Units[i].getHp() + "\n");
+            if (p2Units.size() > i) {
+                ret.append("*" + p2Units.get(i).getId() + ": hp = " + p2Units.get(i).getHp() + "\n");
             } else {
                 ret.append("        \n");
             }
@@ -366,7 +359,7 @@ public class Game {
         return ret.toString();
     }
 
-    public Unit[] getPlayerUnits(int playerNum){
+    public List<Unit> getPlayerUnits(int playerNum){
         if(playerNum == 1){
             return p1Units;
         }

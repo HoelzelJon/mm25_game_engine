@@ -1,6 +1,9 @@
 package mech.mania.playerCommunication;
 
-import java.util.Arrays;
+import mech.mania.Game;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class UnitSetup {
     public static final int ATTACK_PATTERN_SIZE = 7;
@@ -27,17 +30,9 @@ public class UnitSetup {
 
     public int getHealth() { return health; }
     public int getSpeed() { return speed; }
+    public int getUnitId() { return unitId; }
     public int[][] getAttackPattern() { return attackPattern; }
     public boolean[][] getTerrainPattern() { return terrainPattern; }
-
-    void setHealth(int setHealth) { health = setHealth; }
-    void setSpeed(int setSpeed) { speed = setSpeed; }
-    void setAttackPattern(int[][] setAttackPattern) { attackPattern = setAttackPattern; }
-
-    UnitSetup() {
-        health = BASE_HEALTH;
-        speed = BASE_SPEED;
-    }
 
     public UnitSetup(int[][] setAttackPattern, boolean[][] setTerrainCreation, int setHealth, int setSpeed, int setUnitId) {
         attackPattern = setAttackPattern;
@@ -47,45 +42,57 @@ public class UnitSetup {
         unitId = setUnitId;
     }
 
-    public static boolean hasValidStartingConditions(UnitSetup[] units) {
-        return Arrays.stream(units).allMatch(u ->
-                UnitSetup.hasValidStartingConditions(u.health, u.speed, u.attackPattern, u.terrainPattern));
-    }
-
-    public static boolean hasValidStartingConditions(int setHealth, int setSpeed, int[][] setAttackPattern, boolean[][] setTerrainCreation) {
-        if (setHealth < BASE_HEALTH || setSpeed < BASE_SPEED
-                || setAttackPattern.length != ATTACK_PATTERN_SIZE
-                || setTerrainCreation.length != ATTACK_PATTERN_SIZE) {
+    public static boolean validUnitSetups(List<UnitSetup> units, List<Integer> ids) {
+        if (units == null || units.size() != Game.UNITS_PER_PLAYER) {
             return false;
         }
 
-        for (int i = 0; i < ATTACK_PATTERN_SIZE; i++) {
-            if (setAttackPattern[i].length != ATTACK_PATTERN_SIZE || setTerrainCreation[i].length != ATTACK_PATTERN_SIZE) {
+        List<Integer> unitSetupIds = units.stream().map(u -> u.unitId).collect(Collectors.toList());
+        if (!unitSetupIds.containsAll(ids) || !ids.containsAll(unitSetupIds)) {
+            return false; // IDs in unit setups don't match with the actual unit id's
+        }
+
+        return units.stream().allMatch(UnitSetup::validUnitSetup);
+    }
+
+    public static boolean validUnitSetup(UnitSetup setup) {
+        if (setup == null
+                || setup.attackPattern == null
+                || setup.terrainPattern == null
+                || setup.health < BASE_HEALTH
+                || setup.speed < BASE_SPEED
+                || setup.attackPattern.length != ATTACK_PATTERN_SIZE
+                || setup.terrainPattern.length != ATTACK_PATTERN_SIZE) {
+            return false;
+        }
+
+        for (int x = 0; x < ATTACK_PATTERN_SIZE; x++) {
+            if (setup.attackPattern[x].length != ATTACK_PATTERN_SIZE || setup.terrainPattern[x].length != ATTACK_PATTERN_SIZE) {
                 return false;
+            }
+
+            for (int y = 0; y < ATTACK_PATTERN_SIZE; y ++) {
+                if ((x == 3 && y == 3) || Math.abs(x-3) + Math.abs(y-3) > 3) {
+                    // this position should not have any attack or terrain creation set
+                    if (setup.attackPattern[x][y] > 0 || setup.terrainPattern[x][y]) {
+                        return false;
+                    }
+                }
             }
         }
 
         int sum = 0;
-        for (int[] row : setAttackPattern) {
+        for (int[] row : setup.attackPattern) {
             for (int cell : row) {
-                if (cell > 1) {
-                    // avoid ArrayIndexOutOfBounds
-                    if (cell >= DAMAGE_SCALING.length) {
-                        sum = MAX_POINTS + 1;
-                        break;
-                    } else {
-                        sum += DAMAGE_SCALING[cell - 1];
-                    }
-
-                } else if (cell < 0) {
+                if (cell < 0 || cell >= DAMAGE_SCALING.length) {
                     return false;
+                }  else if (cell > 1) {
+                    sum += DAMAGE_SCALING[cell - 1];
                 }
-
-                sum += cell;
             }
         }
 
-        for (boolean[] row : setTerrainCreation) {
+        for (boolean[] row : setup.terrainPattern) {
             for (boolean creatingTerrain : row) {
                 if (creatingTerrain) {
                     sum += TERRAIN_COST;
@@ -93,14 +100,9 @@ public class UnitSetup {
             }
         }
 
-        if (sum > MAX_POINTS) {
+        if (setup.health >= HEALTH_SCALING.length || setup.speed >= SPEED_SCALING.length) {
             return false;
-
-        // avoid ArrayIndexOutOfBounds
-        } else if (setHealth >= HEALTH_SCALING.length || setSpeed >= SPEED_SCALING.length) {
-            return false;
-
-        } else if (HEALTH_SCALING[setHealth - 1] + SPEED_SCALING[setSpeed - 1] + sum > MAX_POINTS) {
+        } else if (HEALTH_SCALING[setup.health - 1] + SPEED_SCALING[setup.speed - 1] + sum > MAX_POINTS) {
             return false;
         }
 

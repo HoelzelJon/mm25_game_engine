@@ -1,6 +1,7 @@
 package mech.mania.playerCommunication;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import mech.mania.Board;
 import mech.mania.Game;
 
@@ -11,10 +12,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 
 public class ServerPlayerCommunicator extends PlayerCommunicator {
     private String urlString;
+    private Gson gson = new Gson();
 
     private static final int MAX_TURN_TIME_MILIS = 5000;
     private static final int MAX_INIT_DECISION_TIME_MILIS = 5000;
@@ -32,13 +36,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
 
             connection = (HttpURLConnection) url.openConnection();
             connection.setReadTimeout(timeout);
-        } catch (MalformedURLException ex) {
-            System.err.println("MalformedURLException found when connecting to player #" + playerNum);
-            System.err.println("URL= " + urlString);
-            return null;
         } catch (IOException ex) {
-            System.err.println("IOException when opening URL connection to player #" + playerNum);
-            System.err.print("URL= " + urlString);
+            ex.printStackTrace();
             return null;
         }
 
@@ -48,6 +47,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             connection.setDoInput(true);
         } catch (ProtocolException ex) {
             System.err.println("ProtocolException when setting request method to POST");
+            ex.printStackTrace();
             return null;
         }
 
@@ -56,6 +56,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             os.write(data.getBytes());
         } catch (IOException ex) {
             System.err.println("IOException when doing getOutputStream on HTTPConnection");
+            ex.printStackTrace();
             return null;
         }
 
@@ -66,6 +67,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             return s.hasNext() ? s.next() : "";
         } catch (IOException ex) {
             System.err.println("IOException when doing getInputStream on HTTPConnection");
+            ex.printStackTrace();
             return null;
         } finally {
             connection.disconnect();
@@ -73,20 +75,28 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public UnitSetup[] getUnitsSetup(Board board) {
+    public List<UnitSetup> getUnitsSetup(Board board) throws InvalidSetupException {
         String initJson = "{\n\"playerNum\":" + this.playerNum + ",\n\"gameId\":\"" + board.getGameId() + "\"\n}";
 
         String setupString = getResponse("game_init", MAX_INIT_DECISION_TIME_MILIS, initJson);
 
         if (setupString == null) {
-            return null;
+            throw new InvalidSetupException("No response received from server");
         } else {
-            Gson gson = new Gson();
-            return gson.fromJson(setupString, UnitSetup[].class);
+            try {
+                UnitSetup[] setup = gson.fromJson(setupString, UnitSetup[].class);
+                if (setup == null) {
+                    throw new InvalidSetupException("Json parsed to NULL");
+                } else {
+                    return Arrays.asList(setup);
+                }
+            } catch (JsonSyntaxException ex) {
+                throw new InvalidSetupException("Invalid JSON syntax: " + ex.getMessage());
+            }
         }
     }
 
-    public Decision getDecision(Game gameState) {
+    public List<UnitDecision> getDecision(Game gameState) throws InvalidDecisionException {
         String gameJson = gameState.getRecentPlayerJson();
 
         String decString = getResponse("turn", MAX_TURN_TIME_MILIS, gameJson);
@@ -94,8 +104,17 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         if (decString == null) {
             return null;
         } else {
-            Gson gson = new Gson();
-            return gson.fromJson(decString, Decision.class);
+            try {
+                UnitDecision[] decisions = gson.fromJson(decString, UnitDecision[].class);
+                if (decisions == null) {
+                    throw new InvalidDecisionException("Gson returned null array of decisions");
+                } else {
+                    return Arrays.asList(decisions);
+                }
+            } catch (JsonSyntaxException ex) {
+                throw new InvalidDecisionException("Exception found while parsing decision JSON");
+            }
+
         }
     }
 

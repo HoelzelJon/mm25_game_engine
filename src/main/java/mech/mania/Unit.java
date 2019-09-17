@@ -13,7 +13,6 @@ public class Unit {
     private Position pos; // position of the unit
     private int[][] attack; // 2-D grid of attack damages
     private boolean[][] terrain;
-    private boolean isAlive;
     private int id;
     private int playerNum;
 
@@ -24,7 +23,6 @@ public class Unit {
         pos = uninitializedUnit.getPos();
         attack = setup.getAttackPattern();
         terrain = setup.getTerrainPattern();
-        isAlive = true;
         playerNum = uninitializedUnit.getPlayerNum();
     }
 
@@ -48,10 +46,6 @@ public class Unit {
         this.pos = pos;
     }
 
-    public boolean isAlive() {
-        return isAlive;
-    }
-
     public int getPlayerNum() {
         return playerNum;
     }
@@ -61,25 +55,16 @@ public class Unit {
      *
      * @return true if the unit just died, false otherwise
      */
-    boolean doDeath() {
-        if (hp <= 0) {
-            isAlive = false;
-            pos = new Position(-10, -10);
-            return true;
-        }
-        return false;
+    boolean shouldDie() {
+        return hp <= 0;
     }
 
     void takeCollisionDamage() {
-        if (isAlive) {
-            hp -= COLLISION_DAMAGE;
-        }
+        hp -= COLLISION_DAMAGE;
     }
 
     public void takeDamage(int damage) {
-        if (isAlive) {
-            hp -= damage;
-        }
+        hp -= damage;
     }
 
     /**

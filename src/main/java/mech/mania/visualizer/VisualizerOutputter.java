@@ -26,8 +26,8 @@ public class VisualizerOutputter {
         try {
             fileWriter = new FileWriter(outputFile, true);
         } catch (IOException e){
-            System.err.println("IOException reached for visualizer output file. Outputting to stdout instead. " +
-                    "Error info: " + e.getMessage());
+            System.err.println("IOException reached for visualizer output file. Outputting to stdout instead.");
+            e.printStackTrace();
             useStdOut = true;
         }
     }
@@ -71,7 +71,7 @@ public class VisualizerOutputter {
         }
     }
 
-    public void sendGameOver() throws IOException{
+    public void close() throws IOException{
         if (!useStdOut){
             fileWriter.close();
         }

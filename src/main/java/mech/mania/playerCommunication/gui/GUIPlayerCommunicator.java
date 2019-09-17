@@ -3,11 +3,9 @@ package mech.mania.playerCommunication.gui;
 import javafx.application.Application;
 import javafx.application.Platform;
 import mech.mania.*;
-import mech.mania.playerCommunication.Decision;
-import mech.mania.playerCommunication.InvalidDecisionException;
-import mech.mania.playerCommunication.PlayerCommunicator;
-import mech.mania.playerCommunication.UnitSetup;
+import mech.mania.playerCommunication.*;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static mech.mania.Game.UNITS_PER_PLAYER;
@@ -50,7 +48,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public UnitSetup[] getUnitsSetup(Board board) {
+    public List<UnitSetup> getUnitsSetup(Board board) throws InvalidSetupException {
         UnitSetup[] allUnits = new UnitSetup[UNITS_PER_PLAYER];
 
         List<UninitializedUnit> nonSetupUnits = board.getInitialUnits(playerNum);
@@ -71,8 +69,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         int[] allSpeeds = applicationInstance.getSpeeds();
 
         if (allAttackPatterns == null || allHps == null || allSpeeds == null) {
-            System.err.println("Unit(s) were not initialized correctly.");
-            System.exit(0);
+            throw new InvalidSetupException("Unit(s) were not initialized correctly.");
         }
 
         for (int i = 0; i < UNITS_PER_PLAYER; i++) {
@@ -80,7 +77,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
             allUnits[i] = new UnitSetup(transformedBoard, allTerrainPatterns[i], allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
         }
 
-        return allUnits;
+        return Arrays.asList(allUnits);
     }
 
     private static int[][] transformBoard(int[][] board) {
@@ -94,7 +91,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public Decision getDecision(Game gameState) throws InvalidDecisionException {
+    public List<UnitDecision> getDecision(Game gameState) throws InvalidDecisionException {
 
         // Print gameState and Unit's stats for user to see (copied from HumanPlayerCommunicator)
         System.out.println(gameState.getBoardString());
@@ -102,22 +99,13 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
 
         System.out.println("**********Player " + playerNum + "**********");
 
-        Unit[] units = gameState.getPlayerUnits(playerNum);
+        List<Unit> units = gameState.getPlayerUnits(playerNum);
 
         Platform.runLater(() -> applicationInstance.launchDecisionGui(playerNum, units));
 
         // re-get the instance (not necessary to set to the static variable again,
         // but it's the same name variable so why bother creating a new variable.
         applicationInstance = GUIInitialUnitInput.awaitAndGetInstance();
-        int[] priorities = applicationInstance.getPriorities();
-        Direction[][] movements = applicationInstance.getMovements();
-        Direction[] attacks = applicationInstance.getAttacks();
-
-        if (priorities == null || movements == null || attacks == null) {
-            System.err.println("Decisions were not properly made.");
-            System.exit(0);
-        }
-
-        return new Decision(priorities, movements, attacks);
+        return applicationInstance.getDecisions();
     }
 }

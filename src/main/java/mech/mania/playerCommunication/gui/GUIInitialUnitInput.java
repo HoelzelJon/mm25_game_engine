@@ -9,14 +9,15 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import mech.mania.*;
-import mech.mania.playerCommunication.Decision;
 import mech.mania.playerCommunication.InvalidDecisionException;
+import mech.mania.playerCommunication.UnitDecision;
 import mech.mania.playerCommunication.UnitSetup;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 import static mech.mania.Game.UNITS_PER_PLAYER;
+import static mech.mania.playerCommunication.UnitDecision.isValidDecisionList;
 import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
 
 public class GUIInitialUnitInput extends Application {
@@ -25,9 +26,7 @@ public class GUIInitialUnitInput extends Application {
     private boolean[][][] terrainPatterns;
     private int[] hps;
     private int[] speeds;
-    private int[] priorities;
-    private Direction[][] movements;
-    private Direction[] attacks;
+    private List<UnitDecision> decisions;
     private List<UninitializedUnit> nonSetupUnits;
 
     private int playerNum = -1;
@@ -203,7 +202,7 @@ public class GUIInitialUnitInput extends Application {
      * @param setPlayerNum player number to display as the title of the GUI
      * @param units an array of Unit objects to be accessed for speed and ID
      */
-    void launchDecisionGui(final int setPlayerNum, final Unit[] units) {
+    void launchDecisionGui(final int setPlayerNum, final List<Unit> units) {
         playerNum = setPlayerNum;
         Stage stage = new Stage();
         stage.setTitle("Player " + setPlayerNum + " Decision");
@@ -215,14 +214,12 @@ public class GUIInitialUnitInput extends Application {
         // priority, movements, and attack fields that can be accessed later for
         // their values. Therefore storing both the object and the HBox created
         // by it is important.
-        DecisionInputHBox[] allUnitDerivationObjs = new DecisionInputHBox[units.length];
-        HBox[] allUnitHBoxes = new HBox[units.length];
-        for (int i = 0; i < units.length; i++) {
-            if (units[i].isAlive()) {
-                allUnitDerivationObjs[i] = new DecisionInputHBox();
-                allUnitHBoxes[i] = allUnitDerivationObjs[i].getDecisionInputHBox(
-                        "Unit " + units[i].getId(), units[i].getSpeed());
-            }
+        DecisionInputHBox[] allUnitDerivationObjs = new DecisionInputHBox[units.size()];
+        HBox[] allUnitHBoxes = new HBox[units.size()];
+        for (int i = 0; i < units.size(); i++) {
+            allUnitDerivationObjs[i] = new DecisionInputHBox();
+            allUnitHBoxes[i] = allUnitDerivationObjs[i].getDecisionInputHBox(
+                    "Unit " + units.get(i).getId(), units.get(i).getSpeed());
         }
 
         // default error message that can change if there is an error
@@ -231,52 +228,20 @@ public class GUIInitialUnitInput extends Application {
         // submit button
         Button submit = new Button("Submit");
         submit.setOnMouseClicked(event -> {
-            int[] priorities = new int[units.length];
-            Direction[][] movements = new Direction[units.length][];
-            Direction[] attacks = new Direction[units.length];
+            List<UnitDecision> myDecisions = new ArrayList<>();
 
-            for (int i = 0; i < units.length; i++) {
-
-                // if the unit is dead, then this index of the list wouldn't
-                // have been initialized, so to prevent NullPointerException
-                // we need to account for it here.
-                if (allUnitDerivationObjs[i] == null) {
-                    priorities[i] = 0;
-                    attacks[i] = Direction.STAY;
-                    Direction[] myMovements = new Direction[units[i].getSpeed()];
-                    for (int j = 0; j < units[i].getSpeed(); j++) {
-                        myMovements[j] = Direction.STAY;
-                    }
-                    movements[i] = myMovements;
-                    continue;
-                }
-
-                // if the unit is still alive, then get the corresponding values from
-                // each of the TextFields and ChoiceBoxes that were displayed on screen
-                priorities[i] = PRIORITY_MAP.get(allUnitDerivationObjs[i].priority.getValue());
-                attacks[i] = DIRECTION_MAP.get(allUnitDerivationObjs[i].attack.getValue());
-
-                Direction[] myMovements = new Direction[units[i].getSpeed()];
-                for (int j = 0; j < units[i].getSpeed(); j++) {
+            for (int i = 0; i < units.size(); i++) {
+                List<Direction> myMovements = new ArrayList<>();
+                for (int j = 0; j < units.get(i).getSpeed(); j++) {
                     String choice = allUnitDerivationObjs[i].movements[j].getValue();
-                    myMovements[j] = DIRECTION_MAP.get(choice);
+                    myMovements.add(DIRECTION_MAP.get(choice));
                 }
-                movements[i] = myMovements;
-            }
 
-            // this part is here to set priorities in a valid manner when not all units are alive
-            // TODO: find a better way to handle priorities for dead units
-            Set<Integer> unusedPriorities = new HashSet<>(Arrays.asList(1, 2, 3));
-            for (int i = 0; i < priorities.length; i ++) {
-                if (priorities[i] != 0) {
-                    unusedPriorities.remove(priorities[i]);
-                }
-            }
-            for (int i = 0; i < priorities.length; i ++) {
-                if (priorities[i] == 0) {
-                    priorities[i] = unusedPriorities.stream().findFirst().get();
-                    unusedPriorities.remove(priorities[i]);
-                }
+                myDecisions.add(
+                        new UnitDecision(PRIORITY_MAP.get(allUnitDerivationObjs[i].priority.getValue()),
+                                units.get(i).getId(),
+                                DIRECTION_MAP.get(allUnitDerivationObjs[i].attack.getValue()),
+                                myMovements));
             }
 
             // if the Decision that the player made was valid (if the priorities were
@@ -284,18 +249,14 @@ public class GUIInitialUnitInput extends Application {
             // the window and countdown the latch (which will allow the next part of
             // the code to run (awaitAndGetInstance() in this file and
             // GUIPlayerCommunicator.getDecision())
-            try {
-                Decision ignoredDecisionToCheckIfValid = new Decision(priorities, movements, attacks);
+                if (isValidDecisionList(myDecisions, units)) {
+                    decisions = myDecisions;
 
-                this.priorities = priorities;
-                this.movements = movements;
-                this.attacks = attacks;
-
-                stage.close();
-                latch.countDown();
-            } catch (InvalidDecisionException ex) {
-                errorMessage.setText(ex.getMessage());
-            }
+                    stage.close();
+                    latch.countDown();
+                } else {
+                    errorMessage.setText("Invalid decision");
+                }
         });
 
         // create a "root" node that we can store all of our stuff in
@@ -307,7 +268,7 @@ public class GUIInitialUnitInput extends Application {
         hBoxWrapper.getChildren().addAll(errorMessage, submit);
 
         // use the max speed to adjust how wide the screen should be
-        int maxSpeed = Arrays.stream(units).max(Comparator.comparingInt(Unit::getSpeed)).get().getSpeed();
+        int maxSpeed = units.stream().max(Comparator.comparingInt(Unit::getSpeed)).get().getSpeed();
         // if the screen is prematurely closed, then quit the game
         stage.setOnCloseRequest(event -> {
             latch.countDown();
@@ -344,7 +305,7 @@ public class GUIInitialUnitInput extends Application {
 
         boolean[][] terrainCreation = terrainGrid.getTerrainPattern();
 
-        return UnitSetup.hasValidStartingConditions(hp, speed, attackPattern, terrainCreation);
+        return UnitSetup.validUnitSetup(new UnitSetup(attackPattern, terrainCreation, hp, speed, 0));
     }
 
     int[][][] getAttackPatterns() {
@@ -363,18 +324,9 @@ public class GUIInitialUnitInput extends Application {
         return speeds;
     }
 
-    int[] getPriorities() {
-        return priorities;
+    List<UnitDecision> getDecisions() {
+        return decisions;
     }
-
-    Direction[][] getMovements() {
-        return movements;
-    }
-
-    Direction[] getAttacks() {
-        return attacks;
-    }
-
 }
 
 
