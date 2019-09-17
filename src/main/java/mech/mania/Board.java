@@ -66,22 +66,26 @@ public class Board {
 
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
-                Tile t = new Tile();
+                Tile t;
 
                 if (stringGrid.get(height - y - 1).length > x) {
                     String s = stringGrid.get(height - y - 1)[x].trim();
 
                     if (s.equalsIgnoreCase("I")) {
-                        t.setType(Tile.Type.INDESTRUCTIBLE);
+                        t = Tile.createIndestructible();
                     } else if (s.length() >= 2 && (s.charAt(0) == 'A' || s.charAt(0) == 'B')) {
                         int playerNum = s.charAt(0) == 'A' ? 1 : 2;
                         int unitId = Integer.parseInt(s.substring(1));
                         initUnits.add(new UninitializedUnit(unitId, playerNum, new Position(x, y)));
+                        t = Tile.createBlank();
                     } else if (s.length() > 0) {
                         // should be a Destructible tile, so entry should be a number
-                        t.setHp(Integer.parseInt(s));
-                        t.setType(Tile.Type.DESTRUCTIBLE);
+                        t = Tile.createDestructible(Integer.parseInt(s));
+                    } else {
+                        t = Tile.createBlank();
                     }
+                } else {
+                    t = Tile.createBlank();
                 }
 
                 tiles[x][y] = t;

@@ -5,13 +5,24 @@ package mech.mania;
  */
 public class Tile {
     static final int COLLISION_DAMAGE = 1;
-    private static final int DEFAULT_TILE_HP = 5;
     private static int ID_COUNTER = 100;
 
     private long id;
     private Unit unit; // the Unit present on this tile (or null, if no unit is present)
     private Type type; // the type of tile this is (see Type enum below)
     private int hp; // health of this tile (only important for DESTRUCTIBLE type)
+
+    public static Tile createIndestructible() {
+        return new Tile(Type.INDESTRUCTIBLE, 1);
+    }
+
+    public static Tile createBlank() {
+        return new Tile(Type.BLANK, 0);
+    }
+
+    public static Tile createDestructible(int hp) {
+        return new Tile(Type.DESTRUCTIBLE, hp);
+    }
 
     enum Type {
         BLANK, // blank tile -- nothing is on it (except maybe a unit)
@@ -21,11 +32,11 @@ public class Tile {
                        // units cannot be on INDESTRUCTIBLE-type tiles
     }
 
-    public Tile() {
+    private Tile(Type aType, int aHp) {
         id = ID_COUNTER++;
         unit = null;
-        type = Type.BLANK;
-        hp = DEFAULT_TILE_HP;
+        type = aType;
+        hp = aHp;
     }
 
     public long getId() {
