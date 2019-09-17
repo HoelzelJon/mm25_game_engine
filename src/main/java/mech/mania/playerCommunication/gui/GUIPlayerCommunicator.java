@@ -76,7 +76,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         }
 
         for (int i = 0; i < UNITS_PER_PLAYER; i++) {
-            int[][] transformedBoard = transformBoard(allAttackPatterns[i]); //Board.toVisualCoords(allAttackPatterns[i]);
+            int[][] transformedBoard = transformBoard(allAttackPatterns[i]);
             allUnits[i] = new UnitSetup(transformedBoard, allTerrainPatterns[i], allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
         }
 
