@@ -2,6 +2,7 @@ package mech.mania;
 
 import mech.mania.playerCommunication.*;
 import mech.mania.playerCommunication.gui.GUIPlayerCommunicator;
+import mech.mania.playerCommunication.server.ServerPlayerCommunicator;
 import mech.mania.visualizer.initial.InitialGameRepresentation;
 import mech.mania.visualizer.VisualizerOutputter;
 import mech.mania.visualizer.perTurn.TurnRepresentation;

@@ -7,7 +7,7 @@ public class Tile {
     static final int COLLISION_DAMAGE = 1;
     private static int ID_COUNTER = 100;
 
-    private long id;
+    private int id;
     private Unit unit; // the Unit present on this tile (or null, if no unit is present)
     private Type type; // the type of tile this is (see Type enum below)
     private int hp; // health of this tile (only important for DESTRUCTIBLE type)
@@ -24,7 +24,7 @@ public class Tile {
         return new Tile(Type.DESTRUCTIBLE, hp);
     }
 
-    enum Type {
+    public enum Type {
         BLANK, // blank tile -- nothing is on it (except maybe a unit)
         DESTRUCTIBLE, // destructible terrain -- becomes BLANK after hp is reduced to or below 0
                       // units cannot be on DESTRUCTIBLE-type tiles
@@ -39,7 +39,7 @@ public class Tile {
         hp = aHp;
     }
 
-    public long getId() {
+    public int getId() {
         return id;
     }
 

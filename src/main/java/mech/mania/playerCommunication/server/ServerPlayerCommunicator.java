@@ -1,9 +1,10 @@
-package mech.mania.playerCommunication;
+package mech.mania.playerCommunication.server;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import com.google.gson.*;
 import mech.mania.Board;
 import mech.mania.Game;
+import mech.mania.playerCommunication.*;
+import mech.mania.playerCommunication.server.GameState;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,7 +19,7 @@ import java.util.Scanner;
 
 public class ServerPlayerCommunicator extends PlayerCommunicator {
     private String urlString;
-    private Gson gson = new Gson();
+    private Gson gson;
 
     private static final int MAX_TURN_TIME_MILIS = 5000;
     private static final int MAX_INIT_DECISION_TIME_MILIS = 5000;
@@ -26,6 +27,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
         this.urlString = urlString;
+        gson = new Gson();
     }
 
     private String getResponse(String argument, int timeout, String data) {
@@ -97,7 +99,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     public List<UnitDecision> getDecision(Game gameState) throws InvalidDecisionException {
-        String gameJson = gameState.getRecentPlayerJson();
+        String gameJson = gson.toJson(new GameState(gameState));
 
         String decString = getResponse("turn", MAX_TURN_TIME_MILIS, gameJson);
 

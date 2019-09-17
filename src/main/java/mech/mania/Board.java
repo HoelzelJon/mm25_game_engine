@@ -94,15 +94,15 @@ public class Board {
         return getInitialUnits(playerNum).stream().map(UninitializedUnit::getUnitId).collect(Collectors.toList());
     }
 
-    Tile tileAt(Position pos) {
+    public Tile tileAt(Position pos) {
         return tiles[pos.x][pos.y];
     }
 
-    int width() {
+    public int width() {
         return tiles.length;
     }
 
-    int height() {
+    public int height() {
         return tiles[0].length;
     }
 

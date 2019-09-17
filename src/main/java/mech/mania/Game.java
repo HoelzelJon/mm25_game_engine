@@ -28,8 +28,6 @@ public class Game {
     private String[] playerNames;
     private int turnsTaken;
 
-    private Gson gameStateSerializer;
-
     private static List<Unit> initUnitList(List<UnitSetup> setups, int playerNum, Board board) {
         List<Unit> ret = new ArrayList<>();
         for (UninitializedUnit tempUnit : board.getInitialUnits(playerNum)) {
@@ -54,24 +52,6 @@ public class Game {
 
         p1Units = initUnitList(p1UnitSetups, 1, board);
         p2Units = initUnitList(p2UnitSetups, 2, board);
-
-        gameStateSerializer = new GsonBuilder().addSerializationExclusionStrategy(
-            new ExclusionStrategy() {
-                @Override
-                public boolean shouldSkipField(FieldAttributes fieldAttributes) {
-                    if (fieldAttributes.getDeclaringClass() == Game.class) {
-                        return fieldAttributes.getName().contains("Serializer") ||
-                                fieldAttributes.getName().equals("recentRounds");
-                    }
-
-                    return false;
-                }
-
-                @Override
-                public boolean shouldSkipClass(Class<?> aClass) {
-                    return false;
-                }
-            }).create();
     }
 
     /**
@@ -333,6 +313,18 @@ public class Game {
         units.removeAll(unitsToRemove);
     }
 
+    public String getGameId() {
+        return gameId;
+    }
+
+    public int getTurnsTaken() {
+        return turnsTaken;
+    }
+
+    public Board getBoard() {
+        return board;
+    }
+
     public String getBoardString() {
         return board.toString();
     }
@@ -377,13 +369,5 @@ public class Game {
         } else {
             return "";
         }
-    }
-
-    public String getInitialVisualizerJson() {
-        return gameStateSerializer.toJson(this);
-    }
-
-    public String getRecentPlayerJson() {
-        return gameStateSerializer.toJson(this);
     }
 }
