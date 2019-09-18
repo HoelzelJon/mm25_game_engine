@@ -32,6 +32,10 @@ public class VisualizerOutputter {
         }
     }
 
+    public void print(String string) throws IOException {
+        System.out.println(string);
+    }
+
     public void printInitialVisualizerJson(InitialGameRepresentation game) throws IOException{
         if (useStdOut) { // Print to stdout
             System.out.println(gson.toJson(game));
