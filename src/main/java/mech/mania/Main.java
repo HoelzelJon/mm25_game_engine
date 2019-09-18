@@ -1,12 +1,18 @@
 package mech.mania;
 
+import mech.mania.playerCommunication.*;
+import mech.mania.playerCommunication.gui.GUIPlayerCommunicator;
+import mech.mania.playerCommunication.server.ServerPlayerCommunicator;
 import mech.mania.visualizer.initial.InitialGameRepresentation;
 import mech.mania.visualizer.VisualizerOutputter;
 import mech.mania.visualizer.perTurn.TurnRepresentation;
 
 import java.io.IOException;
+import java.util.List;
 
-import static mech.mania.UnitSetup.hasValidStartingConditions;
+import static mech.mania.Winner.*;
+import static mech.mania.playerCommunication.UnitDecision.isValidDecisionList;
+import static mech.mania.playerCommunication.UnitSetup.validUnitSetups;
 
 /**
  * Main class -- where the magic happens
@@ -17,11 +23,11 @@ public class Main {
 
     public static void main(String[] args) {
         if (args.length < 6) {
-            System.out.println("Invalid arguments. Expected [gameId] [mapDirectory] [player1Name] [player2Name] [player1URL (or 'HUMAN')] [player2URL (or 'HUMAN')] [outputFile or 'STDOUT']");
+            System.err.println("Invalid arguments. Expected [gameId] [boardDirectory] [player1Name] [player2Name] [player1URL (or 'HUMAN')] [player2URL (or 'HUMAN')] [outputFile or 'STDOUT']");
         }
 
         String gameID = args[0];
-        String mapDirectory = args[1];
+        String boardDirectory = args[1];
         String p1Name = args[2];
         String p2Name = args[3];
         String p1URL = args[4];
@@ -31,10 +37,14 @@ public class Main {
         PlayerCommunicator player1 = getPlayerForURL(p1URL, 1);
         PlayerCommunicator player2 = getPlayerForURL(p2URL, 2);
 
-        Board map = new Board(mapDirectory, gameID);
-
-        UnitSetup[] p1setup = player1.getUnitsSetup(map);
-        UnitSetup[] p2setup = player2.getUnitsSetup(map);
+        Board board;
+        try {
+            board = new Board(boardDirectory, gameID);
+        } catch (IOException ex) {
+            System.err.println("IOException encountered when initializing board");
+            ex.printStackTrace();
+            return;
+        }
 
         VisualizerOutputter visualizerOutput;
         if (outputFile.equals(OUTPUT_FILE_FOR_STDOUT)) {
@@ -43,67 +53,72 @@ public class Main {
             visualizerOutput = new VisualizerOutputter(outputFile);
         }
 
+        boolean p1SetupValid;
+        boolean p2SetupValid;
+        List<UnitSetup> p1Setup = null;
+        List<UnitSetup> p2Setup = null;
         try {
-            if (!hasValidStartingConditions(p1setup)) {
-                if (!hasValidStartingConditions(p2setup)) {
-                    visualizerOutput.printWinnerJSON(Game.TIE);
-                } else {
-                    visualizerOutput.printWinnerJSON(Game.P2_WINNER);
-                }
-                return;
-            } else if (!hasValidStartingConditions(p2setup)) {
-                visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+            p1Setup = player1.getUnitsSetup(board);
+            p1SetupValid = validUnitSetups(p1Setup, board.getUnitIds(1));
+        } catch (InvalidSetupException ex) {
+            ex.printStackTrace();
+            p1SetupValid = false;
+        }
+
+        try {
+            p2Setup = player2.getUnitsSetup(board);
+            p2SetupValid = validUnitSetups(p2Setup, board.getUnitIds(2));
+        } catch (InvalidSetupException ex) {
+            ex.printStackTrace();
+            p2SetupValid = false;
+        }
+
+        try {
+            if (printWinnerIfInvalid(p1SetupValid, p2SetupValid, visualizerOutput)) {
                 return;
             }
         } catch (IOException e){
-            System.err.println(e.getMessage());
+            e.printStackTrace();
             return;
         }
 
-        Game game = new Game(gameID, p1Name, p2Name, p1setup, p2setup, map);
+        Game game = new Game(gameID, p1Name, p2Name, p1Setup, p2Setup, board);
 
         // Print initial visualizer Json
         try {
             visualizerOutput.printInitialVisualizerJson(new InitialGameRepresentation(game));
         } catch (IOException e){
-            System.err.println(e.getMessage());
+            e.printStackTrace();
             return;
         }
 
-        while (game.getWinner() == Game.NO_WINNER) {
+        while (game.getWinner() == NO_WINNER) {
 
-            Decision p1Decision = null, p2Decision = null;
-            boolean p1MadeValidDecision = true;
-            boolean p2MadeValidDecision = true;
+            List<UnitDecision> p1Decision = null, p2Decision = null;
+            boolean p1MadeValidDecision;
+            boolean p2MadeValidDecision;
             try {
-                try {
-                    p1Decision = player1.getDecision(game);
-                } catch (InvalidDecisionException e) {
-                    p1MadeValidDecision = false;
-                }
-
-                try {
-                    p2Decision = player2.getDecision(game);
-                } catch (InvalidDecisionException e) {
-                    p2MadeValidDecision = false;
-                }
-            } catch (RuntimeException e) {
-                e.printStackTrace();
-                System.exit(1);
+                p1Decision = player1.getDecision(game);
+                p1MadeValidDecision = isValidDecisionList(p1Decision, game.getPlayerUnits(1));
+            } catch (InvalidDecisionException e) {
+                p1MadeValidDecision = false;
+                System.err.println(e.getStackTrace());
             }
-            try { // TODO: get this out of this loop somehow
-                if (!p1MadeValidDecision && !p2MadeValidDecision) {
-                    visualizerOutput.printWinnerJSON(Game.TIE);
-                    return;
-                } else if (!p1MadeValidDecision) {
-                    visualizerOutput.printWinnerJSON(Game.P2_WINNER);
-                    return;
-                } else if (!p2MadeValidDecision) {
-                    visualizerOutput.printWinnerJSON(Game.P1_WINNER);
+
+            try {
+                p2Decision = player2.getDecision(game);
+                p2MadeValidDecision = isValidDecisionList(p2Decision, game.getPlayerUnits(2));
+            } catch (InvalidDecisionException e) {
+                p2MadeValidDecision = false;
+                System.err.println(e.getStackTrace());
+            }
+
+            try {
+                if (printWinnerIfInvalid(p1MadeValidDecision, p2MadeValidDecision, visualizerOutput)) {
                     return;
                 }
             } catch (IOException e){
-                System.err.println(e.getMessage());
+                e.printStackTrace();
                 return;
             }
 
@@ -112,23 +127,38 @@ public class Main {
             try {
                 visualizerOutput.printSingleTurnVisualizerJson(turn);
             } catch (IOException e) {
-                System.err.println(e.getMessage());
+                e.printStackTrace();
                 return;
             }
         }
-
-
 
         player1.sendGameOver(gameID);
         player2.sendGameOver(gameID);
 
         try {
             visualizerOutput.printWinnerJSON(game.getWinner());
-            visualizerOutput.sendGameOver();
+            visualizerOutput.close();
         } catch (IOException e){
-            System.err.println(e.getMessage());
-            return;
+            e.printStackTrace();
         }
+    }
+
+    /**
+     * @return true iff one of the two inputs is false
+     */
+    private static boolean printWinnerIfInvalid(boolean p1Valid, boolean p2Valid, VisualizerOutputter outputter) throws IOException {
+        if (!p1Valid && !p2Valid) {
+            outputter.printWinnerJSON(TIE);
+            return true;
+        } else if (!p1Valid) {
+            outputter.printWinnerJSON(P2_WINNER);
+            return true;
+        } else if (!p2Valid) {
+            outputter.printWinnerJSON(P1_WINNER);
+            return true;
+        }
+
+        return false;
     }
 
     private static PlayerCommunicator getPlayerForURL(String url, int playerNum) {

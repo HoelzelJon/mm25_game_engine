@@ -9,7 +9,7 @@ public class Position {
     public int x;
     public int y;
 
-    Position(int x, int y){
+    public Position(int x, int y){
         this.x = x;
         this.y = y;
     }
@@ -31,7 +31,7 @@ public class Position {
     /**
      * @param dir direction in which you want to move
      * @return position that is 1 unit from this, in direction dir
-     *         (NOTE: the position (0,0) is the bottom-left of the map)
+     *         (NOTE: the position (0,0) is the bottom-left of the board)
      */
     public Position getNewPosition(Direction dir) {
         if (dir == Direction.DOWN) {

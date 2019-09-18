@@ -1,19 +1,17 @@
 package mech.mania;
 
-import com.google.gson.ExclusionStrategy;
-import com.google.gson.FieldAttributes;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import javafx.util.Pair;
 import mech.mania.visualizer.perTurn.AttackRepresentation;
 import mech.mania.visualizer.perTurn.UnitStatusRepresentation;
 import mech.mania.visualizer.perTurn.TerrainStatusRepresentation;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
-import static mech.mania.UnitSetup.ATTACK_PATTERN_SIZE;
+import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
 
 /**
  * Stores the 2-D array of tiles that makes up the game board.
@@ -22,31 +20,22 @@ import static mech.mania.UnitSetup.ATTACK_PATTERN_SIZE;
 public class Board {
     private String gameId;
     private Tile[][] tiles; // 2-D array of all tiles on the board
-    private Position[][] init_positions; // init_positions[0] = array of player 1's initial positions
-                                        // init_positions[1] = array of player 2's initial positions
+    private List<UninitializedUnit> initUnits;
 
     /**
-     * Default map constructor: generates map based on a random file from DIRECTORY, in the following format:
+     * Default board constructor: generates board based on a random file from DIRECTORY, in the following format:
      * - formatted as a .csv file (columns separated by commas, rows separated by newlines)
      * - Indestructible tiles are marked with 'I'
      * - Destructible tiles marked with an integer for their health
-     * - Tiles which are initial spawns for units should be 'U##', where:
-     *      - the first # is replaced by either 1 or 2, based on which player owns that unit
-     *      - the second # is replaced by 0, 1, or 2, based on which unit it is
+     * - Tiles which are initial spawns for units should be 'A#' or 'B#', where:
+     *      - it is player 1's unit if the first character is 'A', or player 2's if the first character is 'B'
+     *      - the # is replaced by the ID of the unit
      */
-    public Board(String directory, String gameId) {
+    public Board(String fileLocation, String gameId) throws IOException {
         this.gameId = gameId;
-        File folder = new File(directory);
-        File[] files = folder.listFiles();
+        File file = new File(fileLocation);
 
-        int fileIndex = (int)(Math.random() * files.length);
-
-        List<String> fileStr = new ArrayList<>();
-        try {
-            fileStr = Files.readAllLines(files[fileIndex].toPath());
-        } catch (Exception ex) {
-            System.out.println("Error reading file.");
-        }
+        List<String> fileStr = Files.readAllLines(file.toPath());
 
         int height = fileStr.size();
 
@@ -65,57 +54,55 @@ public class Board {
 
         tiles = new Tile[width][height];
 
-        init_positions = new Position[2][Game.UNITS_PER_PLAYER];
+        initUnits = new ArrayList<>();
 
         for (int x = 0; x < width; x ++) {
             for (int y = 0; y < height; y ++) {
-                Tile t = new Tile();
+                Tile t;
 
                 if (stringGrid.get(height - y - 1).length > x) {
                     String s = stringGrid.get(height - y - 1)[x].trim();
 
                     if (s.equalsIgnoreCase("I")) {
-                        t.setType(Tile.Type.INDESTRUCTIBLE);
-                    } else if (s.length() >= 3 && s.charAt(0) == 'U') {
-                        int playerNum = s.charAt(1) - '0';
-                        int unitNum = s.charAt(2) - '0';
-                        try { // Only do this if unitNum is under array size
-                            // (will catch exception if Game.UNITS_PER_PLAYER < 3)
-                            init_positions[playerNum - 1][unitNum] = new Position(x, y);
-                        } catch (ArrayIndexOutOfBoundsException e){}
+                        t = Tile.createIndestructible();
+                    } else if (s.length() >= 2 && (s.charAt(0) == 'A' || s.charAt(0) == 'B')) {
+                        int playerNum = s.charAt(0) == 'A' ? 1 : 2;
+                        int unitId = Integer.parseInt(s.substring(1));
+                        initUnits.add(new UninitializedUnit(unitId, playerNum, new Position(x, y)));
+                        t = Tile.createBlank();
                     } else if (s.length() > 0) {
                         // should be a Destructible tile, so entry should be a number
-                        try {
-                            t.setHp(Integer.parseInt(s));
-                            t.setType(Tile.Type.DESTRUCTIBLE);
-                        } catch (NumberFormatException e) {
-                            System.out.println("Found weird string at position (" + x + "," + y + ") while parsing map: " + s);
-                        }
+                        t = Tile.createDestructible(Integer.parseInt(s));
+                    } else {
+                        t = Tile.createBlank();
                     }
+                } else {
+                    t = Tile.createBlank();
                 }
 
                 tiles[x][y] = t;
             }
         }
+        initUnits.sort(Comparator.comparingInt(UninitializedUnit::getUnitId));
     }
 
-    Position[] getP1InitialPositions() {
-        return init_positions[0];
+    public List<UninitializedUnit> getInitialUnits(int playerNum) {
+        return initUnits.stream().filter(aUnit -> aUnit.getPlayerNum() == playerNum).collect(Collectors.toList());
     }
 
-    Position[] getP2InitialPositions() {
-        return init_positions[1];
+    public List<Integer> getUnitIds(int playerNum) {
+        return getInitialUnits(playerNum).stream().map(UninitializedUnit::getUnitId).collect(Collectors.toList());
     }
 
-    Tile tileAt(Position pos) {
+    public Tile tileAt(Position pos) {
         return tiles[pos.x][pos.y];
     }
 
-    int width() {
+    public int width() {
         return tiles.length;
     }
 
-    int height() {
+    public int height() {
         return tiles[0].length;
     }
 
@@ -278,60 +265,11 @@ public class Board {
     }
 
     /**
-     * Transform from visual coordinates to game coordinates by reflecting horizontally
-     * 
-     * @param map The map (in visual coordinates) to transform to game coordinates
-     * 
-     * @return The map transformed to game coordinates
-     */
-    static int[][] toGameCoords(int[][] map){
-        int[][] transform = new int[map.length][map[0].length];
-        for(int r = 0; r < transform.length; r++){
-            for (int c = 0; c < transform[0].length; c++){
-                transform[r][c] = map[map.length - r - 1][c];
-            }
-        }
-        return transform;
-    }
-
-    /**
-     * @param pos a position that may or may not be on the map
-     * @return true if the position lies within the map, false otherwise
+     * @param pos a position that may or may not be on the board
+     * @return true if the position lies within the board, false otherwise
      */
     boolean inBounds(Position pos) {
         return (pos.x >= 0 && pos.x < width() && pos.y >= 0 && pos.y < height());
-    }
-
-    /**
-     * Transform from game coordinate to visual coordinate by reflecting horizontally
-     * 
-     * @param map The map (in game coordinates) to transform to visual coordinates
-     * 
-     * @return The map transformed to visual coordinates
-     */
-    static int[][] toVisualCoords(int [][] map){
-        // Since a horizontal reflect works both ways, both coordinate conversions are the same
-        return toGameCoords(map);
-    }
-
-    String toInitialPlayerJSON() {
-        Gson serializer = new GsonBuilder().addSerializationExclusionStrategy(
-                new ExclusionStrategy() {
-                    @Override
-                    public boolean shouldSkipField(FieldAttributes fieldAttributes) {
-                        if (fieldAttributes.getDeclaringClass() == Tile.class) {
-                            return fieldAttributes.getName().equals("id") ||
-                                    fieldAttributes.getName().equals("unit");
-                        }
-                        return false;
-                    }
-
-                    @Override
-                    public boolean shouldSkipClass(Class<?> aClass) {
-                        return false;
-                    }
-                }).create();
-        return serializer.toJson(this);
     }
 
     public String getGameId(){ return gameId; }

@@ -10,7 +10,7 @@ public class InitialGameRepresentation {
 
     public InitialGameRepresentation(Game aGame) {
         teams = Arrays.asList(
-                new TeamRepresentation(Arrays.asList(aGame.getPlayerUnits(1)), aGame.getPlayerName(1)),
-                new TeamRepresentation(Arrays.asList(aGame.getPlayerUnits(2)), aGame.getPlayerName(2)));
+                new TeamRepresentation(aGame.getPlayerUnits(1), aGame.getPlayerName(1)),
+                new TeamRepresentation(aGame.getPlayerUnits(2), aGame.getPlayerName(2)));
     }
 }
