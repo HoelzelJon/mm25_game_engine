@@ -102,6 +102,7 @@ public class Main {
                 p1MadeValidDecision = isValidDecisionList(p1Decision, game.getPlayerUnits(1));
             } catch (InvalidDecisionException e) {
                 p1MadeValidDecision = false;
+                System.err.println(e.getStackTrace());
             }
 
             try {
@@ -109,6 +110,7 @@ public class Main {
                 p2MadeValidDecision = isValidDecisionList(p2Decision, game.getPlayerUnits(2));
             } catch (InvalidDecisionException e) {
                 p2MadeValidDecision = false;
+                System.err.println(e.getStackTrace());
             }
 
             try {
