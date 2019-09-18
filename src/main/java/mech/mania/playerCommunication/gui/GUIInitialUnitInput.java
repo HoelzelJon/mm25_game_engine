@@ -10,6 +10,7 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import mech.mania.*;
 import mech.mania.playerCommunication.InvalidDecisionException;
+import mech.mania.playerCommunication.InvalidSetupException;
 import mech.mania.playerCommunication.UnitDecision;
 import mech.mania.playerCommunication.UnitSetup;
 
@@ -17,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 import static mech.mania.Game.UNITS_PER_PLAYER;
-import static mech.mania.playerCommunication.UnitDecision.isValidDecisionList;
+import static mech.mania.playerCommunication.UnitDecision.throwExceptionOnInvalidDecisionList;
 import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
 
 public class GUIInitialUnitInput extends Application {
@@ -249,13 +250,14 @@ public class GUIInitialUnitInput extends Application {
             // the window and countdown the latch (which will allow the next part of
             // the code to run (awaitAndGetInstance() in this file and
             // GUIPlayerCommunicator.getDecision())
-                if (isValidDecisionList(myDecisions, units)) {
+                try {
+                    throwExceptionOnInvalidDecisionList(myDecisions, units);
                     decisions = myDecisions;
 
                     stage.close();
                     latch.countDown();
-                } else {
-                    errorMessage.setText("Invalid decision");
+                } catch (InvalidDecisionException ex) {
+                    errorMessage.setText("Invalid decision: " + ex.getMessage());
                 }
         });
 
@@ -305,7 +307,12 @@ public class GUIInitialUnitInput extends Application {
 
         boolean[][] terrainCreation = terrainGrid.getTerrainPattern();
 
-        return UnitSetup.validUnitSetup(new UnitSetup(attackPattern, terrainCreation, hp, speed, 0));
+        try {
+            UnitSetup.throwExceptionOnInvalidSetup(new UnitSetup(attackPattern, terrainCreation, hp, speed, 0));
+            return true;
+        } catch (InvalidSetupException ex){
+            return false;
+        }
     }
 
     int[][][] getAttackPatterns() {
