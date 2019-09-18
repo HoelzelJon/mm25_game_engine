@@ -36,34 +36,44 @@ public class UnitDecision {
         return attack;
     }
 
-    public static boolean isValidDecisionList(List<UnitDecision> decisions, List<Unit> units) {
-        if (decisions == null || decisions.size() != units.size()) {
-            return false;
+    public static void throwExceptionOnInvalidDecisionList(List<UnitDecision> decisions, List<Unit> units) throws InvalidDecisionException {
+        if (decisions == null) {
+            throw new InvalidDecisionException("Decision list is null");
+        } else if (decisions.size() != units.size()) {
+            throw new InvalidDecisionException("Size of decisions list is incorrect. Expected " + units.size() + ", got " + decisions.size());
         }
 
         Collection<Integer> usedPriorities = new HashSet<>();
         for (UnitDecision decision : decisions) {
-            if (usedPriorities.contains(decision.priority) || !validPriorities.contains(decision.priority)) {
-                return false;
+            if (decision == null) {
+                throw new InvalidDecisionException("Null decision found in decision list");
+            } else if (usedPriorities.contains(decision.priority)) {
+                throw new InvalidDecisionException("Used same priority for two different units: " + decision.priority);
+            } else if (!validPriorities.contains(decision.priority)) {
+                throw new InvalidDecisionException("Invalid priority chosen: unitId = " + decision.unitId + ", priority = " + decision.priority);
             }
             usedPriorities.add(decision.priority);
 
             Optional<Unit> unit = units.stream().filter(u -> u.getId() == decision.getUnitId()).findAny();
             if (!unit.isPresent()) {
-                return false;
-            } else if (!isValidDecision(decision, unit.get())) {
-                return false;
+                throw new InvalidDecisionException("Specified invalid unitId in decision: " + decision.unitId);
+            } else {
+                throwExceptionOnInvalidDecision(decision, unit.get()); // TODO: catch and re-throw to add unitId in exception message
             }
         }
-
-        return true;
     }
 
-    private static boolean isValidDecision(UnitDecision decision, Unit unit) {
-        return (decision != null
-                && decision.movement != null
-                && decision.attack != null
-                && decision.movement.stream().noneMatch(Objects::isNull)
-                && decision.movement.size() == unit.getSpeed());
+    private static void throwExceptionOnInvalidDecision(UnitDecision decision, Unit unit) throws InvalidDecisionException {
+        if (decision == null) {
+            throw new InvalidDecisionException("Null decision found");
+        } else if (decision.movement == null) {
+            throw new InvalidDecisionException("Decision contains null movement array");
+        } else if (decision.attack == null) {
+            throw new InvalidDecisionException("Decision contains null attack choice");
+        } else if (decision.movement.stream().noneMatch(Objects::isNull)) {
+            throw new InvalidDecisionException("Decision contains null element in movement array");
+        } else if (decision.movement.size() != unit.getSpeed()) {
+            throw new InvalidDecisionException("Decision movement array is incorrect length");
+        }
     }
 }

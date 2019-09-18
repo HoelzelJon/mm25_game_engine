@@ -11,8 +11,8 @@ import java.io.IOException;
 import java.util.List;
 
 import static mech.mania.Winner.*;
-import static mech.mania.playerCommunication.UnitDecision.isValidDecisionList;
-import static mech.mania.playerCommunication.UnitSetup.validUnitSetups;
+import static mech.mania.playerCommunication.UnitDecision.throwExceptionOnInvalidDecisionList;
+import static mech.mania.playerCommunication.UnitSetup.throwExceptionOnInvalidSetupList;
 
 /**
  * Main class -- where the magic happens
@@ -59,18 +59,20 @@ public class Main {
         List<UnitSetup> p2Setup = null;
         try {
             p1Setup = player1.getUnitsSetup(board);
-            p1SetupValid = validUnitSetups(p1Setup, board.getUnitIds(1));
+            throwExceptionOnInvalidSetupList(p1Setup, board.getUnitIds(1));
+            p1SetupValid = true;
         } catch (InvalidSetupException ex) {
-            ex.printStackTrace();
             p1SetupValid = false;
+            System.err.println("Player 1 made invalid setup: " + ex.getMessage());
         }
 
         try {
             p2Setup = player2.getUnitsSetup(board);
-            p2SetupValid = validUnitSetups(p2Setup, board.getUnitIds(2));
+            throwExceptionOnInvalidSetupList(p2Setup, board.getUnitIds(2));
+            p2SetupValid = true;
         } catch (InvalidSetupException ex) {
-            ex.printStackTrace();
             p2SetupValid = false;
+            System.err.println("Player 2 made invalid setup: " + ex.getMessage());
         }
 
         try {
@@ -99,18 +101,20 @@ public class Main {
             boolean p2MadeValidDecision;
             try {
                 p1Decision = player1.getDecision(game);
-                p1MadeValidDecision = isValidDecisionList(p1Decision, game.getPlayerUnits(1));
+                throwExceptionOnInvalidDecisionList(p1Decision, game.getPlayerUnits(1));
+                p1MadeValidDecision = true;
             } catch (InvalidDecisionException e) {
                 p1MadeValidDecision = false;
-                System.err.println(e.getStackTrace());
+                System.err.println("Error in player 1 decision: " + e.getMessage());
             }
 
             try {
                 p2Decision = player2.getDecision(game);
-                p2MadeValidDecision = isValidDecisionList(p2Decision, game.getPlayerUnits(2));
+                throwExceptionOnInvalidDecisionList(p2Decision, game.getPlayerUnits(2));
+                p2MadeValidDecision = true;
             } catch (InvalidDecisionException e) {
                 p2MadeValidDecision = false;
-                System.err.println(e.getStackTrace());
+                System.err.println("Error in player 2 decision: " + e.getMessage());
             }
 
             try {

@@ -3,6 +3,7 @@ package mech.mania.playerCommunication;
 import mech.mania.Game;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class UnitSetup {
@@ -42,40 +43,57 @@ public class UnitSetup {
         unitId = setUnitId;
     }
 
-    public static boolean validUnitSetups(List<UnitSetup> units, List<Integer> ids) {
-        if (units == null || units.size() != Game.UNITS_PER_PLAYER) {
-            return false;
+    public static void throwExceptionOnInvalidSetupList(List<UnitSetup> setups, List<Integer> ids) throws InvalidSetupException {
+        if (setups == null) {
+            throw new InvalidSetupException("Setup list is null");
+        } else if (setups.size() != Game.UNITS_PER_PLAYER) {
+            throw new InvalidSetupException("Setup list is incorrect size. Expected " + Game.UNITS_PER_PLAYER + ", received " + setups.size());
+        } else if (setups.stream().anyMatch(Objects::isNull)) {
+            throw new InvalidSetupException("Setup list contains one or more null elements");
         }
 
-        List<Integer> unitSetupIds = units.stream().map(u -> u.unitId).collect(Collectors.toList());
+        List<Integer> unitSetupIds = setups.stream().map(s -> s.unitId).collect(Collectors.toList());
         if (!unitSetupIds.containsAll(ids) || !ids.containsAll(unitSetupIds)) {
-            return false; // IDs in unit setups don't match with the actual unit id's
+            throw new InvalidSetupException("Setup list contains different unit Ids than this player's units");
         }
 
-        return units.stream().allMatch(UnitSetup::validUnitSetup);
+        for (UnitSetup setup : setups) {
+            try {
+                throwExceptionOnInvalidSetup(setup);
+            } catch (InvalidSetupException ex) {
+                throw new InvalidSetupException("Invalid setup for unitId " + setup.unitId + ": " + ex.getMessage());
+            }
+        }
     }
 
-    public static boolean validUnitSetup(UnitSetup setup) {
-        if (setup == null
-                || setup.attackPattern == null
-                || setup.terrainPattern == null
-                || setup.health < BASE_HEALTH
-                || setup.speed < BASE_SPEED
-                || setup.attackPattern.length != ATTACK_PATTERN_SIZE
-                || setup.terrainPattern.length != ATTACK_PATTERN_SIZE) {
-            return false;
+    public static void throwExceptionOnInvalidSetup(UnitSetup setup) throws InvalidSetupException {
+        if (setup.attackPattern == null) {
+            throw new InvalidSetupException("Setup contains null attack pattern");
+        } else if (setup.terrainPattern == null) {
+            throw new InvalidSetupException("Setup contains null terrain pattern");
+        } else if (setup.health < BASE_HEALTH || setup.health >= HEALTH_SCALING.length) {
+            throw new InvalidSetupException("Invalid health value: " + setup.health);
+        } else if (setup.speed < BASE_SPEED || setup.speed >= SPEED_SCALING.length) {
+            throw new InvalidSetupException("Invalid speed value: " + setup.speed);
+        } else if (setup.attackPattern.length != ATTACK_PATTERN_SIZE) {
+            throw new InvalidSetupException("Incorrect size of attack pattern in setup");
+        } else if (setup.terrainPattern.length != ATTACK_PATTERN_SIZE) {
+            throw new InvalidSetupException("Incorrect size of terrain pattern in setup");
         }
 
         for (int x = 0; x < ATTACK_PATTERN_SIZE; x++) {
-            if (setup.attackPattern[x].length != ATTACK_PATTERN_SIZE || setup.terrainPattern[x].length != ATTACK_PATTERN_SIZE) {
-                return false;
+            if (setup.attackPattern[x].length != ATTACK_PATTERN_SIZE) {
+                throw new InvalidSetupException("Incorrect size of attack pattern");
+            } else if (setup.terrainPattern[x].length != ATTACK_PATTERN_SIZE) {
+                throw new InvalidSetupException("Incorrect size of terrain pattern");
             }
 
             for (int y = 0; y < ATTACK_PATTERN_SIZE; y ++) {
                 if ((x == 3 && y == 3) || Math.abs(x-3) + Math.abs(y-3) > 3) {
-                    // this position should not have any attack or terrain creation set
-                    if (setup.attackPattern[x][y] > 0 || setup.terrainPattern[x][y]) {
-                        return false;
+                    if (setup.attackPattern[x][y] > 0){
+                        throw new InvalidSetupException("Non-zero damage set outside of allowed attack bounds");
+                    } else if (setup.terrainPattern[x][y]) {
+                        throw new InvalidSetupException("Terrain creation set to true outside of allowed attack bounds");
                     }
                 }
             }
@@ -85,7 +103,7 @@ public class UnitSetup {
         for (int[] row : setup.attackPattern) {
             for (int cell : row) {
                 if (cell < 0 || cell >= DAMAGE_SCALING.length) {
-                    return false;
+                    throw new InvalidSetupException("Invalid damage value set in attack pattern: " + cell);
                 }  else if (cell > 1) {
                     sum += DAMAGE_SCALING[cell - 1];
                 }
@@ -100,12 +118,10 @@ public class UnitSetup {
             }
         }
 
-        if (setup.health >= HEALTH_SCALING.length || setup.speed >= SPEED_SCALING.length) {
-            return false;
-        } else if (HEALTH_SCALING[setup.health - 1] + SPEED_SCALING[setup.speed - 1] + sum > MAX_POINTS) {
-            return false;
+        sum += HEALTH_SCALING[setup.health - 1];
+        sum += SPEED_SCALING[setup.speed - 1];
+        if (sum > MAX_POINTS) {
+            throw new InvalidSetupException("Setup cost too high: " + sum);
         }
-
-        return true;
     }
 }
