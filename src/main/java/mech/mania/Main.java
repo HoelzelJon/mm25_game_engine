@@ -84,14 +84,9 @@ public class Main {
             return;
         }
 
-        try {
-            String argumentsString = String.format("gameID: %s, boardDirectory: %s, p1Name: %s, p2Name: %s, p1URL: %s, p2URL: %s, outputFile: %s",
-                    gameID, boardDirectory, p1Name, p2Name, p1URL, p2URL, outputFile);
-            visualizerOutput.print(argumentsString);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        String argumentsString = String.format("gameID: %s, boardDirectory: %s, p1Name: %s, p2Name: %s, p1URL: %s, p2URL: %s, outputFile: %s",
+                gameID, boardDirectory, p1Name, p2Name, p1URL, p2URL, outputFile);
+        System.err.println(argumentsString);
 
         Game game = new Game(gameID, p1Name, p2Name, p1Setup, p2Setup, board);
 
