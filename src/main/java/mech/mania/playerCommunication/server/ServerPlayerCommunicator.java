@@ -120,7 +120,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     public List<UnitDecision> getDecision(Game gameState) throws InvalidDecisionException {
-        String gameJson = gson.toJson(new GameState(gameState));
+        String gameJson = gson.toJson(new GameState(gameState, playerNum));
 
         String decString = getResponse("turn", MAX_TURN_TIME_MILIS, gameJson);
 
