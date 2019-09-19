@@ -43,7 +43,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public void sendGameOver(String gameID) {
+    public void sendGameOver(String gameID, int winner) {
         onGameEnd();
     }
 

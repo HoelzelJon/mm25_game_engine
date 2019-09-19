@@ -19,7 +19,7 @@ public abstract class PlayerCommunicator {
 
     public abstract List<UnitDecision> getDecision(Game gameState) throws InvalidDecisionException;
 
-    public void sendGameOver(String gameID) {
+    public void sendGameOver(String gameID, int winner) {
         // do nothing by default
     }
 }
