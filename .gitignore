@@ -6,3 +6,6 @@
 
 # VS Code Files
 /.vscode/*
+
+target/*
+!target/GameEngine.jar
