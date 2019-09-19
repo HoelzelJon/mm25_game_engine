@@ -7,5 +7,6 @@
 # VS Code Files
 /.vscode/*
 
+bin/*
 target/*
 !target/GameEngine.jar
