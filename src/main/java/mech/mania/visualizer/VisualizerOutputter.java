@@ -24,7 +24,7 @@ public class VisualizerOutputter {
         useStdOut = false;
         gson = new Gson();
         try {
-            fileWriter = new FileWriter(outputFile, true);
+            fileWriter = new FileWriter(outputFile, false);
         } catch (IOException e){
             System.err.println("IOException reached for visualizer output file. Outputting to stdout instead.");
             e.printStackTrace();
