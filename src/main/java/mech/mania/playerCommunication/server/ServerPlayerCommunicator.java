@@ -18,11 +18,18 @@ import java.util.List;
 import java.util.Scanner;
 
 public class ServerPlayerCommunicator extends PlayerCommunicator {
-    private String urlString;
-    private Gson gson;
+    private static final String POST = "POST";
+    private static final String GET = "GET";
 
     private static final int MAX_TURN_TIME_MILIS = 5000;
     private static final int MAX_INIT_DECISION_TIME_MILIS = 5000;
+
+    private static final int MILIS_BETWEEN_HEALTH_CHECKS = 5000;
+    private static final int TOTAL_MILIS_HEALTH_CHECKS = 30000;
+
+    private String urlString;
+    private Gson gson;
+
 
     public ServerPlayerCommunicator(int playerNum, String urlString) {
         super(playerNum);
@@ -44,7 +51,7 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         }
 
         try {
-            connection.setRequestMethod("POST");
+            connection.setRequestMethod(POST);
             connection.setDoOutput(true);
             connection.setDoInput(true);
         } catch (ProtocolException ex) {
@@ -53,13 +60,27 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
             return null;
         }
 
-        try  {
+        try {
             OutputStream os = connection.getOutputStream();
             os.write(data.getBytes());
         } catch (IOException ex) {
-            System.err.println("IOException when doing getOutputStream on HTTPConnection");
-            ex.printStackTrace();
-            return null;
+            System.err.println("IOException when doing getOutputStream on HTTPConnection. Attempting to reconnect.");
+
+            boolean recovered = checkHealth();
+            if (recovered) {
+                try {
+                    OutputStream os = connection.getOutputStream();
+                    os.write(data.getBytes());
+                } catch (IOException ex2) {
+                    System.err.println("Reconnected, but failed again to getOutputStream.");
+                    ex2.printStackTrace();
+                    return null;
+                }
+            } else {
+                System.err.println("Failed to reconnect.");
+                ex.printStackTrace();
+                return null;
+            }
         }
 
         try {
@@ -125,5 +146,53 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
         String overMsg = "{\"gameId\": \"" + gameId + "\"}";
 
         getResponse("game_over", MAX_INIT_DECISION_TIME_MILIS, overMsg);
+    }
+
+    private boolean checkHealth() {
+        long startTime = System.currentTimeMillis();
+
+        boolean passedHealthCheck = false;
+        while (!passedHealthCheck && System.currentTimeMillis() < startTime + TOTAL_MILIS_HEALTH_CHECKS) {
+            try {
+                Thread.sleep(MILIS_BETWEEN_HEALTH_CHECKS);
+            } catch (InterruptedException ex) {
+                // do nothing
+            }
+
+            System.err.println("Attempting to check /health");
+
+            HttpURLConnection connection;
+
+            try {
+                URL url = new URL(urlString + "health");
+
+                connection = (HttpURLConnection) url.openConnection();
+                connection.setReadTimeout(MILIS_BETWEEN_HEALTH_CHECKS);
+            } catch (IOException ex) {
+                System.err.println("Health check failed -- IOException on opening URLConnection");
+                continue;
+            }
+
+            try {
+                connection.setRequestMethod(GET);
+            } catch (ProtocolException ex) {
+                System.err.println("Health check failed -- ProtocolException on opening URLConnection");
+                continue;
+            }
+
+            try {
+                int responseCode = connection.getResponseCode();
+                passedHealthCheck = (responseCode == 200);
+                if (passedHealthCheck) {
+                    System.err.println("Health check passed -- retrying operation");
+                } else {
+                    System.err.println("Health check failed -- unexpected response code " + responseCode);
+                }
+            } catch (IOException ex) {
+                System.err.println("Health check failed -- IOException on getting response code");
+            }
+        }
+
+        return passedHealthCheck;
     }
 }
