@@ -34,6 +34,10 @@ public class Main {
         String p2URL = args[5];
         String outputFile = args[6];
 
+        String argumentsString = String.format("gameID: %s, boardDirectory: %s, p1Name: %s, p2Name: %s, p1URL: %s, p2URL: %s, outputFile: %s",
+                gameID, boardDirectory, p1Name, p2Name, p1URL, p2URL, outputFile);
+        System.err.println(argumentsString);
+
         PlayerCommunicator player1 = getPlayerForURL(p1URL, 1);
         PlayerCommunicator player2 = getPlayerForURL(p2URL, 2);
 
@@ -79,14 +83,10 @@ public class Main {
             if (printWinnerIfInvalid(p1SetupValid, p2SetupValid, visualizerOutput)) {
                 return;
             }
-        } catch (IOException e){
+        } catch (IOException e) {
             e.printStackTrace();
             return;
         }
-
-        String argumentsString = String.format("gameID: %s, boardDirectory: %s, p1Name: %s, p2Name: %s, p1URL: %s, p2URL: %s, outputFile: %s",
-                gameID, boardDirectory, p1Name, p2Name, p1URL, p2URL, outputFile);
-        System.err.println(argumentsString);
 
         Game game = new Game(gameID, p1Name, p2Name, p1Setup, p2Setup, board);
 
