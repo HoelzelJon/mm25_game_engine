@@ -77,7 +77,11 @@ public class Tile {
 //        }
 //        return String.format(" %03d ", id);
         if (type == Type.DESTRUCTIBLE) {
-            return String.format(" %-2d", hp);
+            if (hp < 100) {
+                return String.format(" %-2d", hp);
+            } else {
+                return String.format("%-3d",hp);
+            }
         } else if (type == Type.INDESTRUCTIBLE) {
             return " I ";
         } else if (unit != null) {

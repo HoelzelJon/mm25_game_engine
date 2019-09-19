@@ -17,7 +17,7 @@ public class GameState {
 
     public GameState(Game aGame) {
         gameId = aGame.getGameId();
-        turnsTaken = aGame.getTurnsTaken();
+        turnsTaken = aGame.getTurnNumber();
         playerNames = new String[] {aGame.getPlayerName(1), aGame.getPlayerName(2)};
         units = new ArrayList<>();
         units.addAll(aGame.getPlayerUnits(1));
