@@ -43,7 +43,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public void sendGameOver(String gameID, int winner) {
+    public void sendGameOver(String gameID, String result) {
         onGameEnd();
     }
 
@@ -94,14 +94,14 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     public List<UnitDecision> getDecision(Game gameState) throws InvalidDecisionException {
 
         // Print gameState and Unit's stats for user to see (copied from HumanPlayerCommunicator)
-        System.out.println(gameState.getBoardString());
-        System.out.println(gameState.getUnitStatsString());
+        String boardString = gameState.getBoardString();
+        String unitStatString = gameState.getUnitStatsString();
 
-        System.out.println("**********Player " + playerNum + "**********");
-
+//        System.out.println("**********Player " + playerNum + "**********");
+//
         List<Unit> units = gameState.getPlayerUnits(playerNum);
 
-        Platform.runLater(() -> applicationInstance.launchDecisionGui(playerNum, units));
+        Platform.runLater(() -> applicationInstance.launchDecisionGui(playerNum, units, boardString, unitStatString));
 
         // re-get the instance (not necessary to set to the static variable again,
         // but it's the same name variable so why bother creating a new variable.

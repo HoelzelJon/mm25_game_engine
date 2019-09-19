@@ -141,8 +141,8 @@ public class Main {
         }
 
         int winner = game.getWinner() == P1_WINNER ? 1 : game.getWinner() == P2_WINNER ? 2 : 0;
-        player1.sendGameOver(gameID, winner);
-        player2.sendGameOver(gameID, winner);
+        player1.sendGameOver(gameID, winner == 0 ? "TIE" : winner == 1 ? "WIN" : "LOSE");
+        player2.sendGameOver(gameID, winner == 0 ? "TIE" : winner == 2 ? "WIN" : "LOSE");
 
         try {
             visualizerOutput.printWinnerJSON(game.getWinner());

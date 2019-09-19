@@ -336,15 +336,15 @@ public class Game {
 
         for (int i = 0; i < Math.max(p1Units.size(), p2Units.size()); i++) {
             if (p1Units.size() > i) {
-                ret.append("*" + p1Units.get(i).getId() + ": hp = " + p1Units.get(i).getHp() + "\t\t\t\t");
+                ret.append("*" + p1Units.get(i).getId() + ": hp = " + p1Units.get(i).getHp() + "\t\t");
             } else {
-                ret.append("        \t\t\t\t");
+                ret.append("      \t\t");
             }
 
             if (p2Units.size() > i) {
                 ret.append("*" + p2Units.get(i).getId() + ": hp = " + p2Units.get(i).getHp() + "\n");
             } else {
-                ret.append("        \n");
+                ret.append("      \n");
             }
         }
 

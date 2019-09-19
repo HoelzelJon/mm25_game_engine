@@ -142,8 +142,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public void sendGameOver(String gameId, int winner) {
-        String overMsg = "{\"gameId\": \"" + gameId + "\", \"winner\": " + winner + "}";
+    public void sendGameOver(String gameId, String result) {
+        String overMsg = "{\"gameId\": \"" + gameId + "\", \"result\": " + result + "}";
 
         getResponse("game_over", MAX_INIT_DECISION_TIME_MILIS, overMsg);
     }
