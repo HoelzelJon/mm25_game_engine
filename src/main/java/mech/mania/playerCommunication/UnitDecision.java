@@ -58,7 +58,11 @@ public class UnitDecision {
             if (!unit.isPresent()) {
                 throw new InvalidDecisionException("Specified invalid unitId in decision: " + decision.unitId);
             } else {
-                throwExceptionOnInvalidDecision(decision, unit.get()); // TODO: catch and re-throw to add unitId in exception message
+                try {
+                    throwExceptionOnInvalidDecision(decision, unit.get());
+                } catch (InvalidDecisionException ex) {
+                    throw new InvalidDecisionException("Invalid decicion for unitId " + decision.unitId + ": " + ex.getMessage());
+                }
             }
         }
     }
@@ -70,7 +74,7 @@ public class UnitDecision {
             throw new InvalidDecisionException("Decision contains null movement array");
         } else if (decision.attack == null) {
             throw new InvalidDecisionException("Decision contains null attack choice");
-        } else if (decision.movement.stream().noneMatch(Objects::isNull)) {
+        } else if (decision.movement.stream().anyMatch(Objects::isNull)) {
             throw new InvalidDecisionException("Decision contains null element in movement array");
         } else if (decision.movement.size() != unit.getSpeed()) {
             throw new InvalidDecisionException("Decision movement array is incorrect length");
