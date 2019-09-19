@@ -22,6 +22,7 @@ import mech.mania.playerCommunication.UnitSetup;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import static javafx.application.ConditionalFeature.SWT;
 import static mech.mania.Game.UNITS_PER_PLAYER;
 import static mech.mania.playerCommunication.UnitDecision.throwExceptionOnInvalidDecisionList;
 import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
@@ -218,13 +219,13 @@ public class GUIInitialUnitInput extends Application {
 
         StackPane gameStatePane = new StackPane();
         Text gameStateTextBox = new Text(boardString);
-        gameStateTextBox.setFont(Font.font("Courier"));
+        gameStateTextBox.setFont(Font.font(java.awt.Font.MONOSPACED, 25));
         gameStatePane.getChildren().add(gameStateTextBox);
         StackPane.setAlignment(gameStateTextBox, Pos.CENTER);
 
         StackPane unitStatPane = new StackPane();
         Text unitStatTextBox = new Text(unitStatString);
-        unitStatTextBox.setFont(Font.font("Courier"));
+        unitStatTextBox.setFont(Font.font(java.awt.Font.MONOSPACED, 25));
         unitStatPane.getChildren().add(unitStatTextBox);
         StackPane.setAlignment(unitStatTextBox, Pos.CENTER);
 
