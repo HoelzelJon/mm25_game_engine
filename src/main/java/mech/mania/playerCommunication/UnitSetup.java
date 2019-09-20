@@ -71,9 +71,9 @@ public class UnitSetup {
             throw new InvalidSetupException("Setup contains null attack pattern");
         } else if (setup.terrainPattern == null) {
             throw new InvalidSetupException("Setup contains null terrain pattern");
-        } else if (setup.health < BASE_HEALTH || setup.health >= HEALTH_SCALING.length) {
+        } else if (setup.health < BASE_HEALTH || setup.health - BASE_HEALTH - 1 >= HEALTH_SCALING.length) {
             throw new InvalidSetupException("Invalid health value: " + setup.health);
-        } else if (setup.speed < BASE_SPEED || setup.speed >= SPEED_SCALING.length) {
+        } else if (setup.speed < BASE_SPEED || setup.speed - BASE_SPEED - 1 >= SPEED_SCALING.length) {
             throw new InvalidSetupException("Invalid speed value: " + setup.speed);
         } else if (setup.attackPattern.length != ATTACK_PATTERN_SIZE) {
             throw new InvalidSetupException("Incorrect size of attack pattern in setup");
@@ -126,6 +126,7 @@ public class UnitSetup {
         if (setup.speed > BASE_SPEED) {
             sum += SPEED_SCALING[setup.speed - BASE_SPEED - 1];
         }
+
         if (sum > MAX_POINTS) {
             throw new InvalidSetupException("Setup cost too high: " + sum);
         }
