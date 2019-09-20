@@ -1,6 +1,5 @@
 package mech.mania;
 
-import com.google.gson.*;
 import mech.mania.playerCommunication.UnitDecision;
 import mech.mania.playerCommunication.UnitSetup;
 import mech.mania.visualizer.perTurn.MovementRepresentation;
@@ -8,9 +7,7 @@ import mech.mania.visualizer.perTurn.MovementType;
 import mech.mania.visualizer.perTurn.RoundRepresentation;
 import mech.mania.visualizer.perTurn.TurnRepresentation;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static mech.mania.Winner.*;
@@ -19,6 +16,8 @@ import static mech.mania.Winner.*;
  * Stores the state of the game, as well as handling much of the logic during each turn
  */
 public class Game {
+    // stores the turn number to do the shrinking, along with the
+    private static final List<Integer> TURN_NUMBERS_TO_SHRINK_BOARD = Arrays.asList(15, 20, 24, 27, 29, 30);
     public static final int UNITS_PER_PLAYER = 3;
 
     private Board board; // current board
@@ -26,7 +25,8 @@ public class Game {
     private List<Unit> p2Units; // array of Player 2's units
     private String gameId;
     private String[] playerNames;
-    private int turnsTaken;
+    private int turnNumber;
+    private int borderSize;
 
     private static List<Unit> initUnitList(List<UnitSetup> setups, int playerNum, Board board) {
         List<Unit> ret = new ArrayList<>();
@@ -48,7 +48,8 @@ public class Game {
         this.playerNames = new String[] {player1Name, player2Name};
         this.gameId = id;
         this.board = board;
-        turnsTaken = 0;
+        turnNumber = 0;
+        borderSize = 0;
 
         p1Units = initUnitList(p1UnitSetups, 1, board);
         p2Units = initUnitList(p2UnitSetups, 2, board);
@@ -82,8 +83,8 @@ public class Game {
      * @param p2Decision the decision for player 2 to take
      */
     TurnRepresentation doTurn(List<UnitDecision> p1Decision, List<UnitDecision> p2Decision) {
-        turnsTaken ++;
-        TurnRepresentation turnRepresentation = new TurnRepresentation(turnsTaken);
+        turnNumber++;
+        TurnRepresentation turnRepresentation = new TurnRepresentation(turnNumber);
 
         for (int priority = 1; priority <= UNITS_PER_PLAYER; priority ++) {
             List<Unit> unitsToActThisRound = new ArrayList<>();
@@ -93,6 +94,17 @@ public class Game {
             addUnitsAndDecisionsByPriority(unitsToActThisRound, unitDecisionsThisRound, priority, p2Units, p2Decision);
 
             turnRepresentation.addRound(doRound(priority, unitsToActThisRound, unitDecisionsThisRound));
+        }
+
+        if (borderSize < TURN_NUMBERS_TO_SHRINK_BOARD.size() && turnNumber == TURN_NUMBERS_TO_SHRINK_BOARD.get(borderSize)) {
+            board.addBorder(borderSize, turnRepresentation);
+            borderSize ++;
+
+            // if any units died, remove them from the players' unit lists
+            for (Integer unitId : turnRepresentation.getUnitsKilledByOuterWall()) {
+                p1Units.removeIf(u -> u.getId() == unitId);
+                p2Units.removeIf(u -> u.getId() == unitId);
+            }
         }
 
         return turnRepresentation;
@@ -317,8 +329,8 @@ public class Game {
         return gameId;
     }
 
-    public int getTurnsTaken() {
-        return turnsTaken;
+    public int getTurnNumber() {
+        return turnNumber;
     }
 
     public Board getBoard() {

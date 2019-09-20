@@ -2,6 +2,7 @@ package mech.mania;
 
 import javafx.util.Pair;
 import mech.mania.visualizer.perTurn.AttackRepresentation;
+import mech.mania.visualizer.perTurn.TurnRepresentation;
 import mech.mania.visualizer.perTurn.UnitStatusRepresentation;
 import mech.mania.visualizer.perTurn.TerrainStatusRepresentation;
 
@@ -18,6 +19,8 @@ import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
  * May also be responsible for generating random boards, if that is what we end up doing.
  */
 public class Board {
+    private static final int BORDER_TERRAIN_HEALTH = 999;
+
     private String gameId;
     private Tile[][] tiles; // 2-D array of all tiles on the board
     private List<UninitializedUnit> initUnits;
@@ -248,6 +251,39 @@ public class Board {
         t.setType(Tile.Type.DESTRUCTIBLE);
         t.setHp(health);
         return new TerrainStatusRepresentation(pos, t.getHp());
+    }
+
+    private void doBuildBorderTerrain(Position pos, TurnRepresentation turnRepresentation) {
+        if (tileAt(pos).getUnit() != null) {
+            turnRepresentation.addUnitKilledByOuterWalls(tileAt(pos).getUnit().getId());
+            tileAt(pos).setUnit(null);
+        }
+
+        turnRepresentation.addOuterWall(doBuildTerrain(pos, BORDER_TERRAIN_HEALTH));
+    }
+
+    public void addBorder(int distanceFromEdge, TurnRepresentation turnRepresentation) {
+        int x, y;
+
+        x = distanceFromEdge;
+        for (y = distanceFromEdge; y < height() - distanceFromEdge; y ++) {
+            doBuildBorderTerrain(new Position(x, y), turnRepresentation);
+        }
+
+        x = width() - distanceFromEdge - 1;
+        for (y = distanceFromEdge; y < height() - distanceFromEdge; y ++) {
+            doBuildBorderTerrain(new Position(x, y), turnRepresentation);
+        }
+
+        y = distanceFromEdge;
+        for (x = distanceFromEdge + 1; x < width() - distanceFromEdge - 1; x ++) {
+            doBuildBorderTerrain(new Position(x, y), turnRepresentation);
+        }
+
+        y = height() - distanceFromEdge - 1;
+        for (x = distanceFromEdge + 1; x < width() - distanceFromEdge - 1; x ++) {
+            doBuildBorderTerrain(new Position(x, y), turnRepresentation);
+        }
     }
 
     @Override
