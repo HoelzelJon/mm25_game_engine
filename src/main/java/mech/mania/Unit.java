@@ -2,6 +2,8 @@ package mech.mania;
 
 import mech.mania.playerCommunication.UnitSetup;
 
+import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
+
 /**
  * Represents a single mech.
  */
@@ -11,7 +13,7 @@ public class Unit {
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
-    private int[][] attack; // 2-D grid of attack damages
+    private int[][] attack; // 2-D grid of attack tiles
     private boolean[][] terrain;
     private int id;
     private int playerNum;
@@ -21,9 +23,9 @@ public class Unit {
         hp = setup.getHealth();
         speed = setup.getSpeed();
         pos = uninitializedUnit.getPos();
+        playerNum = uninitializedUnit.getPlayerNum();
         attack = setup.getAttackPattern();
         terrain = setup.getTerrainPattern();
-        playerNum = uninitializedUnit.getPlayerNum();
     }
 
     public int getId() {
@@ -113,7 +115,7 @@ public class Unit {
 
             for (int y = 0; y < ret[0].length; y++) {
                 for (int x = 0; x < ret.length; x++) {
-                    ret[x][y] = new AttackTile(attack[y][x], terrain[y][x]);
+                    ret[x][y] = new AttackTile(attack[x][y], terrain[x][y]);
                 }
             }
             return ret;

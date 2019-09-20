@@ -1,12 +1,17 @@
 package mech.mania.playerCommunication.gui;
 
 import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import mech.mania.*;
 import mech.mania.playerCommunication.InvalidDecisionException;
@@ -17,6 +22,7 @@ import mech.mania.playerCommunication.UnitSetup;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
+import static javafx.application.ConditionalFeature.SWT;
 import static mech.mania.Game.UNITS_PER_PLAYER;
 import static mech.mania.playerCommunication.UnitDecision.throwExceptionOnInvalidDecisionList;
 import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
@@ -32,7 +38,7 @@ public class GUIInitialUnitInput extends Application {
 
     private int playerNum = -1;
     private static final int DEFAULT_SCENE_WIDTH = 600;
-    private static final int DEFAULT_SCENE_HEIGHT = 550;
+    private static final int DEFAULT_SCENE_HEIGHT = 500;
 
     private static GUIInitialUnitInput instance;
     private static CountDownLatch latch;
@@ -167,7 +173,10 @@ public class GUIInitialUnitInput extends Application {
         // Show everything
         VBox root = new VBox();
         root.getChildren().addAll(allComps, errorMessage, submit);
+        root.setSpacing(5.0);
+        root.setPadding(new Insets(10, 10, 10, 10));
         primaryStage.setScene(new Scene(root, DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT));
+        primaryStage.sizeToScene();
         primaryStage.show();
     }
 
@@ -203,13 +212,26 @@ public class GUIInitialUnitInput extends Application {
      * @param setPlayerNum player number to display as the title of the GUI
      * @param units an array of Unit objects to be accessed for speed and ID
      */
-    void launchDecisionGui(final int setPlayerNum, final List<Unit> units) {
+    void launchDecisionGui(final int setPlayerNum, final List<Unit> units, final String boardString, final String unitStatString) {
         playerNum = setPlayerNum;
         Stage stage = new Stage();
         stage.setTitle("Player " + setPlayerNum + " Decision");
 
-        Text directions = new Text("Type in a number (1, 2, 3) in the first box " +
-                "for the priority, then choose movement step(s) and a direction of attack.");
+        StackPane gameStatePane = new StackPane();
+        Text gameStateTextBox = new Text(boardString);
+        gameStateTextBox.setFont(Font.font(java.awt.Font.MONOSPACED, 25));
+        gameStatePane.getChildren().add(gameStateTextBox);
+        StackPane.setAlignment(gameStateTextBox, Pos.CENTER);
+
+        StackPane unitStatPane = new StackPane();
+        Text unitStatTextBox = new Text(unitStatString);
+        unitStatTextBox.setFont(Font.font(java.awt.Font.MONOSPACED, 25));
+        unitStatPane.getChildren().add(unitStatTextBox);
+        StackPane.setAlignment(unitStatTextBox, Pos.CENTER);
+
+        Text directions = new Text("Select a priority in the first box, " +
+                "then choose movement step(s) and a direction of attack. This is based on your bot's speed.");
+        TextFlow directionsFlow = new TextFlow(directions);
 
         // DecisionInputHBox is an object that holds the HBox and its internal
         // priority, movements, and attack fields that can be accessed later for
@@ -265,7 +287,9 @@ public class GUIInitialUnitInput extends Application {
         VBox hBoxWrapper = new VBox();
         // filter out all of the dead units
         HBox[] nonNullHBoxes = Arrays.stream(allUnitHBoxes).filter(Objects::nonNull).toArray(HBox[]::new);
-        hBoxWrapper.getChildren().add(directions);
+        hBoxWrapper.getChildren().add(gameStatePane);
+        hBoxWrapper.getChildren().add(unitStatPane);
+        hBoxWrapper.getChildren().add(directionsFlow);
         hBoxWrapper.getChildren().addAll(nonNullHBoxes);
         hBoxWrapper.getChildren().addAll(errorMessage, submit);
 
@@ -279,8 +303,11 @@ public class GUIInitialUnitInput extends Application {
         });
 
         // create the Scene and show the stage
-        Scene root = new Scene(hBoxWrapper, DEFAULT_SCENE_WIDTH * (1 + maxSpeed * 0.05), DEFAULT_SCENE_HEIGHT * 0.5);
+        Scene root = new Scene(hBoxWrapper);
+        hBoxWrapper.setSpacing(5.0);
+        hBoxWrapper.setPadding(new Insets(10, 10, 10, 10));
         stage.setScene(root);
+        stage.sizeToScene();
         stage.show();
     }
 

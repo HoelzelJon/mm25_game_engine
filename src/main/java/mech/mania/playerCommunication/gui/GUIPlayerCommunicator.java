@@ -43,7 +43,7 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     }
 
     @Override
-    public void sendGameOver(String gameID) {
+    public void sendGameOver(String gameID, String result) {
         onGameEnd();
     }
 
@@ -73,11 +73,22 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         }
 
         for (int i = 0; i < UNITS_PER_PLAYER; i++) {
-            int[][] transformedBoard = transformBoard(allAttackPatterns[i]);
-            allUnits[i] = new UnitSetup(transformedBoard, allTerrainPatterns[i], allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
+            int[][] transformedAttacks = transformBoard(transformBoard(transformBoard(allAttackPatterns[i])));
+            boolean[][] transformedTerrains = transformBoard(transformBoard(transformBoard(allTerrainPatterns[i])));
+            allUnits[i] = new UnitSetup(transformedAttacks, transformedTerrains, allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
         }
 
         return Arrays.asList(allUnits);
+    }
+
+    private static boolean[][] transformBoard(boolean[][] board) {
+        boolean[][] transform = new boolean[board.length][board[0].length];
+        for(int r = 0; r < transform.length; r++){
+            for (int c = 0; c < transform[0].length; c++){
+                transform[r][c] = board[r][board[0].length - c - 1];
+            }
+        }
+        return transform;
     }
 
     private static int[][] transformBoard(int[][] board) {
@@ -94,14 +105,14 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
     public List<UnitDecision> getDecision(Game gameState) throws InvalidDecisionException {
 
         // Print gameState and Unit's stats for user to see (copied from HumanPlayerCommunicator)
-        System.out.println(gameState.getBoardString());
-        System.out.println(gameState.getUnitStatsString());
+        String boardString = gameState.getBoardString();
+        String unitStatString = gameState.getUnitStatsString();
 
-        System.out.println("**********Player " + playerNum + "**********");
-
+//        System.out.println("**********Player " + playerNum + "**********");
+//
         List<Unit> units = gameState.getPlayerUnits(playerNum);
 
-        Platform.runLater(() -> applicationInstance.launchDecisionGui(playerNum, units));
+        Platform.runLater(() -> applicationInstance.launchDecisionGui(playerNum, units, boardString, unitStatString));
 
         // re-get the instance (not necessary to set to the static variable again,
         // but it's the same name variable so why bother creating a new variable.
