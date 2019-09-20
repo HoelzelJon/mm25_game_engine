@@ -344,6 +344,8 @@ public class Game {
     public String getUnitStatsString(){
         StringBuilder ret = new StringBuilder();
 
+        ret.append("\t    Decision for turn " + (turnNumber+1) + "\n");
+
         ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
 
         for (int i = 0; i < Math.max(p1Units.size(), p2Units.size()); i++) {
