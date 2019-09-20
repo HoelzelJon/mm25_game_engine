@@ -120,8 +120,12 @@ public class UnitSetup {
             }
         }
 
-        sum += HEALTH_SCALING[setup.health - 1];
-        sum += SPEED_SCALING[setup.speed - 1];
+        if (setup.health > BASE_HEALTH) {
+            sum += HEALTH_SCALING[setup.health - BASE_HEALTH - 1];
+        }
+        if (setup.speed > BASE_SPEED) {
+            sum += SPEED_SCALING[setup.speed - BASE_SPEED - 1];
+        }
         if (sum > MAX_POINTS) {
             throw new InvalidSetupException("Setup cost too high: " + sum);
         }
