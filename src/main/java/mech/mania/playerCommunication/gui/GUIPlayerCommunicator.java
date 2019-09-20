@@ -73,11 +73,22 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         }
 
         for (int i = 0; i < UNITS_PER_PLAYER; i++) {
-            int[][] transformedBoard = transformBoard(allAttackPatterns[i]);
-            allUnits[i] = new UnitSetup(transformedBoard, allTerrainPatterns[i], allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
+            int[][] transformedAttacks = transformBoard(transformBoard(transformBoard(allAttackPatterns[i])));
+            boolean[][] transformedTerrains = transformBoard(transformBoard(transformBoard(allTerrainPatterns[i])));
+            allUnits[i] = new UnitSetup(transformedAttacks, transformedTerrains, allHps[i], allSpeeds[i], nonSetupUnits.get(i).getUnitId());
         }
 
         return Arrays.asList(allUnits);
+    }
+
+    private static boolean[][] transformBoard(boolean[][] board) {
+        boolean[][] transform = new boolean[board.length][board[0].length];
+        for(int r = 0; r < transform.length; r++){
+            for (int c = 0; c < transform[0].length; c++){
+                transform[r][c] = board[r][board[0].length - c - 1];
+            }
+        }
+        return transform;
     }
 
     private static int[][] transformBoard(int[][] board) {

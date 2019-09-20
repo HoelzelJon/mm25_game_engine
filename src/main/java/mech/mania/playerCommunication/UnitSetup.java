@@ -94,6 +94,8 @@ public class UnitSetup {
                         throw new InvalidSetupException("Non-zero damage set outside of allowed attack bounds");
                     } else if (setup.terrainPattern[x][y]) {
                         throw new InvalidSetupException("Terrain creation set to true outside of allowed attack bounds");
+                    } else if (setup.attackPattern[x][y] == 0 && setup.terrainPattern[x][y]) {
+                        throw new InvalidSetupException("Terrain creation set to true on tile with 0 attack");
                     }
                 }
             }

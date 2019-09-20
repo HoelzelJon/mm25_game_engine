@@ -2,6 +2,8 @@ package mech.mania;
 
 import mech.mania.playerCommunication.UnitSetup;
 
+import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
+
 /**
  * Represents a single mech.
  */
@@ -11,8 +13,7 @@ public class Unit {
     private int hp; // unit's current health
     private int speed; // unit's speed (number of tiles it can move per turn)
     private Position pos; // position of the unit
-    private int[][] attack; // 2-D grid of attack damages
-    private boolean[][] terrain;
+    private AttackTile[][] attackTiles; // 2-D grid of attack tiles
     private int id;
     private int playerNum;
 
@@ -21,9 +22,15 @@ public class Unit {
         hp = setup.getHealth();
         speed = setup.getSpeed();
         pos = uninitializedUnit.getPos();
-        attack = setup.getAttackPattern();
-        terrain = setup.getTerrainPattern();
         playerNum = uninitializedUnit.getPlayerNum();
+
+        attackTiles = new AttackTile[ATTACK_PATTERN_SIZE][];
+        for (int x = 0; x < ATTACK_PATTERN_SIZE; x ++) {
+            attackTiles[x] = new AttackTile[ATTACK_PATTERN_SIZE];
+            for (int y = 0; y < ATTACK_PATTERN_SIZE; y ++) {
+                attackTiles[x][y] = new AttackTile(setup.getAttackPattern()[x][y], setup.getTerrainPattern()[x][y]);
+            }
+        }
     }
 
     public int getId() {
@@ -78,15 +85,15 @@ public class Unit {
      * @return this unit's attack, rotated in direction dir
      */
     public AttackTile[][] getAttack(Direction dir) {
-        int width = attack.length;
-        int height = attack[0].length;
+        int width = attackTiles.length;
+        int height = attackTiles[0].length;
 
         if (dir == Direction.LEFT) {
             AttackTile[][] ret = new AttackTile[height][width];
 
             for (int y = 0; y < ret[0].length; y++) {
                 for (int x = 0; x < ret.length; x++) {
-                    ret[x][y] = new AttackTile(attack[y][width - x - 1], terrain[y][width - x - 1]);
+                    ret[x][y] = attackTiles[y][width - x - 1];
                 }
             }
             return ret;
@@ -95,7 +102,7 @@ public class Unit {
 
             for (int y = 0; y < ret[0].length; y++) {
                 for (int x = 0; x < ret.length; x++) {
-                    ret[x][y] = new AttackTile(attack[width - x - 1][height - y - 1], terrain[width - x - 1][height - y - 1]);
+                    ret[x][y] = attackTiles[width - x - 1][height - y - 1];
                 }
             }
             return ret;
@@ -104,7 +111,7 @@ public class Unit {
 
             for (int y = 0; y < ret[0].length; y++) {
                 for (int x = 0; x < ret.length; x++) {
-                    ret[x][y] = new AttackTile(attack[height - y - 1][x], terrain[height - y - 1][x]);
+                    ret[x][y] = attackTiles[height - y - 1][x];
                 }
             }
             return ret;
@@ -113,7 +120,7 @@ public class Unit {
 
             for (int y = 0; y < ret[0].length; y++) {
                 for (int x = 0; x < ret.length; x++) {
-                    ret[x][y] = new AttackTile(attack[y][x], terrain[y][x]);
+                    ret[x][y] = attackTiles[x][y];
                 }
             }
             return ret;
