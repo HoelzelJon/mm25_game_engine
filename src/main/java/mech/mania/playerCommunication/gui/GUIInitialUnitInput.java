@@ -22,7 +22,6 @@ import mech.mania.playerCommunication.UnitSetup;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-import static javafx.application.ConditionalFeature.SWT;
 import static mech.mania.Game.UNITS_PER_PLAYER;
 import static mech.mania.playerCommunication.UnitDecision.throwExceptionOnInvalidDecisionList;
 import static mech.mania.playerCommunication.UnitSetup.ATTACK_PATTERN_SIZE;
@@ -125,20 +124,19 @@ public class GUIInitialUnitInput extends Application {
 
             for (int i = 0; i < unitInputs.length; i++) {
                 // check conditions using helper method below
-                boolean valid = isValid(unitInputs[i].hpField,
-                        unitInputs[i].speedField,
-                        unitInputs[i].attackPatternGrid,
-                        unitInputs[i].terrainPatternGrid);
+                try {
+                    throwExceptionOnInvalidSetup(unitInputs[i].hpField,
+                            unitInputs[i].speedField,
+                            unitInputs[i].attackPatternGrid,
+                            unitInputs[i].terrainPatternGrid);
 
-                // if valid, then set the actual values in the array above
-                if (valid) {
                     allAttackPatterns[i] = unitInputs[i].attackPatternGrid.getAttackPattern();
                     allTerrainPatterns[i] = unitInputs[i].terrainPatternGrid.getTerrainPattern();
                     allHps[i] = getNumFromTextField(unitInputs[i].hpField, UnitSetup.BASE_HEALTH);
                     allSpeeds[i] = getNumFromTextField(unitInputs[i].speedField, UnitSetup.BASE_SPEED);
-                } else {
+                } catch (InvalidSetupException ex) {
                     // print out an error message for the user to see
-                    errorMessage.setText("invalid conditions\n");
+                    errorMessage.setText(ex.getMessage());
                     allValid = false;
                     break;
                 }
@@ -325,7 +323,10 @@ public class GUIInitialUnitInput extends Application {
     }
 
     /** Helper method for validating a condition given TextFields */
-    private static boolean isValid(TextField hpField, TextField speedField, AttackPatternGrid attackGrid, TerrainPatternGrid terrainGrid) {
+    private static void throwExceptionOnInvalidSetup(TextField hpField,
+                                                     TextField speedField,
+                                                     AttackPatternGrid attackGrid,
+                                                     TerrainPatternGrid terrainGrid) throws InvalidSetupException {
         int hp = getNumFromTextField(hpField, 0);
         int speed = getNumFromTextField(speedField, 0);
 
@@ -334,12 +335,7 @@ public class GUIInitialUnitInput extends Application {
 
         boolean[][] terrainCreation = terrainGrid.getTerrainPattern();
 
-        try {
-            UnitSetup.throwExceptionOnInvalidSetup(new UnitSetup(attackPattern, terrainCreation, hp, speed, 0));
-            return true;
-        } catch (InvalidSetupException ex){
-            return false;
-        }
+        UnitSetup.throwExceptionOnInvalidSetup(new UnitSetup(attackPattern, terrainCreation, hp, speed, 0));
     }
 
     int[][][] getAttackPatterns() {
