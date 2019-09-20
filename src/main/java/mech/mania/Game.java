@@ -217,12 +217,18 @@ public class Game {
                 collided[i] = true;
                 units.get(i).takeCollisionDamage();
 
-                // add to game log
-                movementRepresentation.get(i).setCollision(goalPositions.get(i));
 
                 if (board.inBounds(goalPositions.get(i))) {
                     // add the terrain to the list of terrain to damage
                     collidedTiles.add(board.tileAt(goalPositions.get(i)));
+                    movementRepresentation.get(i).collidedWithTerrain(goalPositions.get(i),
+                            board.tileAt(goalPositions.get(i)).getHp() - 1,
+                            units.get(i).getHp());
+                } else {
+                    // add to game log
+                    movementRepresentation.get(i).collidedWithTerrain(goalPositions.get(i),
+                            -1,
+                            units.get(i).getHp());
                 }
             } else if (board.tileAt(goalPositions.get(i)).getUnit() != null) {
                 // handle collision with stationary unit
@@ -234,7 +240,10 @@ public class Game {
                     board.tileAt(goalPositions.get(i)).getUnit().takeCollisionDamage();
 
                     // add to game log
-                    movementRepresentation.get(i).setCollision(goalPositions.get(i));
+                    movementRepresentation.get(i).collidedWithUnit(goalPositions.get(i),
+                            board.tileAt(goalPositions.get(i)).getUnit().getHp(),
+                            units.get(i).getHp(),
+                            board.tileAt(goalPositions.get(i)).getUnit().getId());
                 }
             }
         }
@@ -252,8 +261,14 @@ public class Game {
                     units.get(j).takeCollisionDamage();
 
                     // add to game log
-                    movementRepresentation.get(i).setCollision(goalPositions.get(i));
-                    movementRepresentation.get(j).setCollision(goalPositions.get(j));
+                    movementRepresentation.get(i).collidedWithUnit(goalPositions.get(i),
+                            units.get(j).getHp(),
+                            units.get(i).getHp(),
+                            units.get(j).getId());
+                    movementRepresentation.get(j).collidedWithUnit(goalPositions.get(j),
+                            units.get(i).getHp(),
+                            units.get(j).getHp(),
+                            units.get(i).getId());
                 }
             }
         }
@@ -272,8 +287,14 @@ public class Game {
                             units.get(j).takeCollisionDamage();
 
                             // add to game log
-                            movementRepresentation.get(i).setCollision(goalPositions.get(i));
-                            movementRepresentation.get(j).setCollision(goalPositions.get(j));
+                            movementRepresentation.get(i).collidedWithUnit(goalPositions.get(i),
+                                    units.get(j).getHp(),
+                                    units.get(i).getHp(),
+                                    units.get(j).getId());
+                            movementRepresentation.get(j).collidedWithUnit(goalPositions.get(j),
+                                    units.get(i).getHp(),
+                                    units.get(j).getHp(),
+                                    units.get(i).getId());
                             break;
                         }
                     }
