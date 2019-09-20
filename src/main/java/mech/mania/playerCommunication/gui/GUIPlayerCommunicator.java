@@ -108,11 +108,9 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
         String boardString = gameState.getBoardString();
         String unitStatString = gameState.getUnitStatsString();
 
-//        System.out.println("**********Player " + playerNum + "**********");
-//
         List<Unit> units = gameState.getPlayerUnits(playerNum);
 
-        Platform.runLater(() -> applicationInstance.launchDecisionGui(playerNum, units, boardString, unitStatString));
+        Platform.runLater(() -> applicationInstance.launchDecisionGui(playerNum, units, boardString, unitStatString, gameState.getTurnNumber()));
 
         // re-get the instance (not necessary to set to the static variable again,
         // but it's the same name variable so why bother creating a new variable.

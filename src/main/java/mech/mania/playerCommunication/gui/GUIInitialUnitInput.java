@@ -36,8 +36,6 @@ public class GUIInitialUnitInput extends Application {
     private List<UninitializedUnit> nonSetupUnits;
 
     private int playerNum = -1;
-    private static final int DEFAULT_SCENE_WIDTH = 700;
-    private static final int DEFAULT_SCENE_HEIGHT = 600;
 
     private static GUIInitialUnitInput instance;
     private static CountDownLatch latch;
@@ -168,13 +166,14 @@ public class GUIInitialUnitInput extends Application {
             System.exit(0);
         });
 
+
+
         // Show everything
         VBox root = new VBox();
         root.getChildren().addAll(allComps, errorMessage, submit);
         root.setSpacing(5.0);
         root.setPadding(new Insets(10, 10, 10, 10));
-        primaryStage.setScene(new Scene(root, DEFAULT_SCENE_WIDTH, DEFAULT_SCENE_HEIGHT));
-        primaryStage.sizeToScene();
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 
@@ -210,10 +209,10 @@ public class GUIInitialUnitInput extends Application {
      * @param setPlayerNum player number to display as the title of the GUI
      * @param units an array of Unit objects to be accessed for speed and ID
      */
-    void launchDecisionGui(final int setPlayerNum, final List<Unit> units, final String boardString, final String unitStatString) {
+    void launchDecisionGui(final int setPlayerNum, final List<Unit> units, final String boardString, final String unitStatString, final int turnNum) {
         playerNum = setPlayerNum;
         Stage stage = new Stage();
-        stage.setTitle("Player " + setPlayerNum + " Decision");
+        stage.setTitle("Player " + setPlayerNum + " Decision : Turn " + turnNum);
 
         StackPane gameStatePane = new StackPane();
         Text gameStateTextBox = new Text(boardString);

@@ -344,21 +344,19 @@ public class Game {
     public String getUnitStatsString(){
         StringBuilder ret = new StringBuilder();
 
-        ret.append("\t    Decision for turn " + (turnNumber+1) + "\n");
-
         ret.append("Player 1 Unit Stats:\tPlayer 2 Unit Stats:\n");
 
         for (int i = 0; i < Math.max(p1Units.size(), p2Units.size()); i++) {
             if (p1Units.size() > i) {
                 ret.append("*" + p1Units.get(i).getId() + ": hp = " + p1Units.get(i).getHp() + "\t\t");
             } else {
-                ret.append("      \t\t");
+                ret.append("          \t\t");
             }
 
             if (p2Units.size() > i) {
                 ret.append("*" + p2Units.get(i).getId() + ": hp = " + p2Units.get(i).getHp() + "\n");
             } else {
-                ret.append("      \n");
+                ret.append("          \n");
             }
         }
 
@@ -366,7 +364,7 @@ public class Game {
     }
 
     public List<Unit> getPlayerUnits(int playerNum){
-        if(playerNum == 1){
+        if (playerNum == 1){
             return p1Units;
         }
         else if (playerNum == 2){

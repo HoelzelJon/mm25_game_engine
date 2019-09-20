@@ -1,5 +1,6 @@
 package mech.mania.playerCommunication.gui;
 
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.Node;
 import javafx.scene.control.CheckBox;
@@ -49,7 +50,7 @@ class TerrainPatternGrid {
                     case MECH:
                         Text text = new Text("M");
                         grid.add(text, i, j);
-                        grid.setAlignment(Pos.CENTER);
+                        GridPane.setHalignment(text, HPos.CENTER);
                     case INVALID:
                         nodes[i][j] = null;
                         break;

@@ -31,11 +31,13 @@ class InitializationInputVBox {
         HBox hpBox = new HBox();
         Text hpText = new Text("hp: ");
         hpField = new TextField("" + UnitSetup.BASE_HEALTH);
+        hpField.setPrefWidth(100);
         hpBox.getChildren().addAll(hpText, hpField);
 
         HBox speedBox = new HBox();
         Text speedText = new Text("speed: ");
         speedField = new TextField("" + UnitSetup.BASE_SPEED);
+        speedField.setPrefWidth(100);
         speedBox.getChildren().addAll(speedText, speedField);
 
         // add to 1 VBox, then return
