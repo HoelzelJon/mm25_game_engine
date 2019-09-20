@@ -36,8 +36,8 @@ public class GUIInitialUnitInput extends Application {
     private List<UninitializedUnit> nonSetupUnits;
 
     private int playerNum = -1;
-    private static final int DEFAULT_SCENE_WIDTH = 600;
-    private static final int DEFAULT_SCENE_HEIGHT = 500;
+    private static final int DEFAULT_SCENE_WIDTH = 700;
+    private static final int DEFAULT_SCENE_HEIGHT = 600;
 
     private static GUIInitialUnitInput instance;
     private static CountDownLatch latch;
