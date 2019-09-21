@@ -161,9 +161,9 @@ public class GUIInitialUnitInput extends Application {
         // if initialization is cancelled by closing the window, then
         // exit the game.
         primaryStage.setOnCloseRequest(event -> {
+            attackPatterns = null;
+            terrainPatterns = null;
             latch.countDown();
-            System.out.println("Game exited.");
-            System.exit(0);
         });
 
 
@@ -294,9 +294,8 @@ public class GUIInitialUnitInput extends Application {
         int maxSpeed = units.stream().max(Comparator.comparingInt(Unit::getSpeed)).get().getSpeed();
         // if the screen is prematurely closed, then quit the game
         stage.setOnCloseRequest(event -> {
+            decisions = null;
             latch.countDown();
-            System.err.println("Unit decision was not made properly.");
-            System.exit(0);
         });
 
         // create the Scene and show the stage

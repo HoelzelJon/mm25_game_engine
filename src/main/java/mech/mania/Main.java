@@ -47,6 +47,7 @@ public class Main {
         } catch (IOException ex) {
             System.err.println("IOException encountered when initializing board");
             ex.printStackTrace();
+            System.exit(1);
             return;
         }
 
@@ -80,8 +81,8 @@ public class Main {
         }
 
         try {
-            if (printWinnerIfInvalid(p1SetupValid, p2SetupValid, visualizerOutput)) {
-                return;
+            if (printWinnerIfInvalid(p1SetupValid, p2SetupValid, player1, player2, gameID, visualizerOutput)) {
+                System.exit(0);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -122,12 +123,12 @@ public class Main {
             }
 
             try {
-                if (printWinnerIfInvalid(p1MadeValidDecision, p2MadeValidDecision, visualizerOutput)) {
-                    return;
+                if (printWinnerIfInvalid(p1MadeValidDecision, p2MadeValidDecision, player1, player2, game.getGameId(), visualizerOutput)) {
+                    System.exit(0);
                 }
             } catch (IOException e){
                 e.printStackTrace();
-                return;
+                System.exit(1);
             }
 
             // Print visualizer Json for this round
@@ -136,7 +137,7 @@ public class Main {
                 visualizerOutput.printSingleTurnVisualizerJson(turn);
             } catch (IOException e) {
                 e.printStackTrace();
-                return;
+                System.exit(1);
             }
         }
 
@@ -155,15 +156,21 @@ public class Main {
     /**
      * @return true iff one of the two inputs is false
      */
-    private static boolean printWinnerIfInvalid(boolean p1Valid, boolean p2Valid, VisualizerOutputter outputter) throws IOException {
+    private static boolean printWinnerIfInvalid(boolean p1Valid, boolean p2Valid, PlayerCommunicator player1, PlayerCommunicator player2, String gameId, VisualizerOutputter outputter) throws IOException {
         if (!p1Valid && !p2Valid) {
             outputter.printWinnerJSON(TIE);
+            player1.sendGameOver(gameId, "TIE");
+            player2.sendGameOver(gameId, "TIE");
             return true;
         } else if (!p1Valid) {
             outputter.printWinnerJSON(P2_WINNER);
+            player1.sendGameOver(gameId, "LOSE");
+            player2.sendGameOver(gameId, "WIN");
             return true;
         } else if (!p2Valid) {
             outputter.printWinnerJSON(P1_WINNER);
+            player1.sendGameOver(gameId, "WIN");
+            player2.sendGameOver(gameId, "LOSE");
             return true;
         }
 

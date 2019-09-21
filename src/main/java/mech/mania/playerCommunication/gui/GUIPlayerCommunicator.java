@@ -17,7 +17,7 @@ import static mech.mania.Game.UNITS_PER_PLAYER;
 public class GUIPlayerCommunicator extends PlayerCommunicator {
     // keep the JavaFX application running throughout
     private static GUIInitialUnitInput applicationInstance;
-
+    private static boolean calledOnGameEnd = false;
 
     public GUIPlayerCommunicator(int playerNum) {
         super(playerNum);
@@ -44,7 +44,10 @@ public class GUIPlayerCommunicator extends PlayerCommunicator {
 
     @Override
     public void sendGameOver(String gameID, String result) {
-        onGameEnd();
+        if (!calledOnGameEnd) {
+            calledOnGameEnd = true;
+            onGameEnd();
+        }
     }
 
     @Override
