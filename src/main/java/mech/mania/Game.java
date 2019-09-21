@@ -166,7 +166,8 @@ public class Game {
                 }
             }
 
-            doDeaths();
+            List<Integer> deadUnitIds = doDeaths();
+            units.removeIf(u -> deadUnitIds.contains(u.getId()));
         }
 
         roundRepresentation.addAttacks(
@@ -325,16 +326,18 @@ public class Game {
     /**
      * For any dead units, removes them from the board
      */
-    private void doDeaths() {
-        doDeaths(p1Units);
-        doDeaths(p2Units);
+    private List<Integer> doDeaths() {
+        List<Integer> ret = new ArrayList<>();
+        ret.addAll(doDeaths(p1Units));
+        ret.addAll(doDeaths(p2Units));
+        return ret;
     }
 
     /**
      * handles death for an array of units
      * @param units array of units to check death conditions for
      */
-    private void doDeaths(List<Unit> units) {
+    private List<Integer> doDeaths(List<Unit> units) {
         List<Unit> unitsToRemove = new ArrayList<>();
         for (Unit u : units) {
             if (u.shouldDie()) {
@@ -344,6 +347,7 @@ public class Game {
         }
 
         units.removeAll(unitsToRemove);
+        return unitsToRemove.stream().map(Unit::getId).collect(Collectors.toList());
     }
 
     public String getGameId() {
