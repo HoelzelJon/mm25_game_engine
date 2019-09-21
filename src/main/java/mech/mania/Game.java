@@ -158,7 +158,9 @@ public class Game {
             }
 
             List<MovementRepresentation> movementStepRepresentation = doMovementStep(units, stepDirections);
-            roundRepresentation.addMovementStep(movementStepRepresentation);
+            if (!movementStepRepresentation.isEmpty()) {
+                roundRepresentation.addMovementStep(movementStepRepresentation);
+            }
 
             for (MovementRepresentation move : movementStepRepresentation) {
                 if (move.getMovementType() == MovementType.Collision) {
