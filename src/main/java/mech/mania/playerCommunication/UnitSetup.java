@@ -106,7 +106,7 @@ public class UnitSetup {
             for (int cell : row) {
                 if (cell < 0 || cell >= DAMAGE_SCALING.length) {
                     throw new InvalidSetupException("Invalid damage value set in attack pattern: " + cell);
-                }  else if (cell > 1) {
+                }  else if (cell >= 1) {
                     sum += DAMAGE_SCALING[cell - 1];
                 }
             }
