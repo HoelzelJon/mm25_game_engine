@@ -143,13 +143,15 @@ public class Game {
         }
 
         List<Integer> botIdsThatCollidedThisRound = new ArrayList<>();
+        List<Integer> botIdsThatDiedThisRound = new ArrayList<>();
 
         for (int stepNum = 0; stepNum < numMovementSteps; stepNum ++) {
             List<Direction> stepDirections = new ArrayList<>();
 
             for (int unitNum = 0; unitNum < units.size(); unitNum ++) {
                 if (units.get(unitNum).getSpeed() > stepNum
-                        && !botIdsThatCollidedThisRound.contains(units.get(unitNum).getId())) {
+                        && !botIdsThatCollidedThisRound.contains(units.get(unitNum).getId())
+                        && !botIdsThatDiedThisRound.contains(units.get(unitNum).getId())) {
                     stepDirections.add(unitNum, decisions.get(unitNum).getMovement().get(stepNum));
                 } else {
                     // have the non-moving bot do a 'STAY' movement, as visualizer requested
@@ -168,9 +170,11 @@ public class Game {
                 }
             }
 
-            List<Integer> deadUnitIds = doDeaths();
-            units.removeIf(u -> deadUnitIds.contains(u.getId()));
+            botIdsThatDiedThisRound.addAll(doDeaths());
         }
+
+        units.removeIf(u -> botIdsThatDiedThisRound.contains(u.getId()));
+        decisions.removeIf(d -> botIdsThatDiedThisRound.contains(d.getUnitId()));
 
         roundRepresentation.addAttacks(
                 board.doAttacks(
