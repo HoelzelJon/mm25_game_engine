@@ -21,8 +21,8 @@ public class ServerPlayerCommunicator extends PlayerCommunicator {
     private static final String POST = "POST";
     private static final String GET = "GET";
 
-    private static final int MAX_TURN_TIME_MILIS = 5000;
-    private static final int MAX_INIT_DECISION_TIME_MILIS = 5000;
+    private static final int MAX_TURN_TIME_MILIS = 50000;
+    private static final int MAX_INIT_DECISION_TIME_MILIS = 50000;
 
     private static final int MILIS_BETWEEN_HEALTH_CHECKS = 5000;
     private static final int TOTAL_MILIS_HEALTH_CHECKS = 30000;
